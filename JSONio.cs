@@ -16,10 +16,9 @@ namespace JSONio
 	public class Car
 	{
 		public string id { get; set; }
-		public string name { get; set; }
 		public List<Property> properties { get; set; }
-		public void set (string cname, string cid)
-		{ name = cname; id = cid; }
+		public void set (string cid)
+		{ id = cid; }
 		public void add(Property property)
 		{ properties.Add(property); }
 	}

@@ -5,6 +5,9 @@
     /// </summary>
     public class DataPluginSettings
     {
-        public int SpeedWarningLevel = 100;
+        public List<Property> default = new List<Property>()
+		{
+			new Property() { Name = 'offset'; Value = '0'; }
+		};
     }
 }
