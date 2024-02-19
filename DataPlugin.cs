@@ -144,6 +144,16 @@ namespace JSONio
 				}
 //				Info("Init(): "+report);
 
+			// Load existing JSON
+			path = pluginManager.GetPropertyValue(Ini + "file")?.ToString();
+			if (File.Exists(path))
+			{
+				games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));
+			}
+			else changed = true;
+			if (null == games)
+				games = new Games();
+
 				// append any new properties to previous
 				foreach (Property p in init)
 				{
@@ -178,12 +188,25 @@ namespace JSONio
 			// Declare actions which can be called
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
-				string car = pluginManager.GetPropertyValue("CarID")?.ToString();
-				string game = pluginManager.GetPropertyValue("CurrentGame")?.ToString();
-				if (null != car && null != game && 0 < car.Length && 0 < game.Length)
+				string cname = pluginManager.GetPropertyValue("CarID")?.ToString();
+				string gname = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
+				string s = "New Car: ";
+				if (null != cname && null != gname && 0 < cname.Length && 0 < gname.Length)
 				{
-					Info("New Car: " + car);
-					changed = games.New_Car(car, game);
+					Info(s + cname);
+					changed = games.New_Car(cname, gname);
+				}
+				else
+				{
+					if (null == cname)
+						s += "null CarID, ";
+					else if (0 == cname.Length)
+						s += "empty CarID, ";
+					if (null == gname)
+						s += "null CurrentGame, ";
+					else if (0 == gname.Length)
+						s += "empty CurrentGame, ";
+					Info(s);
 				}
 			});
 
@@ -221,13 +244,6 @@ namespace JSONio
 				Selected_Property = current[Select].Name;
 				Info("Selected property = " + Selected_Property);
 			});
-
-			// Load existing JSON
-			path = pluginManager.GetPropertyValue(Ini + "file")?.ToString();
-			if (File.Exists(path))
-			{
-				games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));
-			} else changed = true;
 		}
 	}
 }

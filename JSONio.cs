@@ -72,7 +72,6 @@ namespace JSONio
 
 	public class Games
 	{
-		public Car defaults { get; set; }
 		public List<Game> Glist { get; set; }
 
 		public bool mod(Game game)
@@ -92,8 +91,18 @@ namespace JSONio
 		internal bool New_Car(string cname, string gname)
 		{
 			bool changed = true;
-			int gndex = Glist.FindIndex(g => g.name == gname);
 			Car car = new Car() {id = cname, properties = DataPlugin.current};
+			int gndex;
+
+			if (null == Glist)
+			{
+				List<Car> car0 = new List<Car>() { car };
+				Game game0 = new Game { name=gname, defaults=car, Clist=car0 };
+				game0.defaults.id = "default";
+				Glist = new List<Game>() { game0 };
+				gndex = 0;
+			}
+			else gndex = Glist.FindIndex(g => g.name == gname);
 
 			if (-1 == gndex) {
 				List<Car> first = new List<Car>() { car };
