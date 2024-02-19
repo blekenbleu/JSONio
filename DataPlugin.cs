@@ -43,7 +43,7 @@ namespace JSONio
             {
                 if (data.OldData != null && data.NewData != null)
                 {
-                    if (data.OldData.SpeedKmh < Settings.SpeedWarningLevel && data.OldData.SpeedKmh >= Settings.SpeedWarningLevel)
+                    if (data.OldData.SpeedKmh < 100 && data.OldData.SpeedKmh >= 100)
                     {
                         // Trigger an event
                         this.TriggerEvent("SpeedWarning");
@@ -94,14 +94,13 @@ namespace JSONio
             // Declare an action which can be called
             this.AddAction("IncrementSpeedWarning",(a, b) =>
             {
-                Settings.SpeedWarningLevel++;
-                SimHub.Logging.Current.Info("Speed warning changed");
+                SimHub.Logging.Current.Info("Speed warning incremented");
             });
 
             // Declare an action which can be called
             this.AddAction("DecrementSpeedWarning", (a, b) =>
             {
-                Settings.SpeedWarningLevel--;
+                SimHub.Logging.Current.Info("Speed warning decremented");
             });
         }
     }

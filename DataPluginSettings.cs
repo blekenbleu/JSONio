@@ -1,13 +1,15 @@
-﻿namespace JSONio
+﻿using System.Collections.Generic;
+
+namespace JSONio
 {
     /// <summary>
     /// Settings class, make sure it can be correctly serialized using JSON.net
     /// </summary>
     public class DataPluginSettings
     {
-        public List<Property> default = new List<Property>()
-		{
-			new Property() { Name = 'offset'; Value = '0'; }
-		};
+        public List<Property> properties = new List<Property>()
+        {
+            new Property() { Name = "threshold", Value = "0" }
+        };
     }
 }
