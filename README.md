@@ -11,8 +11,8 @@
 Want properties specific to each SimHub car:  
 ![](Documentation/properties.png)
 - a C# list of games
-	- each game a name, a car with default properties and list of cars
-		- each car a carID and list of properties
+	- each game a name, game=specific default properties and list of cars
+		- each car a carID and its list of properties
 			- each property a name and value
 - `this.AddAction("ChangeProperties",(a, b) =>` saves current properties, if changed,  
 	then loads properties for the new Car.

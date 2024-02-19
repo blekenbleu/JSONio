@@ -19,7 +19,9 @@ namespace JSONio
 		private string path;			// JSONio.ini 'JSONio.file' property value
 		private bool changed;
 		public Games games;
-		internal List<Property> previous, current, init;
+		public string Selected_Property = "unKnown";
+		public byte Select = 0;
+		internal static List<Property> previous, current, init;
 
 		/// <summary>
 		/// wraps SimHub.Logging.Current.Info(); prefixes MIDIio.My
@@ -104,14 +106,27 @@ namespace JSONio
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-			SimHub.Logging.Current.Info("JSONio Init()");
+			Info("Init()");
 			changed = false;	// write JSON file during End() only if true
 
 			// Load properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 			previous = Settings.properties;
 			init = new List<Property>();
-
+/*	Hack to force settings
+			current = init;
+			foreach (Property p in previous)
+			{
+				if ("offset" == p.Name)
+					continue;
+				if ("gamma" == p.Name)
+					p.Value = "5";
+				else if ("threshold" == p.Name)
+					p.Value = "10";
+				current.Add(p);
+			}
+			previous = current;
+ */
 			// Load properties from JSONio.ini
 			string pts, ds = pluginManager.GetPropertyValue(pts = Ini + "properties")?.ToString();
 			List<string> props;
@@ -139,8 +154,8 @@ namespace JSONio
 
 					Info("Init(): new property " + p.Name);
 					previous.Add(p);
-					if (null != games && null != games.list)
-						foreach (Game g in games.list)
+					if (null != games && null != games.Glist)
+						foreach (Game g in games.Glist)
 							if (g.append(p.Name, p.Value))
 								changed = true;
 				} 
@@ -151,6 +166,11 @@ namespace JSONio
 			// Declare a property available in the property list, this gets evaluated "on demand" (when shown or used in formulas)
 			foreach(Property p in current)
 				this.AttachDelegate(My+p.Name, () => p.Value);
+			if (0 < current.Count)
+			{
+				Selected_Property = current[Select].Name;
+				this.AttachDelegate(My+"Selected", () => Selected_Property);
+			}
 
 			// Declare an event
 			//this.AddEvent("SpeedWarning");
@@ -158,27 +178,48 @@ namespace JSONio
 			// Declare actions which can be called
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
-				SimHub.Logging.Current.Info("New Car: " + pluginManager.GetPropertyValue("CarID")?.ToString());
+				string car = pluginManager.GetPropertyValue("CarID")?.ToString();
+				string game = pluginManager.GetPropertyValue("CurrentGame")?.ToString();
+				if (null != car && null != game && 0 < car.Length && 0 < game.Length)
+				{
+					Info("New Car: " + car);
+					changed = games.New_Car(car, game);
+				}
 			});
 
-			this.AddAction("IncrementCurrentProperty", (a, b) =>
+			this.AddAction("IncrementSelectedProperty", (a, b) =>
 			{
-				SimHub.Logging.Current.Info("property incremented");
+				int fv = int.Parse(current[Select].Value);
+				fv += 1;
+				current[Select].Value = $"{fv}";
+				Info("property incremented");
 			});
 
-			this.AddAction("DecrementCurrentProperty", (a, b) =>
+			this.AddAction("DecrementSelectedProperty", (a, b) =>
 			{
-				SimHub.Logging.Current.Info("property decremented");
+				int fv = int.Parse(current[Select].Value);
+				fv -= 1;
+				current[Select].Value = $"{fv}";
+				
+				Info("property decremented");
 			});
 
 			this.AddAction("NextProperty", (a, b) =>
 			{
-				SimHub.Logging.Current.Info("current property = ");
+				Select++;
+				if (Select >= current.Count)
+					Select = 0;
+				Selected_Property = current[Select].Name;
+				Info("Selected property = " + Selected_Property);
 			});
 
 			this.AddAction("PreviousProperty", (a, b) =>
 			{
-				SimHub.Logging.Current.Info("current property = ");
+				if (0 < Select)
+					Select--;
+				else Select = (byte)(current.Count - 1);
+				Selected_Property = current[Select].Name;
+				Info("Selected property = " + Selected_Property);
 			});
 
 			// Load existing JSON

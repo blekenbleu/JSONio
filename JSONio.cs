@@ -38,7 +38,7 @@ namespace JSONio
 	{
 		public string name { get; set; }
 		public Car defaults { get; set; }
-		public List<Car> cars { get; set; }
+		public List<Car> Clist { get; set; }
 		public void set(string gname) { name = gname; }
 
 		// add (if missing) a value to Car properties,
@@ -49,7 +49,7 @@ namespace JSONio
 
 			if(defaults.mod(name, value, false))
 				changed = true;
-			foreach (Car c in cars)
+			foreach (Car c in Clist)
 				if(c.mod(name, value, false))
 					changed = true;
 			return changed;
@@ -59,12 +59,12 @@ namespace JSONio
 		public bool mod(Car car)
 		{
 			bool changed;
-			int index = cars.FindIndex(a => a.id == car.id);
+			int index = Clist.FindIndex(a => a.id == car.id);
 
 			if (changed = -1 == index)
-				cars.Add(car);
+				Clist.Add(car);
 			else foreach (Property p in car.properties)
-					if (cars[index].mod(p.Name, p.Value, true))
+					if (Clist[index].mod(p.Name, p.Value, true))
 						changed = true;
             return changed;
 		}
@@ -73,20 +73,48 @@ namespace JSONio
 	public class Games
 	{
 		public Car defaults { get; set; }
-		public List<Game> list { get; set; }
+		public List<Game> Glist { get; set; }
 
 		public bool mod(Game game)
 		{
 			bool changed;
 
-            int index = list.FindIndex(g => g.name == game.name);
+            int index = Glist.FindIndex(g => g.name == game.name);
 
 			if (changed = -1 == index)
-				list.Add(game);
-			else foreach (Car c in game.cars)
-				if(list[index].mod(c))
+				Glist.Add(game);
+			else foreach (Car c in game.Clist)
+				if(Glist[index].mod(c))
 						changed = true;
 			return changed;
 		}
+
+		internal bool New_Car(string cname, string gname)
+		{
+			bool changed = true;
+			int gndex = Glist.FindIndex(g => g.name == gname);
+			Car car = new Car() {id = cname, properties = DataPlugin.current};
+
+			if (-1 == gndex) {
+				List<Car> first = new List<Car>() { car };
+				car.id = "default";
+				Glist.Add( new Game() { name=gname, defaults = car, Clist = first });
+			} else {
+                int cndex = Glist[gndex].Clist.FindIndex(c => c.id == cname);
+
+                if (-1 == cndex)
+                {
+					car.id = cname;
+					Glist[gndex].Clist.Add(car);
+				}
+				else {
+					DataPlugin.previous = DataPlugin.current;
+					DataPlugin.current = Glist[gndex].Clist[cndex].properties;
+					changed = false;
+				}
+			}
+			return changed;
+		}
+
 	}
 }

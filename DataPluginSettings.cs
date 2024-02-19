@@ -9,7 +9,7 @@ namespace JSONio
     {
         public List<Property> properties = new List<Property>()
         {
-            new Property() { Name = "threshold", Value = "0" }
+            new Property() { Name = "threshold", Value = "10" }
         };
     }
 }
