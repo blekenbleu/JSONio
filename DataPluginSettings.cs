@@ -9,7 +9,9 @@ namespace JSONio
     {
         public List<Property> properties = new List<Property>()
         {
-            new Property() { Name = "threshold", Value = "10" }
+			// each Value stored as string of integer 10x actual value
+            new Property() { Name = "threshold", Value = "0" }
         };
+		public string gname = "";	// game for which properties were saved
     }
 }
