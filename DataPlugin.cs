@@ -3,28 +3,28 @@ using SimHub.Plugins;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
+using Newtonsoft.Json;
 using System.Windows.Media;
 
 namespace JSONio
 {
-	[PluginDescription("Device Extension Demo")]
-	[PluginAuthor("Author")]
+	[PluginDescription("game&car-specific properties to/from JSON")]
+	[PluginAuthor("blekenbleu")]
 	[PluginName("JSONio plugin")]
 	public class DataPlugin : IPlugin, IDataPlugin, IWPFSettingsV2
 	{
 		public DataPluginSettings Settings;
 		internal static readonly string My = "JSONio."; 
-		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My; // configuration source
-		private string path;			// JSONio.ini 'JSONio.file' property value
+		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
+		private string path;															// file locations
 		private bool changed;
 		private GameHandler games;
 		public string Selected_Property = "unKnown";
 		public byte Select = 0;
 		internal string gname = "";
 		private static List<Property> previous;
-		internal static Car current;
 		internal static List<int>steps;
+		internal static Car current;
 
 		// deep copy 
 		private Property Clone(Property p) => new Property() { Name = string.Copy(p.Name), Value = string.Copy(p.Value) };
@@ -49,7 +49,7 @@ namespace JSONio
 		}
 
 		/// <summary>
-		/// wraps SimHub.Logging.Current.Info(); prefixes MIDIio.My
+		/// Plugin-specific wrapper for SimHub.Logging.Current.Info();
 		/// </summary>
 		internal static bool Info(string str)
 		{
@@ -68,7 +68,7 @@ namespace JSONio
 		public ImageSource PictureIcon => this.ToIcon(Properties.Resources.sdkmenuicon);
 
 		/// <summary>
-		/// Gets a short plugin title to show in left menu. Return null if you want to use the title as defined in PluginName attribute.
+		/// Short plugin title to show in left menu. Return null to use the PluginName attribute.
 		/// </summary>
 		public string LeftMenuTitle => "JSONio plugin";
 
@@ -114,14 +114,12 @@ namespace JSONio
 			}
 			if (null != games)
 			{
- 				bool ch = games.Save_Car(Clone(current), gname);
-				if ( ch || changed )
+//				bool ch = games.Save_Car(Clone(current), gname);
+				if ( games.Save_Car(current, gname) || changed )
 				{
-					var opts = new JsonSerializerOptions { WriteIndented = true };
-					//string js = JsonSerializer.Serialize(games.data);//, opts);
-					string js = JsonSerializer.Serialize(games.data, opts);
+					string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
 					if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
-						Info($"End():  JsonSerializer failure for {games.data.Glist.Count} games");
+						Info("End():  Json Serializer failure for games.data");
 					else File.WriteAllText(path, js);
 				}
 			}
@@ -172,7 +170,7 @@ namespace JSONio
 			path = pluginManager.GetPropertyValue(Ini + "file")?.ToString();
 			if (File.Exists(path))
 			{
-				Games foo = JsonSerializer.Deserialize <Games>(File.ReadAllText(path));
+				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
 				games = new GameHandler() { data = foo };
 			}
 			else changed = true;
