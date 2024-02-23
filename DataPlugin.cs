@@ -18,21 +18,34 @@ namespace JSONio
 		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My; // configuration source
 		private string path;			// JSONio.ini 'JSONio.file' property value
 		private bool changed;
-		public Games games;
+		private GameHandler games;
 		public string Selected_Property = "unKnown";
 		public byte Select = 0;
-		internal string game = "";
-		internal static List<Property> previous, init;
+		internal string gname = "";
+		private static List<Property> previous;
 		internal static Car current;
 		internal static List<int>steps;
 
 		// deep copy 
+		private Property Clone(Property p) => new Property() { Name = string.Copy(p.Name), Value = string.Copy(p.Value) };
+
+		internal List<Property> Pclone(Car car)	=> Pclone(car.properties);
+
 		internal List<Property> Pclone(List<Property> prop)
 		{
-			List<Property> foo = new List<Property> { };
+			List<Property> Plist = new List<Property> { };
 			foreach(Property p in prop)
-				foo.Add(p.Clone());
-			return foo;
+				Plist.Add(Clone(p));
+			return Plist;
+		}
+
+		private Car Clone(Car c)
+		{
+			return new Car()
+			{
+				id = string.Copy(c.id),
+				properties = Pclone(c)
+			};
 		}
 
 		/// <summary>
@@ -94,13 +107,24 @@ namespace JSONio
 		public void End(PluginManager pluginManager)
 		{
 			// Save settings
-			if (0 < game.Length) {
-				Settings.gname = game;
-				Settings.properties = current.properties;
+			if (0 < gname.Length) {
+				Settings.gname = string.Copy(gname);
+				Settings.properties = Pclone(current);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
-			if (null != games && (changed || games.Save_Car(current.Clone(), game)))
-				File.WriteAllText(path, JsonSerializer.Serialize(games, new JsonSerializerOptions { WriteIndented = true }));
+			if (null != games)
+			{
+ 				bool ch = games.Save_Car(Clone(current), gname);
+				if ( ch || changed )
+				{
+					var opts = new JsonSerializerOptions { WriteIndented = true };
+					//string js = JsonSerializer.Serialize(games.data);//, opts);
+					string js = JsonSerializer.Serialize(games.data, opts);
+					if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
+						Info($"End():  JsonSerializer failure for {games.data.Glist.Count} games");
+					else File.WriteAllText(path, js);
+				}
+			}
 		}
 
 		/// <summary>
@@ -125,11 +149,9 @@ namespace JSONio
 
 			// Load properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
-			game = Settings.gname;			// most recent sim
-			previous = Settings.properties;
-			current = new Car() {id = "", properties = previous };
+			gname = Settings.gname;			// most recent sim
+			current = new Car() {id = "", properties = Pclone(previous = Pclone(Settings.properties)) };
 			steps = new List<int>() { } ;
-			init = new List<Property>() {};
 
 /*	Hack to force settings
 			current.properties = null;
@@ -143,14 +165,15 @@ namespace JSONio
 					p.Value = "10";
 				current.properties.Add(p);
 			}
-			previous = current.properties;
+			previous = Pclone(current);
  */
 
 			// Load existing JSON
 			path = pluginManager.GetPropertyValue(Ini + "file")?.ToString();
 			if (File.Exists(path))
 			{
-				games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));
+				Games foo = JsonSerializer.Deserialize <Games>(File.ReadAllText(path));
+				games = new GameHandler() { data = foo };
 			}
 			else changed = true;
 
@@ -163,8 +186,10 @@ namespace JSONio
 			   && null == ss && Info($"Init(): '{sts}' not found")
 				 ))
 			{
-				List<string> props, vals, stps;
+				List<Property> init = new List<Property>() {};
 				List<Property> temp = new List<Property>() {};
+				List<string> props, vals, stps;
+				string s = "";
 
 				props = new List<string>(ds.Split(','));
 				vals = new List<string>(vs.Split(','));
@@ -179,21 +204,31 @@ namespace JSONio
 					count = stps.Count;
 				for (int c = 0; c < count; c++)
 				{
+					// init accumulates properties from GetPropertyValue()
 					init.Add(new Property { Name = props[c], Value = vals[c] });
 					steps.Add((int)(10 * float.Parse(stps[c])));
+
+					// previous has properties from Settings
 					int Index = previous.FindIndex(i => i.Name == props[c]);
+
+					// temp accumulates properties from previous or init, if new
 					if (-1 == Index) {
+						if (0 == s.Length)
+							s += "adding " + props[c];
+						else s += " + " + props[c];
 						temp.Add(init[c]);
-						if (null != games)
+						if (null != games.data)
 							changed = games.append(init[c]) || changed;
 					}
 					else temp.Add(previous[Index]);
 				}
-				previous = temp;
-				Info($"Init(): previous.Count = {previous.Count};  init.Count = {init.Count}");
+				if (0 < s.Length)
+					s += ";  ";
+				if (previous.Count != init.Count)
+					Info("Init():  " + s + $"previous.Count = {previous.Count};  {path}.Count = {init.Count}");
+				current.properties = Pclone(previous = temp);	// UI can force current.properties back to previous
 			}
 
-			current.properties = previous;
 
 			// Declare a property available in the property list
 			// this gets evaluated "on demand" (when shown or used in formulae)
@@ -213,30 +248,30 @@ namespace JSONio
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
 				string cname = pluginManager.GetPropertyValue("CarID")?.ToString();
-				string gname = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
-				string s = "New Car: ";
+  				string s = "New Car: ";
+				gname = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
 				// save current car and game
 				if (null !=cname && 0 < cname.Length && 0 < gname.Length)
 				{
-					s += cname;
+//					s += cname;
 					if (null == games)				// do not save first car
-						games = new Games() { };
+						games = new GameHandler() { data = new Games() {name = " JSONio" }};
 					else if (games.Save_Car(current, gname))
 					{
 						changed = true;
-						s += $";  {current.id} saved";
+//						s += $";  {current.id} saved";
 					}
-					previous = current.properties;
+					previous = Pclone(current);
 					current.id = cname;
-					if (null != games.Glist) {
+					if (null != games.data.Glist) {
 						// retrieve properties stored for this car
-						int gndx = games.Glist.FindIndex(g => g.name == gname);
+						int gndx = games.data.Glist.FindIndex(g => g.name == gname);
 
 						if (-1 != gndx)
 						{
-							int cndx = games.Glist[gndx].Clist.FindIndex(c => c.id == cname);
+							int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.id == cname);
 							if (-1 != cndx)
-								current.properties = games.Glist[gndx].Clist[cndx].properties;
+								current.properties = Pclone(games.data.Glist[gndx].Clist[cndx]);
 						}
 					}
 				}
@@ -248,8 +283,8 @@ namespace JSONio
 					s += "null CurrentGame, ";
 				else if (0 == gname.Length)
 					s += "empty CurrentGame, ";
-
-				Info(s);
+				if (10 < s.Length)
+					Info(s);
 			});
 
 			void ment(int s, string prefix)

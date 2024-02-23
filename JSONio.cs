@@ -4,152 +4,145 @@ using System.Collections.Generic;
 
 namespace JSONio
 {
-	public class Property
+	public class Property		// must be public for DataPluginSettings
 	{
 		public string Name { get; set; }
 		public string Value { get; set; }
-
-		public void set(string name, string value)
-		{ Name = name; Value = value; }
-		public void set(string value) { Value = value; }
-		public string getName() { return Name; }
-		public string getValue() { return Value; }
-
-		// This is a deep copy implementation of Clone
-		public Property Clone()
-		{
-			Property another = new Property() {};
-			another.Name = string.Copy(Name);
-			another.Value = string.Copy(Value);
-			return another;
-		}
 	}
 
-    // return true if any Game changes
-    public class Car
+	// return true if any Game changes
+	public class Car
 	{
 		public string id { get; set; }
 		public List<Property> properties { get; set; }
-
-		public void set (string cid) { id = cid; }
-
-		public bool mod(string name, string value, bool replace)
-		{
-			int index = properties.FindIndex(p => p.Name == name);
-
-			if (-1 == index)
-				properties.Add ( new Property() { Name=string.Copy(name), Value=string.Copy(value) });
-			else if (replace && (properties[index].Value != value))
-				properties[index].Value = string.Copy(value);
-			else return false;
-
-			return true;
-		}
-
-		internal List<Property> Pclone(List<Property> prop)
-        {
-            List<Property> foo = new List<Property> { };
-            foreach(Property p in prop)
-                foo.Add(p.Clone());
-            return foo;
-        }
-
-		public Car Clone()
-		{
-			Car c = new Car(){};
-			c.id = string.Copy(id);
-			c.properties = Pclone(properties);
-			return c;
-		}
 	}
 
 	public class Game
 	{
 		public string name { get; set; }
-		public Car defaults { get; set; }
+		public List<Property> defaults { get; set; }
 		public List<Car> Clist { get; set; }
-		public void set(string gname) { name = gname; }
 
-		// add (if missing) a value to Car properties,
-		// but do not replace value if present
-		public bool append (string name, string value)
-		{
-			if(!defaults.mod(name, value, false))
-				return false;
-
-			foreach (Car c in Clist)
-				c.mod(name, value, false);
-
-			return true;
-		}
-
-		// add or replace property values
-		public bool mod(Car car)
-		{
-			bool changed;
-			int index = Clist.FindIndex(c => c.id == car.id);
-
-			if (changed = -1 == index)
-				Clist.Add(car.Clone());
-			else foreach (Property p in car.properties)
-					changed = Clist[index].mod(p.Name, p.Value, true) || changed;
-			return changed;
-		}
 	}
 
 	public class Games
 	{
+		public string name { get; set; }
 		public List<Game> Glist { get; set; }
+	}
 
-		public bool append (Property prop)
+	internal class GameHandler
+	{
+		internal Games data;
+
+		internal Game New_Game(string gname, Car car)
+		{
+			return new Game()
+			{
+				name = string.Copy(gname),
+				defaults = Pclone(car),
+				Clist = new List<Car>() { Clone(car) }
+			};
+		}
+ 
+		// Implement deep copy
+		internal Property Clone(Property p)
+		{
+			return new Property()
+			{
+				Name = string.Copy(p.Name),
+				Value = string.Copy(p.Value)
+			};
+		}
+
+		internal List<Property> Clone(List<Property> l)
+		{
+			var n = new List<Property>() { };
+
+			foreach (Property p in l)
+				n.Add(Clone(p));
+			return n;
+		}
+
+		internal Car Clone(Car car) => new Car() { id = string.Copy(car.id), properties = Clone(car.properties) };
+
+		// append or replace a single car property
+		internal bool mod(Car c, string name, string value, bool replace)
+		{
+			int index = c.properties.FindIndex(p => p.Name == name);
+
+			if (-1 == index)
+				c.properties.Add ( new Property() { Name=string.Copy(name), Value=string.Copy(value) });
+			else if (replace && (c.properties[index].Value != value))
+				c.properties[index].Value = string.Copy(value);
+			else return false;
+
+			return true;
+		}
+
+		// add or replace any property values for a car in a game
+		internal bool mod(Game g, Car car)
+		{
+			bool changed;
+			int index = g.Clist.FindIndex(c => c.id == car.id);
+
+			if (changed = -1 == index)
+				g.Clist.Add(Clone(car));
+			else foreach (Property p in car.properties)
+					changed = mod(g.Clist[index], p.Name, p.Value, true) || changed;
+			return changed;
+		}
+		internal List<Property> Pclone(Car c)
+		{
+			List<Property> prop = new List<Property> { };
+			foreach(Property p in c.properties)
+				prop.Add(Clone(p));
+			return prop;
+		}
+ 
+		// append a new property to all cars in all games
+		internal bool append (Property prop)
 		{
 			bool changed = false;
 
-			if (null != Glist)
-				foreach(Game g in Glist)
-					changed = g.append(prop.Name, prop.Value) || changed;
+			if (null != data.Glist)
+				foreach(Game g in data.Glist)
+					changed = append(g, prop.Name, prop.Value) || changed;
 
 			return changed;
 		}
 
-		public bool mod(Game game)
+		// add (if missing) a value to Car properties in a game,
+		// but do not replace value if present
+		internal bool append (Game g, string name, string value)
 		{
-			bool changed;
+			Car dcar = new Car() { properties = g.defaults };
+			if(!mod(dcar, name, value, false))
+				return false;
 
-			int index = Glist.FindIndex(g => g.name == game.name);
+			foreach (Car c in g.Clist)
+				mod(c, name, value, false);
 
-			if (changed = -1 == index)
-				Glist.Add(game);
-			else foreach (Car c in game.Clist)
-				changed = Glist[index].mod(c) || changed;
-			return changed;
-		}
-
-		Game gamen(string gname, Car car)
-		{
-			List<Car> carl = new List<Car>() { car.Clone() };
-			car.id = "default";
-			return new Game { name=gname, Clist=carl, defaults = car };
+			return true;
 		}
 
 		// typically called just before updating DataPlugin.current
 		internal bool Save_Car(Car car, string gname)
 		{
 			bool changed = true;
-			int gndex;
 
 			if (null == car || null == car.id || 0 == car.id.Length)
 				return false;									// nothing to save
 
-			if (null == Glist)
-				Glist = new List<Game>() { gamen(gname, car) }; // first time for everything
+			if (null == data.Glist)
+				data.Glist = new List<Game>() { New_Game(gname, car) }; // first time for everything
 			else
 			{													// search for game
-				gndex = Glist.FindIndex(g => g.name == gname);
+				int gndex = data.Glist.FindIndex(g => g.name == gname);
 
 				if (-1 == gndex) 								// first car for this game
-					Glist.Add(gamen(gname, car));
-				else changed = Glist[gndex].mod(car);
+					data.Glist.Add(New_Game(gname, car));
+				else changed = mod(data.Glist[gndex], car);
 			}
 			return changed;
 		}
