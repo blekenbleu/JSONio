@@ -142,11 +142,18 @@ namespace JSONio
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-			Info("Init()");
 			changed = false;	// write JSON file during End() only if true
 
 			// Load properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
+			games = new GameHandler()
+			{
+				data = new Games()
+				{
+					name = "JSONio",
+					Glist = new List<Game>() {}
+				}
+			};
 			gname = Settings.gname;			// most recent sim
 			current = new Car() {id = "", properties = Pclone(previous = Pclone(Settings.properties)) };
 			steps = new List<int>() { } ;
@@ -171,9 +178,12 @@ namespace JSONio
 			if (File.Exists(path))
 			{
 				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
-				games = new GameHandler() { data = foo };
+
+				if (null != foo && null != foo.name && null != foo.Glist)
+					games.data = foo;
+				else changed = Info($"Init():  empty or invalid {path}");
 			}
-			else changed = true;
+			else changed = Info("Init()");
 
 			// Load properties from JSONio.ini
 			string pts, ds = pluginManager.GetPropertyValue(pts = Ini + "properties")?.ToString();
@@ -252,9 +262,8 @@ namespace JSONio
 				if (null !=cname && 0 < cname.Length && 0 < gname.Length)
 				{
 //					s += cname;
-					if (null == games)				// do not save first car
-						games = new GameHandler() { data = new Games() {name = " JSONio" }};
-					else if (games.Save_Car(current, gname))
+					if (0 < games.data.Glist.Count		// do not save first car
+					&& games.Save_Car(current, gname))
 					{
 						changed = true;
 //						s += $";  {current.id} saved";
