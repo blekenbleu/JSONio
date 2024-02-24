@@ -3,7 +3,7 @@
 namespace blekenbleu
 {
     /// <summary>
-    /// Logique d'interaction pour SettingsControl.xaml
+    /// Interaction code for SettingsControl.xaml
     /// </summary>
     public partial class SettingsControl : UserControl
     {
