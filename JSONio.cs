@@ -26,27 +26,16 @@ namespace blekenbleu
 		internal static List<int>steps;
 		internal static Car current;
 
-		// deep copy 
-		private Property Clone(Property p) => new Property() { Name = string.Copy(p.Name), Value = string.Copy(p.Value) };
-
-		internal List<Property> Pclone(Car car)	=> Pclone(car.properties);
-
-		internal List<Property> Pclone(List<Property> prop)
+		internal List<Property> Pclone(List<Property> prop)			// deep copy
 		{
-			List<Property> Plist = new List<Property> { };
+			List<Property> Plist = new List<Property> {};
 			foreach(Property p in prop)
-				Plist.Add(Clone(p));
+				if (null != p.Name && null != p.Value)
+					Plist.Add(new Property() { Name = string.Copy(p.Name), Value = string.Copy(p.Value) });
 			return Plist;
 		}
 
-		private Car Clone(Car c)
-		{
-			return new Car()
-			{
-				id = string.Copy(c.id),
-				properties = Pclone(c)
-			};
-		}
+		internal List<Property> Pclone(Car car)	=> Pclone(car.properties);
 
 		/// <summary>
 		/// Plugin-specific wrapper for SimHub.Logging.Current.Info();
@@ -108,20 +97,16 @@ namespace blekenbleu
 		{
 			// Save settings
 			if (0 < gname.Length) {
-				Settings.gname = string.Copy(gname);
 				Settings.properties = Pclone(current);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
-			if (null != games)
+			if (games.Save_Car(current, gname) || changed)
 			{
-//				bool ch = games.Save_Car(Clone(current), gname);
-				if ( games.Save_Car(current, gname) || changed )
-				{
-					string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
-					if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
-						Info("End():  Json Serializer failure for games.data");
-					else File.WriteAllText(path, js);
-				}
+				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
+
+				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
+					Info("End():  Json Serializer failure for games.data");
+				else File.WriteAllText(path, js);
 			}
 		}
 
@@ -154,7 +139,6 @@ namespace blekenbleu
 					Glist = new List<Game>() {}
 				}
 			};
-			gname = Settings.gname;			// most recent sim
 			current = new Car() {id = "", properties = Pclone(previous = Pclone(Settings.properties)) };
 			steps = new List<int>() { } ;
 
@@ -225,8 +209,7 @@ namespace blekenbleu
 							s += "adding " + props[c];
 						else s += " + " + props[c];
 						temp.Add(init[c]);
-						if (null != games.data)
-							changed = games.append(init[c]) || changed;
+						changed = games.append(init[c]) || changed;
 					}
 					else temp.Add(previous[Index]);
 				}
@@ -256,41 +239,42 @@ namespace blekenbleu
 			// Declare actions which can be called
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
+				string s = "New Car: ";
 				string cname = pluginManager.GetPropertyValue("CarID")?.ToString();
-  				string s = "New Car: ";
-				gname = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
-				// save current car and game
-				if (null !=cname && 0 < cname.Length && 0 < gname.Length)
+				string gnew = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
+				if (null !=cname && 0 < cname.Length && null != gnew)		// valid current car
 				{
-//					s += cname;
-					if (0 < games.data.Glist.Count		// do not save first car
-					&& games.Save_Car(current, gname))
+					s += cname;
+					if (gnew == gname && games.Save_Car(current, gname))	// do not save first car in game
 					{
 						changed = true;
-//						s += $";  {current.id} saved";
+						s += $";  {current.id} saved";
 					}
+					else gname = gnew;
 					previous = Pclone(current);
 					current.id = cname;
-					if (null != games.data.Glist) {
-						// retrieve properties stored for this car
-						int gndx = games.data.Glist.FindIndex(g => g.name == gname);
 
-						if (-1 != gndx)
-						{
-							int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.id == cname);
-							if (-1 != cndx)
-								current.properties = Pclone(games.data.Glist[gndx].Clist[cndx]);
-						}
+					// properties for this car
+					int gndx = games.data.Glist.FindIndex(g => g.name == gname);
+
+					if (-1 != gndx)
+					{
+						int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.id == cname);
+						if (-1 != cndx)
+							current.properties = Pclone(games.data.Glist[gndx].Clist[cndx]);
+						else if (null != games.data.Glist[gndx].defaults)
+							current.properties = Pclone(games.data.Glist[gndx].defaults);
 					}
 				}
 				else if (null == cname)
 					s += "null CarID, ";
 				else if (0 == cname.Length)
 					s += "empty CarID, ";
-				if (null == gname)
-					s += "null CurrentGame, ";
-				else if (0 == gname.Length)
-					s += "empty CurrentGame, ";
+				if (null == gnew)
+					s += "null CurrentGame name, ";
+				else if (0 == gnew.Length)
+					s += "empty CurrentGame name, ";
+				else gname = gnew;
 				if (10 < s.Length)
 					Info(s);
 			});
