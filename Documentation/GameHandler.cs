@@ -126,7 +126,7 @@ namespace blekenbleu
 			return true;
 		}
 
-		// typically called just before updating DataPlugin.current
+		// typically called just before updating JSONio.current
 		internal bool Save_Car(Car car, string gname)
 		{
 			bool changed = true;

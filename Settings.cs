@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace JSONio
+namespace blekenbleu
 {
     /// <summary>
     /// Settings class, make sure it can be correctly serialized using JSON.net

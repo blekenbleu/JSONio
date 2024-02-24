@@ -6,12 +6,12 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Windows.Media;
 
-namespace JSONio
+namespace blekenbleu
 {
 	[PluginDescription("game&car-specific properties to/from JSON")]
 	[PluginAuthor("blekenbleu")]
 	[PluginName("JSONio plugin")]
-	public class DataPlugin : IPlugin, IDataPlugin, IWPFSettingsV2
+	public class JSONio : IPlugin, IDataPlugin, IWPFSettingsV2
 	{
 		public DataPluginSettings Settings;
 		internal static readonly string My = "JSONio."; 
@@ -53,7 +53,7 @@ namespace JSONio
 		/// </summary>
 		internal static bool Info(string str)
 		{
-			SimHub.Logging.Current.Info(DataPlugin.My + str);   // bool Info()
+			SimHub.Logging.Current.Info(JSONio.My + str);   // bool Info()
 			return true;
 		}
 
@@ -233,7 +233,8 @@ namespace JSONio
 				if (0 < s.Length)
 					s += ";  ";
 				if (previous.Count != init.Count)
-					Info("Init():  " + s + $"previous.Count = {previous.Count};  {path}.Count = {init.Count}");
+					Info("Init():  " + s + $"{path}.Count = {init.Count};  previous.Count = {previous.Count};\n"
+						 +  JsonConvert.SerializeObject(previous, Formatting.Indented));
 				current.properties = Pclone(previous = temp);	// UI can force current.properties back to previous
 			}
 
