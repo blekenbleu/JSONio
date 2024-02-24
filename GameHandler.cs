@@ -126,7 +126,7 @@ namespace blekenbleu
 			return true;
 		}
 
-		// typically called just before updating DataPlugin.current
+		// called when changing cars or games
 		internal bool Save_Car(Car car, string gname)
 		{
 			bool changed = true;
@@ -134,16 +134,13 @@ namespace blekenbleu
 			if (null == car || null == car.id || 0 == car.id.Length)
 				return false;									// nothing to save
 
-			if (null == data.Glist)
-				data.Glist = new List<Game>() { New_Game(gname, car) }; // first time for everything
-			else
-			{													// search for game
-				int gndex = data.Glist.FindIndex(g => g.name == gname);
+																// search for game
+			int gndex = data.Glist.FindIndex(g => g.name == gname);
 
-				if (-1 == gndex) 								// first car for this game
-					data.Glist.Add(New_Game(gname, car));
-				else changed = mod(data.Glist[gndex], car);
-			}
+			if (-1 == gndex)	 								// first car for this game
+				data.Glist.Add(New_Game(gname, car));
+			else changed = mod(data.Glist[gndex], car);
+
 			return changed;
 		}
 	}
