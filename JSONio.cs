@@ -345,6 +345,19 @@ namespace blekenbleu
 			}
 
 			this.AddAction("SwapCurrentPrevious", (a, b) => swap() );
+
+			void new_defaults(List<Property> Plist)
+			{
+				if (0 == gname.Length)
+					return;
+
+				int Index = games.data.Glist.FindIndex(i => i.name == gname);
+
+				if (-1 != Index)	
+					games.data.Glist[Index].defaults = Pclone(Plist);
+			}
+
+			this.AddAction("CurrentAsDefaults", (a, b) => new_defaults(current.properties));
 		}
 	}
 }
