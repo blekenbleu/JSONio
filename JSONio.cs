@@ -35,6 +35,16 @@ namespace blekenbleu
 			return Plist;
 		}
 
+		void cCopy(List<Property> Plist)
+		{
+			for(int c = 0; c < current.properties.Count; c++)
+			{
+				int Index = Plist.FindIndex(i => i.Name == current.properties[c].Name);
+				if (-1 != Index)
+					current.properties[c].Value = Plist[Index].Value;
+			}
+		}
+
 		internal List<Property> Pclone(Car car)	=> Pclone(car.properties);
 
 		/// <summary>
@@ -265,9 +275,9 @@ namespace blekenbleu
 					{
 						int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.id == cname);
 						if (-1 != cndx)
-							current.properties = Pclone(games.data.Glist[gndx].Clist[cndx]);
+							cCopy(games.data.Glist[gndx].Clist[cndx].properties);
 						else if (null != games.data.Glist[gndx].defaults)
-							current.properties = Pclone(games.data.Glist[gndx].defaults);
+							cCopy(games.data.Glist[gndx].defaults);
 					}
 				}
 				else if (null == cname)
@@ -331,7 +341,7 @@ namespace blekenbleu
 				List<Property> temp = Pclone(previous);
 
 				previous = Pclone(current.properties);
-				current.properties = temp;
+				cCopy(temp);
 			}
 
 			this.AddAction("SwapCurrentPrevious", (a, b) => swap() );
