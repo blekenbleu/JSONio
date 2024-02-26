@@ -198,7 +198,7 @@ namespace blekenbleu
 				{
 					// init accumulates properties from GetPropertyValue()
 					init.Add(new Property { Name = props[c], Value = vals[c] });
-					steps.Add((int)(10 * float.Parse(stps[c])));
+					steps.Add((int)(100 * float.Parse(stps[c])));
 
 					// previous has properties from Settings
 					int Index = previous.FindIndex(i => i.Name == props[c]);
@@ -279,20 +279,25 @@ namespace blekenbleu
 					Info(s);
 			});
 
-			void ment(int s, string prefix)
+			void ment(int sign, string prefix)
 			{
-				if (0 == steps[Select] % 10)
+				int step = steps[Select];
+				int iv = (int)(0.004 + 100 * float.Parse(current.properties[Select].Value));
+
+				iv += sign * step;
+				if (0 <= iv)
 				{
-					int fv = int.Parse(current.properties[Select].Value);
-					fv += (int)(0.1 * s * steps[Select]);
-					current.properties[Select].Value = $"{fv}";
-				} else {
-					float fv = float.Parse(current.properties[Select].Value);
-					int i = (int)(steps[Select] + 10 * s * fv);
-					current.properties[Select].Value = $"{0.1 * i}";
+					if (0 != step % 100)
+					{
+						float fv = (float)(0.01 * iv);
+
+						current.properties[Select].Value = $"{fv}";
+					}
+					else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
+					Info("property " + current.properties[Select].Name + " " + prefix + "cremented");
 				}
-				Info("property " + current.properties[Select].Name + " " + prefix + "cremented");
 			}
+
 			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in"));
 
 			this.AddAction("DecrementSelectedProperty", (a, b) => ment(-1, "de"));
