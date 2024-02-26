@@ -229,8 +229,12 @@ namespace blekenbleu
 
 			if (0 < current.properties.Count)
 			{
-				Selected_Property = current.properties[Select].Name;
+				if (0 == gname.Length || 0 == current.id.Length)
+					Selected_Property = "unKnown";
+				else Selected_Property = current.properties[Select].Name;
 				this.AttachDelegate(My+"Selected", () => Selected_Property);
+				this.AttachDelegate(My+"Car", () => current.id);
+				this.AttachDelegate(My+"Game", () => gname);
 			}
 
 			// Declare an event
@@ -281,6 +285,8 @@ namespace blekenbleu
 
 			void ment(int sign, string prefix)
 			{
+				if (0 == gname.Length || 0 == current.id.Length)
+					return;
 				int step = steps[Select];
 				int iv = (int)(0.004 + 100 * float.Parse(current.properties[Select].Value));
 
@@ -288,13 +294,10 @@ namespace blekenbleu
 				if (0 <= iv)
 				{
 					if (0 != step % 100)
-					{
-						float fv = (float)(0.01 * iv);
-
-						current.properties[Select].Value = $"{fv}";
-					}
+						current.properties[Select].Value = $"{(float)(0.01 * iv)}";
 					else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
-					Info("property " + current.properties[Select].Name + " " + prefix + "cremented");
+					Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
+					changed = true;
 				}
 			}
 
@@ -304,6 +307,9 @@ namespace blekenbleu
 
 			void select(bool next)
 			{
+				if (0 == gname.Length || 0 == current.id.Length)
+					return;
+
 				if (next && ++Select >= current.properties.Count)
 					Select = 0;
 				if (!next)
@@ -319,6 +325,16 @@ namespace blekenbleu
 			this.AddAction("NextProperty", (a, b) => select(true) );
 
 			this.AddAction("PreviousProperty", (a, b) => select(false) );
+
+			void swap()
+			{
+				List<Property> temp = Pclone(previous);
+
+				previous = Pclone(current.properties);
+				current.properties = temp;
+			}
+
+			this.AddAction("SwapCurrentPrevious", (a, b) => swap() );
 		}
 	}
 }
