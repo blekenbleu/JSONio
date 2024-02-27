@@ -279,6 +279,7 @@ namespace blekenbleu
 						else if (null != games.data.Glist[gndx].defaults)
 							cCopy(games.data.Glist[gndx].defaults);
 					}
+					Selected_Property = current.properties[Select].Name;
 				}
 				else if (null == cname)
 					s += "null CarID, ";
