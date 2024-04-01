@@ -69,3 +69,18 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
                 games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));  
             } else changed = true;  
 		```
+- C# [DataGrid](https://blog.udemy.com/wpf-datagrid/)
+	- Fixed number of rows (4)
+		- property name
+		- default value
+		- previous value
+		- current value
+	- first column of row labels, as above
+    - programatically add a column for each property configured
+	- more references:
+		- [DataGrid](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/datagrid?view=netframeworkdesktop-4.8)
+		- [DataGrid in WPF](https://www.c-sharpcorner.com/uploadfile/mahesh/datagrid-in-wpf/)
+		- [DataGrid Class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.controls.datagrid?view=windowsdesktop-8.0)
+		- [DataGrid Examples](https://www.dotnetperls.com/datagrid-wpf)
+		- [DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
+		- [Sizing Options in the DataGrid Control](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/sizing-options-in-the-datagrid-control?view=netframeworkdesktop-4.8)
