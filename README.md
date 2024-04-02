@@ -95,6 +95,13 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- select View->Designer
 		- drag `DaataGrid` from `Common WPF Controls
 		- fiddle with margins for Grid and DataGrid to make space for Label
-		- drag buttons for previous, next, +, -, ...  
+		- drag buttons for previous, next, +, -, etc  
 			![](Documentation/DataGrid.png)  
-			*SampleData does not appear in SimHub*  
+			*SampleData does not appear in SimHub*
+- C# WPF XY plot
+	- using [OxyPlot](https://github.com/oxyplot/oxyplot)?
+		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
+		- [Bart De Meyer - Blog](https://blog.bartdemeyer.be/2013/03/creating-graphs-in-wpf-using-oxyplot/)
+		- [CodeProject](https://www.codeproject.com/Articles/1164395/Wpf-application-with-real-time-data-in-OxyPlot-cha)
+		- [stackoverflow example](https://stackoverflow.com/questions/44697701/create-an-oxyplot-in-wpf)
+	- using [GLGraph](https://github.com/varon/GLGraph)?
