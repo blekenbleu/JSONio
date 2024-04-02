@@ -69,14 +69,15 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
                 games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));  
             } else changed = true;  
 		```
-- C# [DataGrid](https://blog.udemy.com/wpf-datagrid/)
-	- Fixed number of rows (4)
+- C# [Declaring a DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/)
+	- 4 rows:
 		- property name
 		- default value
 		- previous value
 		- current value
 	- first column of row labels, as above
     - programatically add a column for each property configured
+	- highlight current value of only selected property
 	- more references:
 		- [DataGrid](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/datagrid?view=netframeworkdesktop-4.8)
 		- [DataGrid in WPF](https://www.c-sharpcorner.com/uploadfile/mahesh/datagrid-in-wpf/)
@@ -84,3 +85,16 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- [DataGrid Examples](https://www.dotnetperls.com/datagrid-wpf)
 		- [DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 		- [Sizing Options in the DataGrid Control](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/sizing-options-in-the-datagrid-control?view=netframeworkdesktop-4.8)
+		- [highlight Item in Datagrid](https://stackoverflow.com/questions/15467553/proper-datagrid-search-from-textbox-in-wpf-using-mvvm)
+		- [Change DataGrid cell colour](https://stackoverflow.com/questions/5549617/change-datagrid-cell-colour-based-on-values)
+		- [*stackoverflow*:&nbsp; highlight WPF DataGrid cell programmatically](https://stackoverflow.com/questions/3836191/how-to-select-a-row-or-a-cell-in-wpf-datagrid-programmatically)
+		- [*blog.magnusmontin*:&nbsp; programmatically select and focus a WPF DataGrid cell](https://blog.magnusmontin.net/2013/11/08/how-to-programmatically-select-and-focus-a-row-or-cell-in-a-datagrid-in-wpf/)
+		- [*learn.microsoft*:&nbsp; programmatically select AND focus a WPF Datagrid cell](https://learn.microsoft.com/en-us/archive/msdn-technet-forums/89df8b8f-29b8-4915-b2b6-e153e05f9ca9)
+	- first steps in Visual Studio:
+		- click `Control.xaml`
+		- select View->Designer
+		- drag `DaataGrid` from `Common WPF Controls
+		- fiddle with margins for Grid and DataGrid to make space for Label
+		- drag buttons for previous, next, +, -, ...  
+			![](Documentation/DataGrid.png)  
+			*SampleData does not appear in SimHub*  
