@@ -79,11 +79,11 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
     - programatically add a column for each property configured
 	- highlight current value of only selected property
 	- more references:
+		- [*wpf-tutorial*:&nbsp DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/) **binds cells to list of class members**
 		- [DataGrid](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/datagrid?view=netframeworkdesktop-4.8)
 		- [DataGrid in WPF](https://www.c-sharpcorner.com/uploadfile/mahesh/datagrid-in-wpf/)
 		- [DataGrid Class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.controls.datagrid?view=windowsdesktop-8.0)
 		- [DataGrid Examples](https://www.dotnetperls.com/datagrid-wpf)
-		- [*wpf-tutorial*:&nbsp DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 		- [Sizing Options in the DataGrid Control](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/sizing-options-in-the-datagrid-control?view=netframeworkdesktop-4.8)
 		- [highlight Item in Datagrid](https://stackoverflow.com/questions/15467553/proper-datagrid-search-from-textbox-in-wpf-using-mvvm)
 		- [Change DataGrid cell colour](https://stackoverflow.com/questions/5549617/change-datagrid-cell-colour-based-on-values)
