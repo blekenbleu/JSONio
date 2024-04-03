@@ -79,7 +79,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
     - programatically add a column for each property configured
 	- highlight current value of only selected property
 	- more references:
-		- [*wpf-tutorial*:&nbsp DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/) **binds cells to list of class members**
+		- [*wpf-tutorial*:&nbsp; DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/) **binds cells to list of class members**
 		- [DataGrid](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/datagrid?view=netframeworkdesktop-4.8)
 		- [DataGrid in WPF](https://www.c-sharpcorner.com/uploadfile/mahesh/datagrid-in-wpf/)
 		- [DataGrid Class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.controls.datagrid?view=windowsdesktop-8.0)
@@ -102,7 +102,34 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 			- fiddle with margins for Grid and DataGrid to make space for Label
 			- [add DataGrid column Headers](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-add-row-details-to-a-datagrid-control?view=netframeworkdesktop-4.8)
 		- drag in buttons for previous, next, +, -, etc  
-			![](Documentation/DataGrid.png)  
+			![](Documentation/DataGrid.png)
+	- *3 April 2024*:&nbsp; [bind SimProp class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
+		```
+			<DataGrid.Columns>
+                <DataGridTextColumn Header="Property" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Default" Binding="{Binding Default}" />
+                <DataGridTextColumn Header="Current" Binding="{Binding Current}" />
+                <DataGridTextColumn Header="Previous" Binding="{Binding Previous}" />
+            </DataGrid.Columns>
+		...
+		public class SimProp
+	    {
+    	    public string Name { get; set; }
+	        public string Default { get; set; }
+        	public string Current { get; set; }
+    	    public string Previous { get; set; }
+	    }
+		...
+		public List<SimProp> simprops;
+
+		public SettingsControl()
+        {
+            InitializeComponent();
+
+            simprops = new List<SimProp>();
+            dg.ItemsSource = simprops;
+        }
+		```
 - C# WPF XY plot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)?
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
