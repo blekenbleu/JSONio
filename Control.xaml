@@ -6,14 +6,17 @@
 		xmlns:local="clr-namespace:blekenbleu"
 		mc:Ignorable="d"
 		Height="300" Width="480">
-    <Grid Margin="10,10,10,10" RenderTransformOrigin="0,0">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0*"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
+    <Grid Margin="10,10,10,10">
         <Label x:Name="SHlabel" Content="JSONio Properties Manager" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="164" Height="25" Grid.Column="1"/>
-        <DataGrid Name="dg" IsReadOnly="True" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,50,0,70" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1"/>
-        <Button Content="Previous" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="20,230,0,0" VerticalAlignment="Top"/>
+        <DataGrid Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,50,0,70" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Property" Binding="{Binding}" />
+                <DataGridTextColumn Header="Default" Binding="{Binding}" />
+                <DataGridTextColumn Header="Current" Binding="{Binding}" />
+                <DataGridTextColumn Header="Previous" Binding="{Binding}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button Content="Prior" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="40,230,0,0" VerticalAlignment="Top"/>
         <Button Content="Next" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="90,230,0,0" VerticalAlignment="Top"/>
         <Button Content="+" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="137,230,0,0" VerticalAlignment="Top"/>
         <Button Content="-" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="165,230,0,0" VerticalAlignment="Top"/>

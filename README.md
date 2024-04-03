@@ -83,21 +83,26 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- [DataGrid in WPF](https://www.c-sharpcorner.com/uploadfile/mahesh/datagrid-in-wpf/)
 		- [DataGrid Class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.controls.datagrid?view=windowsdesktop-8.0)
 		- [DataGrid Examples](https://www.dotnetperls.com/datagrid-wpf)
-		- [DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
+		- [*wpf-tutorial*:&nbsp DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 		- [Sizing Options in the DataGrid Control](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/sizing-options-in-the-datagrid-control?view=netframeworkdesktop-4.8)
 		- [highlight Item in Datagrid](https://stackoverflow.com/questions/15467553/proper-datagrid-search-from-textbox-in-wpf-using-mvvm)
 		- [Change DataGrid cell colour](https://stackoverflow.com/questions/5549617/change-datagrid-cell-colour-based-on-values)
 		- [*stackoverflow*:&nbsp; highlight WPF DataGrid cell programmatically](https://stackoverflow.com/questions/3836191/how-to-select-a-row-or-a-cell-in-wpf-datagrid-programmatically)
 		- [*blog.magnusmontin*:&nbsp; programmatically select and focus a WPF DataGrid cell](https://blog.magnusmontin.net/2013/11/08/how-to-programmatically-select-and-focus-a-row-or-cell-in-a-datagrid-in-wpf/)
 		- [*learn.microsoft*:&nbsp; programmatically select AND focus a WPF Datagrid cell](https://learn.microsoft.com/en-us/archive/msdn-technet-forums/89df8b8f-29b8-4915-b2b6-e153e05f9ca9)
+		- [programmatically add DataGrid rows](https://stackoverflow.com/questions/10063770/how-to-add-a-new-row-to-datagridview-programmatically)
+		- [DataGridViewRow Class](https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.datagridviewrow?view=windowsdesktop-8.0)
+		- [*stackoverflow*:&nbsp; change WPF DataGrid cell value programmatically](https://stackoverflow.com/questions/12164079/change-datagrid-cell-value-programmatically-in-wpf)
+		- [access WPF DataGrid row and cell *example*](https://techiethings.blogspot.com/2010/05/get-wpf-datagrid-row-and-cell.html)
+		- [*CodeProject*:&nbsp; MVVM and the WPF DataGrid](https://www.codeproject.com/articles/42548/mvvm-and-the-wpf-datagrid)
 	- first steps in Visual Studio:
 		- click `Control.xaml`
 		- select View->Designer
-		- drag `DaataGrid` from `Common WPF Controls
-		- fiddle with margins for Grid and DataGrid to make space for Label
-		- drag buttons for previous, next, +, -, etc  
+		- drag in `DataGrid` from `Common WPF Controls`
+			- fiddle with margins for Grid and DataGrid to make space for Label
+			- [add DataGrid column Headers](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-add-row-details-to-a-datagrid-control?view=netframeworkdesktop-4.8)
+		- drag in buttons for previous, next, +, -, etc  
 			![](Documentation/DataGrid.png)  
-			*SampleData does not appear in SimHub*
 - C# WPF XY plot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)?
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
