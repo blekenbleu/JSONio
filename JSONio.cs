@@ -82,20 +82,6 @@ namespace blekenbleu
 		/// <param name="data">Current game data, including current and previous data frame.</param>
 		public void DataUpdate(PluginManager pluginManager, ref GameData data)
 		{
-/*
-			// Define the value of our property (declared in Init())
-			if (data.GameRunning)
-			{
-				if (data.OldData != null && data.NewData != null)
-				{
-					if (data.OldData.SpeedKmh < 100 && data.OldData.SpeedKmh >= 100)
-					{
-						// Trigger an event
-						this.TriggerEvent("SpeedWarning");
-					}
-				}
-			}
- */
 		}
 
 		/// <summary>
@@ -130,6 +116,11 @@ namespace blekenbleu
 			return new SettingsControl(this);
 		}
 
+		/// <summary>
+		/// Helper functions used in Init() AddAction()s and Control.xaml.cs for button Clicks
+		/// </summary>
+		/// <param name="sign"></param> should be 1 or -1
+		/// <param name="prefix"></param> should be "in" or "de"
 		public void ment(int sign, string prefix)
 		{
 			if (0 == gname.Length || 0 == current.id.Length)
@@ -143,24 +134,28 @@ namespace blekenbleu
 				if (0 != step % 100)
 					current.properties[Select].Value = $"{(float)(0.01 * iv)}";
 				else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
-				Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
+//				Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
 				changed = true;
 			}
 		}
 
+		/// <summary>
+		/// select next or prior property
+		/// </summary>
+		/// <param name="next"></param> false for prior
 		public void select(bool next)
 		{
 			if (0 == gname.Length || 0 == current.id.Length)
 				return;
 
-			if (next && ++Select >= current.properties.Count)
-				Select = 0;
-			if (!next)
+			if (next)
 			{
-				if (0 < Select)
-					Select--;
-				else Select = (byte)(current.properties.Count - 1);
+				if (++Select >= current.properties.Count)
+					Select = 0;
 			}
+			else if (0 < Select)	// prior
+				Select--;
+			else Select = (byte)(current.properties.Count - 1);
 			Selected_Property = current.properties[Select].Name;
 //			Info("Selected property = " + Selected_Property);
 		}
@@ -300,9 +295,11 @@ namespace blekenbleu
 				this.AttachDelegate(My+"Game", () => gname);
 			}
 
-			// Declare an event
-			//this.AddEvent("SpeedWarning");
-
+/*---------	this.AddAction("ChangeProperties",... gets invoked for CarId changes, based on this NCalcScripts/JSONio.ini entry:
+ ;			[ExportEvent]
+ ;			name='CarChange'
+ ;			trigger=changed(200, [DataCorePlugin.GameData.CarId])
+ ;--------------------------------------------------------------- */	
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
 				string s = "New Car: ";
@@ -346,17 +343,12 @@ namespace blekenbleu
 					Info(s);
 			});
 
-			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in"));
-
+			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in")	);
 			this.AddAction("DecrementSelectedProperty", (a, b) => ment(-1, "de"));
-
-			this.AddAction("NextProperty", (a, b) => select(true) );
-
-			this.AddAction("PreviousProperty", (a, b) => select(false) );
-
-			this.AddAction("SwapCurrentPrevious", (a, b) => swap() );
-
-			this.AddAction("CurrentAsDefaults", (a, b) => new_defaults());
+			this.AddAction("NextProperty",				(a, b) => select(true)	);
+			this.AddAction("PreviousProperty",			(a, b) => select(false)	);
+			this.AddAction("SwapCurrentPrevious",		(a, b) => swap()		);
+			this.AddAction("CurrentAsDefaults",			(a, b) => new_defaults());
 		}
 	}
 }
