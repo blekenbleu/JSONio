@@ -130,6 +130,60 @@ namespace blekenbleu
 			return new SettingsControl(this);
 		}
 
+		public void ment(int sign, string prefix)
+		{
+			if (0 == gname.Length || 0 == current.id.Length)
+				return;
+			int step = steps[Select];
+			int iv = (int)(0.004 + 100 * float.Parse(current.properties[Select].Value));
+
+			iv += sign * step;
+			if (0 <= iv)
+			{
+				if (0 != step % 100)
+					current.properties[Select].Value = $"{(float)(0.01 * iv)}";
+				else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
+				Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
+				changed = true;
+			}
+		}
+
+		public void select(bool next)
+		{
+			if (0 == gname.Length || 0 == current.id.Length)
+				return;
+
+			if (next && ++Select >= current.properties.Count)
+				Select = 0;
+			if (!next)
+			{
+				if (0 < Select)
+					Select--;
+				else Select = (byte)(current.properties.Count - 1);
+			}
+			Selected_Property = current.properties[Select].Name;
+//			Info("Selected property = " + Selected_Property);
+		}
+
+		public void swap()
+		{
+			List<Property> temp = Pclone(previous);
+
+			previous = Pclone(current.properties);
+			cCopy(temp);
+		}
+
+		public void new_defaults()
+		{
+			if (0 == gname.Length)
+				return;
+
+			int Index = games.data.Glist.FindIndex(i => i.name == gname);
+
+			if (-1 != Index)	
+				games.data.Glist[Index].defaults = Pclone(current.properties);
+		}
+
 		/// <summary>
 		/// Called once after plugins startup
 		/// Plugins are rebuilt at game change
@@ -231,7 +285,6 @@ namespace blekenbleu
 				current.properties = Pclone(previous = temp);	// UI can force current.properties back to previous
 			}
 
-
 			// Declare a property available in the property list
 			// this gets evaluated "on demand" (when shown or used in formulae)
 			foreach(Property p in current.properties)
@@ -250,7 +303,6 @@ namespace blekenbleu
 			// Declare an event
 			//this.AddEvent("SpeedWarning");
 
-			// Declare actions which can be called
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
 				string s = "New Car: ";
@@ -294,71 +346,17 @@ namespace blekenbleu
 					Info(s);
 			});
 
-			void ment(int sign, string prefix)
-			{
-				if (0 == gname.Length || 0 == current.id.Length)
-					return;
-				int step = steps[Select];
-				int iv = (int)(0.004 + 100 * float.Parse(current.properties[Select].Value));
-
-				iv += sign * step;
-				if (0 <= iv)
-				{
-					if (0 != step % 100)
-						current.properties[Select].Value = $"{(float)(0.01 * iv)}";
-					else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
-					Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
-					changed = true;
-				}
-			}
-
 			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in"));
 
 			this.AddAction("DecrementSelectedProperty", (a, b) => ment(-1, "de"));
-
-			void select(bool next)
-			{
-				if (0 == gname.Length || 0 == current.id.Length)
-					return;
-
-				if (next && ++Select >= current.properties.Count)
-					Select = 0;
-				if (!next)
-				{
-					if (0 < Select)
-						Select--;
-					else Select = (byte)(current.properties.Count - 1);
-				}
-				Selected_Property = current.properties[Select].Name;
-				Info("Selected property = " + Selected_Property);
-			}
 
 			this.AddAction("NextProperty", (a, b) => select(true) );
 
 			this.AddAction("PreviousProperty", (a, b) => select(false) );
 
-			void swap()
-			{
-				List<Property> temp = Pclone(previous);
-
-				previous = Pclone(current.properties);
-				cCopy(temp);
-			}
-
 			this.AddAction("SwapCurrentPrevious", (a, b) => swap() );
 
-			void new_defaults(List<Property> Plist)
-			{
-				if (0 == gname.Length)
-					return;
-
-				int Index = games.data.Glist.FindIndex(i => i.name == gname);
-
-				if (-1 != Index)	
-					games.data.Glist[Index].defaults = Pclone(Plist);
-			}
-
-			this.AddAction("CurrentAsDefaults", (a, b) => new_defaults(current.properties));
+			this.AddAction("CurrentAsDefaults", (a, b) => new_defaults());
 		}
 	}
 }

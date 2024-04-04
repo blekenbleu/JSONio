@@ -25,6 +25,16 @@ namespace blekenbleu
 
 	}
 
+    // programatically define DataGrid columns
+    // https://wpf-tutorial.com/datagrid-control/custom-columns/
+    public class SimProp
+    {
+        public string Name { get; set; }
+        public string Default { get; set; }
+        public string Current { get; set; }
+        public string Previous { get; set; }
+    }
+
 	public class Games
 	{
 		public string name { get; set; }
@@ -57,11 +67,11 @@ namespace blekenbleu
 
 		internal List<Property> Clone(List<Property> l)
 		{
-			var n = new List<Property>() { };
+			var nl = new List<Property>() { };
 
 			foreach (Property p in l)
-				n.Add(Clone(p));
-			return n;
+				nl.Add(Clone(p));
+			return nl;
 		}
 
 		internal Car Clone(Car car) => new Car() { id = string.Copy(car.id), properties = Clone(car.properties) };
@@ -92,6 +102,7 @@ namespace blekenbleu
 					changed = mod(g.Clist[index], p.Name, p.Value, true) || changed;
 			return changed;
 		}
+
 		internal List<Property> Pclone(Car c)
 		{
 			List<Property> prop = new List<Property> { };

@@ -1,18 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace blekenbleu
 {
-	// manually define DataGrid columns shown
-	// https://wpf-tutorial.com/datagrid-control/custom-columns/
-	public class SimProp
-	{
-		public string Name { get; set; }
-		public string Default { get; set; }
-		public string Current { get; set; }
-		public string Previous { get; set; }
-	}
-
     /// <summary>
     /// Interaction code for SettingsControl.xaml
     /// </summary>
@@ -34,5 +25,36 @@ namespace blekenbleu
         {
             this.Plugin = plugin;
         }
+
+		// handle button clicks
+		private void Prior_Click(object sender, RoutedEventArgs e)
+        {
+			Plugin.select(false);
+		}
+
+		private void Next_Click(object sender, RoutedEventArgs e)
+        {
+			Plugin.select(true);
+		}
+
+		private void Inc_Click(object sender, RoutedEventArgs e)
+        {
+			Plugin.ment(1, "in");
+		}
+
+		private void Dec_Click(object sender, RoutedEventArgs e)
+        {
+			Plugin.ment(-1, "de");
+		}
+
+		private void Swap_Click(object sender, RoutedEventArgs e)
+        {
+			Plugin.swap();
+		}
+
+		private void Def_Click(object sender, RoutedEventArgs e)
+        {
+			Plugin.new_defaults();
+		}
     }
 }

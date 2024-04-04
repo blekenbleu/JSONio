@@ -16,11 +16,11 @@
                 <DataGridTextColumn Header="Previous" Binding="{Binding Previous}" />
             </DataGrid.Columns>
         </DataGrid>
-        <Button Content="Prior" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="40,230,0,0" VerticalAlignment="Top"/>
-        <Button Content="Next" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="90,230,0,0" VerticalAlignment="Top"/>
-        <Button Content="+" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="137,230,0,0" VerticalAlignment="Top"/>
-        <Button Content="-" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="165,230,0,0" VerticalAlignment="Top"/>
-        <Button Content="Current&lt;>Previous" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="190,230,0,0" VerticalAlignment="Top"/>
-        <Button Content="Current>Default" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="320,230,0,0" VerticalAlignment="Top"/>
+        <Button Content="Prior" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="40,230,0,0" VerticalAlignment="Top" Click="Prior_Click"/>
+        <Button Content="Next" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="90,230,0,0" VerticalAlignment="Top" Click="Next_Click"/>
+        <Button Content="+" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="137,230,0,0" VerticalAlignment="Top" Click="Inc_Click"/>
+        <Button Content="-" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="165,230,0,0" VerticalAlignment="Top" Click="Dec_Click"/>
+        <Button Content="Current&lt;>Previous" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="190,230,0,0" VerticalAlignment="Top" Click="Swap_Click"/>
+        <Button Content="Current>Default" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="320,230,0,0" VerticalAlignment="Top" Click="Def_Click"/>
     </Grid>
 </UserControl>

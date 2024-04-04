@@ -103,7 +103,8 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 			- [add DataGrid column Headers](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-add-row-details-to-a-datagrid-control?view=netframeworkdesktop-4.8)
 		- drag in buttons for previous, next, +, -, etc  
 			![](Documentation/DataGrid.png)
-	- *3 April 2024*:&nbsp; [bind SimProp class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
+	- *3 April 2024*:  
+		- [bind SimProp class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 		```
 			<DataGrid.Columns>
                 <DataGridTextColumn Header="Property" Binding="{Binding Name}" />
@@ -130,6 +131,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
             dg.ItemsSource = simprops;
         }
 		```
+		- bind WPF button clicks directly to Plugin Action methods
 - C# WPF XY plot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)?
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
