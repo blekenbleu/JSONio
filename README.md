@@ -1,10 +1,10 @@
 # SimHub JSONio plugin  
- from SimHubPluginSdk
+ from [SimHubPluginSdk](https://github.com/blekenbleu/SimHubPluginSdk/blob/main/README.md)  
 - instead of just copying that SimHubPluginSdk repository
-    - Had Visual Studio create a new project, then quit
-    - deleted everything in that project except `JSONio.sln` and `JSONio.csproj`
-    - copied `Properties/` and source files from `SimHubPluginSdk/`
-    - performed GVIM split diff on `JSONio.sln` and `JSONio.csproj`
+	- Had Visual Studio create a new project, then quit
+	- deleted everything in that project except `JSONio.sln` and `JSONio.csproj`
+	- copied `Properties/` and source files from `SimHubPluginSdk/`
+	- performed GVIM split diff on `JSONio.sln` and `JSONio.csproj`
 		to preserve new `ProjectGuid`, etc
 	- **forgot to** update namespace from `User.PluginSdk` to `JSONio` e.g. in `Properties/`...!
 ## What
@@ -40,34 +40,35 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 ## New to me
 - C# `List<>` and particularly with non-trivial objects.
 	- [Here are some snippits](https://www.tutorialsteacher.com/csharp/csharp-list) with `List<Student>`
-	- [stackoverflow list search by LINQ](https://stackoverflow.com/questions/1175645/find-an-item-in-a-list-by-linq)
-	- [M$ Learn List<T>.FindIndex Method](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1.findindex):&nbsp;
+	- [*stackoverflow*:&nbsp; list search](https://stackoverflow.com/questions/1175645/find-an-item-in-a-list-by-linq)
+	- [*M$ Learn*:&nbsp; List<T>.FindIndex Method](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1.findindex):&nbsp;
 		[*index of item in a list*](https://stackoverflow.com/questions/17995706/how-can-i-get-the-index-of-an-item-in-a-list-in-a-single-step):  
 		```
 			int index = properties.FindIndex(a => a.Name == name);
 
-            if (-1 == index)
-                properties.Add ( new Property() { Name=name, Value=value });
-            else if (replace && properties[index].Value != value)
-                properties[index].Value = value;
+			if (-1 == index)
+				properties.Add ( new Property() { Name=name, Value=value });
+			else if (replace && properties[index].Value != value)
+				properties[index].Value = value;
 		```
 - C# JSON
-	- Visual Studio had to add `System.Text.Json` package...  
-	- [pretty-print JSON from C#](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.writeindented)  AKA
+	- In Visual Studio, [add `Newtonsoft.Json.NET` package](https://learn.microsoft.com/en-us/nuget/quickstart/install-and-use-a-package-in-visual-studio#add-the-newtonsoftjson-nuget-package)...  
+	- pretty-print JSON from C#  AKA
 		[serialize](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to)  
 		```
-			using System.Text.Json;
+			using Newtonsoft.Json;
 
-			if (changed)
-                File.WriteAllText(path, JsonSerializer.Serialize(games, new JsonSerializerOptions { WriteIndented = true }));
+			if (games.Save_Car(current, gname) || changed)
+			{
+				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
 		```
 	- Eventually, [Read and Parse a JSON File in C#](https://code-maze.com/csharp-read-and-process-json-file/) AKA
 	 [deserialize](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/deserialization)  
 		```
 			if (File.Exists(path))  
-            {  
-                games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));  
-            } else changed = true;  
+			{  
+				games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));  
+			} else changed = true;  
 		```
 - C# [Declaring a DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/)
 	- 4 column:
@@ -76,7 +77,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- previous value
 		- current value
 	- XML header of row labels, as above
-    - programatically add a row for each property configured
+	- programatically add a row for each property configured
 	- highlight current value of only selected property
 	- more references:
 		- [*wpf-tutorial*:&nbsp; DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/) **binds cells to list of class members**
@@ -107,29 +108,29 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- [bind SimProp class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 		```
 			<DataGrid.Columns>
-                <DataGridTextColumn Header="Property" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Default" Binding="{Binding Default}" />
-                <DataGridTextColumn Header="Current" Binding="{Binding Current}" />
-                <DataGridTextColumn Header="Previous" Binding="{Binding Previous}" />
-            </DataGrid.Columns>
+				<DataGridTextColumn Header="Property" Binding="{Binding Name}" />
+				<DataGridTextColumn Header="Default" Binding="{Binding Default}" />
+				<DataGridTextColumn Header="Current" Binding="{Binding Current}" />
+				<DataGridTextColumn Header="Previous" Binding="{Binding Previous}" />
+			</DataGrid.Columns>
 		...
 		public class SimProp
-	    {
-    	    public string Name { get; set; }
-	        public string Default { get; set; }
-        	public string Current { get; set; }
-    	    public string Previous { get; set; }
-	    }
+		{
+			public string Name { get; set; }
+			public string Default { get; set; }
+			public string Current { get; set; }
+			public string Previous { get; set; }
+		}
 		...
 		public List<SimProp> simprops;
 
 		public SettingsControl()
-        {
-            InitializeComponent();
+		{
+			InitializeComponent();
 
-            simprops = new List<SimProp>();
-            dg.ItemsSource = simprops;
-        }
+			simprops = new List<SimProp>();
+			dg.ItemsSource = simprops;
+		}
 		```
 		- bind WPF button clicks directly to Plugin Action methods
 	- *4 Apr*:
