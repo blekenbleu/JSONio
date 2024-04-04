@@ -8,11 +8,11 @@
 		to preserve new `ProjectGuid`, etc
 	- **forgot to** update namespace from `User.PluginSdk` to `JSONio` e.g. in `Properties/`...!
 ## What
-Want properties specific to each SimHub car:  
+A common list of SimHub properties with values potentially specific to each sim and car:  
 ![](Documentation/properties.png)
 - a C# list of games
-	- each game a name, game=specific default properties and list of cars
-		- each car a carID and its list of properties
+	- each game a name, game-specific default property values and list of cars
+		- each car a carID and its list of property values
 			- each property a name and value
 - `this.AddAction("ChangeProperties",(a, b) =>` saves current properties, if changed,  
 	then loads properties for the new Car.
