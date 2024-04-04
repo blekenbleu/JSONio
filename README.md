@@ -1,5 +1,15 @@
 # SimHub JSONio plugin  
  from [SimHubPluginSdk](https://github.com/blekenbleu/SimHubPluginSdk/blob/main/README.md)  
+## What
+A common list of custom SimHub properties with values potentially specific to each sim and car.  
+In this example, 4 properties are managed for ShakeIt Wheel Slip haptics:  
+![](Documentation/properties.png)
+- a C# list of games
+	- each game a name, game-specific default property values and list of cars
+		- each car a carID and its list of property values
+			- each property a name and value
+- properties to be managed are configured in `JSONio.ini`.
+## How
 - instead of just copying that SimHubPluginSdk repository
 	- Had Visual Studio create a new project, then quit
 	- deleted everything in that project except `JSONio.sln` and `JSONio.csproj`
@@ -7,13 +17,6 @@
 	- performed GVIM split diff on `JSONio.sln` and `JSONio.csproj`
 		to preserve new `ProjectGuid`, etc
 	- **forgot to** update namespace from `User.PluginSdk` to `JSONio` e.g. in `Properties/`...!
-## What
-A common list of SimHub properties with values potentially specific to each sim and car:  
-![](Documentation/properties.png)
-- a C# list of games
-	- each game a name, game-specific default property values and list of cars
-		- each car a carID and its list of property values
-			- each property a name and value
 - `this.AddAction("ChangeProperties",(a, b) =>` saves current properties, if changed,  
 	then loads properties for the new Car.
 	- creates new Car object from game default if no CarID match
@@ -136,10 +139,9 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 	- *4 Apr*:
 		- test buttons
 		- populate `List<SimProp>` from existing `current`, `previous`, etc
-- C# WPF XY plot
-	- using [OxyPlot](https://github.com/oxyplot/oxyplot)?
+- C# WPF XY plot:&nbsp; SimHub already uses OxyPlot
+	- using [OxyPlot](https://github.com/oxyplot/oxyplot)
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
 		- [Bart De Meyer - Blog](https://blog.bartdemeyer.be/2013/03/creating-graphs-in-wpf-using-oxyplot/)
 		- [CodeProject](https://www.codeproject.com/Articles/1164395/Wpf-application-with-real-time-data-in-OxyPlot-cha)
 		- [stackoverflow example](https://stackoverflow.com/questions/44697701/create-an-oxyplot-in-wpf)
-	- using [GLGraph](https://github.com/varon/GLGraph)?
