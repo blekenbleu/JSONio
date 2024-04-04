@@ -70,13 +70,13 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
             } else changed = true;  
 		```
 - C# [Declaring a DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/)
-	- 4 rows:
+	- 4 column:
 		- property name
 		- default value
 		- previous value
 		- current value
-	- first column of row labels, as above
-    - programatically add a column for each property configured
+	- XML header of row labels, as above
+    - programatically add a row for each property configured
 	- highlight current value of only selected property
 	- more references:
 		- [*wpf-tutorial*:&nbsp; DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/) **binds cells to list of class members**
@@ -132,6 +132,9 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
         }
 		```
 		- bind WPF button clicks directly to Plugin Action methods
+	- *4 Apr*:
+		- test buttons
+		- populate `List<SimProp>` from existing `current`, `previous`, etc
 - C# WPF XY plot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)?
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
