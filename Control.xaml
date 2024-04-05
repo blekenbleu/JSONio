@@ -7,8 +7,10 @@
 		mc:Ignorable="d"
 		Height="300" Width="480">
     <Grid Margin="10,10,10,10">
-        <Label x:Name="SHlabel" Content="JSONio Properties Manager" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="164" Height="25" Grid.Column="1"/>
-        <DataGrid Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,50,0,70" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1">
+        <Label x:Name="SHlabel" Content="JSONio Properties Manager" HorizontalAlignment="Center"
+				 Margin="0,10,0,0" VerticalAlignment="Top" Width="164" Height="25" Grid.Column="1"/>
+        <DataGrid Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
+				 Margin="0,50,0,70" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Property" Binding="{Binding Name}" />
                 <DataGridTextColumn Header="Default" Binding="{Binding Default}" />
@@ -16,11 +18,11 @@
                 <DataGridTextColumn Header="Previous" Binding="{Binding Previous}" />
             </DataGrid.Columns>
         </DataGrid>
-        <Button Content="Prior" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="40,230,0,0" VerticalAlignment="Top" Click="Prior_Click"/>
-        <Button Content="Next" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="90,230,0,0" VerticalAlignment="Top" Click="Next_Click"/>
-        <Button Content="+" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="137,230,0,0" VerticalAlignment="Top" Click="Inc_Click"/>
-        <Button Content="-" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="165,230,0,0" VerticalAlignment="Top" Click="Dec_Click"/>
-        <Button Content="Current&lt;>Previous" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="190,230,0,0" VerticalAlignment="Top" Click="Swap_Click"/>
-        <Button Content="Current>Default" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="320,230,0,0" VerticalAlignment="Top" Click="Def_Click"/>
+        <Button Content="Prior" HorizontalAlignment="Left" Margin="80,230,0,0" Click="Prior_Click"/>
+        <Button Content="Next"  HorizontalAlignment="Left" Margin="130,230,0,0" Click="Next_Click"/>
+        <Button Content=" + "   HorizontalAlignment="Left" Margin="177,230,0,0" Click="Inc_Click"/>
+        <Button Content=" - "   HorizontalAlignment="Left" Margin="210,230,0,0" Click="Dec_Click"/>
+        <Button Content="Current&lt;>&#xa;Previous" HorizontalAlignment="Left" Margin="240,230,0,0" Click="Swap_Click"/>
+        <Button Content="Current&#xa;>Default" HorizontalAlignment="Left" Margin="320,230,0,0" Click="Def_Click"/>
     </Grid>
 </UserControl>
