@@ -73,7 +73,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 				games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));  
 			} else changed = true;  
 		```
-- C# [WPF DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/) - [more references](Documentation/references)
+- C# [WPF DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/) - [more references](Documentation/)
 	- 4 column table:
 		- property name
 		- default value
