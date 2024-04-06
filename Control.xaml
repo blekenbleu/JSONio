@@ -9,20 +9,50 @@
     <Grid Margin="10,10,10,10">
         <Label x:Name="SHlabel" Content="JSONio Properties Manager" HorizontalAlignment="Center"
 				 Margin="0,10,0,0" VerticalAlignment="Top" Width="164" Height="25" Grid.Column="1"/>
+        
+        <Button Content=" Up " Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,40,0,0" Click="Prior_Click"/>
+        <Button Content="Down"  Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,40,0,0" Click="Next_Click"/>
+        <Button Content=" + "   Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="177,40,0,0" Click="Inc_Click"/>
+        <Button Content=" - "   Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="210,40,0,0" Click="Dec_Click"/>
+        <Button Content="Current&lt;>&#xa;Previous" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="240,40,0,0" Click="Swap_Click"/>
+        <Button Content="Current&#xa;>Default" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="320,40,0,0" Click="Def_Click"/>
+
         <DataGrid Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
-				 Margin="0,50,0,70" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1">
+                 SelectionUnit="Cell" SelectionMode="Single" IsSynchronizedWithCurrentItem="True" Loaded="dgSelect"
+				 Margin="0,90,0,20" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1">
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Red"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Property" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Default" Binding="{Binding Default}" />
-                <DataGridTextColumn Header="Current" Binding="{Binding Current}" />
-                <DataGridTextColumn Header="Previous" Binding="{Binding Previous}" />
+                <DataGridTextColumn Header="Property" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="Current" Binding="{Binding Current}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Previous" Binding="{Binding Previous}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Default" Binding="{Binding Default}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <Button Content="Prior" HorizontalAlignment="Left" Margin="80,230,0,0" Click="Prior_Click"/>
-        <Button Content="Next"  HorizontalAlignment="Left" Margin="130,230,0,0" Click="Next_Click"/>
-        <Button Content=" + "   HorizontalAlignment="Left" Margin="177,230,0,0" Click="Inc_Click"/>
-        <Button Content=" - "   HorizontalAlignment="Left" Margin="210,230,0,0" Click="Dec_Click"/>
-        <Button Content="Current&lt;>&#xa;Previous" HorizontalAlignment="Left" Margin="240,230,0,0" Click="Swap_Click"/>
-        <Button Content="Current&#xa;>Default" HorizontalAlignment="Left" Margin="320,230,0,0" Click="Def_Click"/>
     </Grid>
 </UserControl>

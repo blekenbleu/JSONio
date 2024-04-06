@@ -72,6 +72,11 @@ namespace blekenbleu
 		public string LeftMenuTitle => "JSONio plugin";
 
 		/// <summary>
+		/// DisplayGrid contents
+		/// </summary>
+		public List<SimProp> simprops = new List<SimProp>();		// must be initialized before Init()
+
+		/// <summary>
 		/// Called one time per game data update, contains all normalized game data,
 		/// raw data are intentionnally "hidden" under a generic object type (A plugin SHOULD NOT USE IT)
 		///
@@ -111,9 +116,10 @@ namespace blekenbleu
 		/// </summary>
 		/// <param name="pluginManager"></param>
 		/// <returns></returns>
+		public SettingsControl ui;
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
-			return new SettingsControl(this);
+			return ui = new SettingsControl(this);
 		}
 
 		/// <summary>
@@ -135,6 +141,8 @@ namespace blekenbleu
 					current.properties[Select].Value = $"{(float)(0.01 * iv)}";
 				else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
 //				Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
+				simprops[Select].Current = current.properties[Select].Value;
+				ui.Refresh();
 				changed = true;
 			}
 		}
@@ -199,6 +207,10 @@ namespace blekenbleu
 				}
 			};
 			current = new Car() {id = "", properties = Pclone(previous = Pclone(Settings.properties)) };
+			// populate DisplayGrip ItemsSource
+			for (int i = 0; i < current.properties.Count; i++)
+				simprops.Add(new SimProp { Name = current.properties[i].Name, Current = current.properties[i].Value, Default = current.properties[i].Value, Previous = previous[i].Value });
+			// highlight selected cell
 			steps = new List<int>() { } ;
 
 /*	Hack to force settings
