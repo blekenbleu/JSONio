@@ -1,6 +1,8 @@
 ﻿using SimHub.Plugins.OutputPlugins.Dash.GLCDTemplating;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace blekenbleu
 {
@@ -27,12 +29,55 @@ namespace blekenbleu
 
     // programatically define DataGrid columns
     // https://wpf-tutorial.com/datagrid-control/custom-columns/
-    public class SimProp
+    public class SimProp : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
     {
-        public string Name { get; set; }
-        public string Default { get; set; }
-        public string Current { get; set; }
-        public string Previous { get; set; }
+		private string _Default = "default", _Current = "current", _Previous = "previous";
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+		// Create the OnPropertyChanged method to raise the event
+		protected void OnPropertyChanged(string value)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(value));
+		}
+
+        public string Name { get; set; }	// should not change
+        public string Current
+        {
+            get { return _Current; }
+            set
+            {
+                if (string.Compare(_Current, value) != 0)
+                {
+                    _Current = value;
+                    OnPropertyChanged("Current");
+                }
+            }
+        }
+        public string Default
+        {
+            get { return _Default; }
+            set
+            {
+                if (string.Compare(_Default, value) != 0)
+                {
+                    _Default = value;
+                    OnPropertyChanged("Default");
+                }
+            }
+        }
+        public string Previous
+        {
+            get { return _Previous; }
+            set
+            {
+                if (string.Compare(_Previous, value) != 0)
+                {
+                    _Previous = value;
+                    OnPropertyChanged("Previous");
+                }
+            }
+        }
     }
 
 	public class Games

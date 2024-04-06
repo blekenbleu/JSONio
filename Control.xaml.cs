@@ -36,7 +36,7 @@ namespace blekenbleu
         private void dgSelect(object sender, RoutedEventArgs e) { Select(); }
 
 		// updates values displayed in SimHub plugin
-        public void Refresh() { dg.Items.Refresh(); }
+        //public void Refresh() { dg.Items.Refresh(); }   // crashes if called from main Plugin thread
 
 		// handle button clicks
 		private void Prior_Click(object sender, RoutedEventArgs e)
@@ -66,11 +66,13 @@ namespace blekenbleu
 		private void Swap_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.swap();
+            Select();
 		}
 
 		private void Def_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.new_defaults();
+            Select();
 		}
     }
 }

@@ -20,11 +20,23 @@ namespace blekenbleu
 		private bool changed;
 		private GameHandler games;
 		public string Selected_Property = "unKnown";
-		public byte Select = 0;
 		internal string gname = "";
 		private static List<Property> previous;
 		internal static List<int>steps;
 		internal static Car current;
+		private byte _Select = 0;
+		public byte Select
+		{
+			get { return _Select; }
+			set
+			{
+				if (_Select != value)
+				{
+					_Select = value;
+					// trigger "IsSelected"
+				}
+			}
+		}
 
 		internal List<Property> Pclone(List<Property> prop)			// deep copy
 		{
@@ -142,7 +154,6 @@ namespace blekenbleu
 				else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
 //				Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
 				simprops[Select].Current = current.properties[Select].Value;
-				ui.Refresh();
 				changed = true;
 			}
 		}
@@ -174,6 +185,11 @@ namespace blekenbleu
 
 			previous = Pclone(current.properties);
 			cCopy(temp);
+			for (int i = 0; i < previous.Count; i++)
+			{
+				simprops[i].Current = current.properties[i].Value;
+				simprops[i].Previous = previous[i].Value;
+			}
 		}
 
 		public void new_defaults()
@@ -183,8 +199,12 @@ namespace blekenbleu
 
 			int Index = games.data.Glist.FindIndex(i => i.name == gname);
 
-			if (-1 != Index)	
+			if (-1 != Index)
+			{
 				games.data.Glist[Index].defaults = Pclone(current.properties);
+				for (int i = 0; i < current.properties.Count; i++)
+					simprops[i].Default = current.properties[i].Value;
+			}
 		}
 
 		/// <summary>
@@ -327,6 +347,8 @@ namespace blekenbleu
 					}
 					else gname = gnew;
 					previous = Pclone(current);
+					for (int i = 0; i < previous.Count; i++)
+						simprops[i].Previous = previous[i].Value;
 					current.id = cname;
 
 					// properties for this car
@@ -339,6 +361,11 @@ namespace blekenbleu
 							cCopy(games.data.Glist[gndx].Clist[cndx].properties);
 						else if (null != games.data.Glist[gndx].defaults)
 							cCopy(games.data.Glist[gndx].defaults);
+						for (int i = 0; i < previous.Count; i++)
+							simprops[i].Current = current.properties[i].Value;
+						if (null != games.data.Glist[gndx].defaults)
+							for (int i = 0; i < previous.Count; i++)
+								simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
 					}
 					Selected_Property = current.properties[Select].Name;
 				}
