@@ -21,8 +21,32 @@ namespace blekenbleu
             dg.ItemsSource = plugin.simprops;
         }
 
+		public event PropertyChangedEventHandler PropertyChanged;
+
+        // Create the OnPropertyChanged method to raise the event
+        protected void OnPropertyChanged(string value)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(value));
+        }
+
+        private byte _Select;
+
+        public byte Select
+        {
+
+            get { return _Select; }
+            set
+            {
+                if (_Select != value)
+                {
+                    _Select = value;
+                    OnPropertyChanged("Select");
+                }
+            }
+        }
+
 		// highlights Current property value selected
-        private void Select()	// crashes if called from other threads
+        private void Selected()	// crashes if called from other threads
         {
             if ((dg.Items.Count > Plugin.Select) && (dg.Columns.Count > 2))
             {
@@ -33,7 +57,7 @@ namespace blekenbleu
             }
         }
 
-        private void dgSelect(object sender, RoutedEventArgs e) { Select(); }
+        private void dgSelect(object sender, RoutedEventArgs e) { Selected(); }
 
 		// updates values displayed in SimHub plugin
         //public void Refresh() { dg.Items.Refresh(); }   // crashes if called from main Plugin thread
@@ -42,37 +66,33 @@ namespace blekenbleu
 		private void Prior_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.select(false);
-            Select();
+            Selected();
 		}
 
 		private void Next_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.select(true);
-            Select();
+            Selected();
 		}
 
 		private void Inc_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.ment(1, "in");
-//          Select();
 		}
 
 		private void Dec_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.ment(-1, "de");
-//          Select();
 		}
 
 		private void Swap_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.swap();
-//          Select();
 		}
 
 		private void Def_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.new_defaults();
-//          Select();
 		}
     }
 }

@@ -24,7 +24,7 @@ namespace blekenbleu
 		private static List<Property> previous;
 		internal static List<int>steps;
 		internal static Car current;
-		public byte Select = new PropSelect().Select;
+		public byte Select;
 
 		internal List<Property> Pclone(List<Property> prop)			// deep copy
 		{
@@ -119,7 +119,9 @@ namespace blekenbleu
 		public SettingsControl ui;
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
-			return ui = new SettingsControl(this);
+			ui = new SettingsControl(this);
+			Select = ui.Select;
+			return ui;
 		}
 
 		/// <summary>

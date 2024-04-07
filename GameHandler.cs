@@ -27,33 +27,6 @@ namespace blekenbleu
 
 	}
 
-	public class PropSelect : INotifyPropertyChanged
-	{
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		// Create the OnPropertyChanged method to raise the event
-        protected void OnPropertyChanged(string value)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(value));
-        }
-
-		private byte _Select;
-
-		public byte Select
-        {
-
-            get { return _Select; }
-            set
-            {
-                if (_Select != value)
-                {
-                    _Select = value;
-                    OnPropertyChanged("Select");
-                }
-            }
-        }
-	}
-
     // programatically define DataGrid columns
     // https://wpf-tutorial.com/datagrid-control/custom-columns/
     public class SimProp : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
