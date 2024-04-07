@@ -18,11 +18,12 @@
         <Button Content="Current&#xa;>Default" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="320,40,0,0" Click="Def_Click"/>
 
         <DataGrid Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
-                 SelectionUnit="Cell" SelectionMode="Single" IsSynchronizedWithCurrentItem="True" Loaded="dgSelect"
+                 SelectionUnit="Cell" SelectionMode="Single" IsSynchronizedWithCurrentItem="False" Loaded="dgSelect"
 				 Margin="0,90,0,20" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding Selected}"/>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="Red"/>
                         </Trigger>

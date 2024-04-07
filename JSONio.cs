@@ -24,19 +24,7 @@ namespace blekenbleu
 		private static List<Property> previous;
 		internal static List<int>steps;
 		internal static Car current;
-		private byte _Select = 0;
-		public byte Select
-		{
-			get { return _Select; }
-			set
-			{
-				if (_Select != value)
-				{
-					_Select = value;
-					// trigger "IsSelected"
-				}
-			}
-		}
+		public byte Select = new PropSelect().Select;
 
 		internal List<Property> Pclone(List<Property> prop)			// deep copy
 		{

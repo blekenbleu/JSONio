@@ -54,25 +54,25 @@ namespace blekenbleu
 		private void Inc_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.ment(1, "in");
-            Select();
+//          Select();
 		}
 
 		private void Dec_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.ment(-1, "de");
-            Select();
+//          Select();
 		}
 
 		private void Swap_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.swap();
-            Select();
+//          Select();
 		}
 
 		private void Def_Click(object sender, RoutedEventArgs e)
         {
 			Plugin.new_defaults();
-            Select();
+//          Select();
 		}
     }
 }
