@@ -30,8 +30,9 @@ In this example, 4 properties are managed for ShakeIt Wheel Slip haptics:
 		name='CarChange'
 		trigger=changed(20, [DataCorePlugin.GameData.CarId]) 
 		```
-		- *my experience*:&nbsp; SimHub ignored this **Source** when `JSONio.ini` was first loaded...  
+
 ![](Documentation/mapping.png)  
+		- *my experience*:&nbsp; SimHub ignored this **Source** when `JSONio.ini` was first loaded...  
 
 - in `JSONio.cs Init()`
 	- create `games` object
@@ -47,7 +48,7 @@ but jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collecti
 e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/).
 
 ## New to me
-- C# `List<>` and particularly with non-trivial objects.
+- C# `List<>` patterns, particularly with non-trivial objects.
 	- [Here are some snippits](https://www.tutorialsteacher.com/csharp/csharp-list) with `List<Student>`
 	- [*stackoverflow*:&nbsp; list search](https://stackoverflow.com/questions/1175645/find-an-item-in-a-list-by-linq)
 	- [*M$ Learn*:&nbsp; List<T>.FindIndex Method](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1.findindex):&nbsp;
@@ -79,7 +80,9 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 				games = JsonSerializer.Deserialize<Games>(File.ReadAllText(path));  
 			} else changed = true;  
 		```
-- C# [WPF DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/) - [more references](Documentation/index.md)
+- C# [WPF DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/)&nbsp; -&nbsp;
+	[more references](Documentation/index.md)  
+![](Documentation/DataGrid.png)
 	- 4 column table:
 		- property name
 		- default value
@@ -95,7 +98,6 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 			- fiddle with margins for Grid and DataGrid to make space for Label
 			- [add DataGrid column Headers](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-add-row-details-to-a-datagrid-control?view=netframeworkdesktop-4.8)
 		- drag in buttons for previous, next, +, -, etc  
-			![](Documentation/DataGrid.png)
 	- *3 April 2024*:  
 		- [bind Values class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 		```
@@ -137,7 +139,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- fully functional by buttons *and* dashboard
 			- thanks to arguably sketch code rearranging...
 			- still to do:&nbsp; fully integrate `simprops` in `JSONio.cs`
-- C# WPF XY plot:&nbsp; SimHub already uses OxyPlot
+- C# WPF XY plot:&nbsp; *yet to do*;&nbsp; SimHub already uses OxyPlot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
 		- [Bart De Meyer - Blog](https://blog.bartdemeyer.be/2013/03/creating-graphs-in-wpf-using-oxyplot/)
