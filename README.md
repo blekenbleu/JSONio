@@ -97,7 +97,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- drag in buttons for previous, next, +, -, etc  
 			![](Documentation/DataGrid.png)
 	- *3 April 2024*:  
-		- [bind SimProp class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
+		- [bind Values class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 		```
 			<DataGrid.Columns>
 				<DataGridTextColumn Header="Property" Binding="{Binding Name}" />
@@ -106,7 +106,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 				<DataGridTextColumn Header="Previous" Binding="{Binding Previous}" />
 			</DataGrid.Columns>
 		...
-		public class SimProp
+		public class Values
 		{
 			public string Name { get; set; }
 			public string Default { get; set; }
@@ -114,20 +114,20 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 			public string Previous { get; set; }
 		}
 		...
-		public List<SimProp> simprops;
+		public List<Values> simprops;
 
 		public SettingsControl()
 		{
 			InitializeComponent();
 
-			simprops = new List<SimProp>();
+			simprops = new List<Values>();
 			dg.ItemsSource = simprops;
 		}
 		```
 		- bind WPF button clicks directly to Plugin Action methods
 	- *4 Apr*:
 		- test buttons
-		- populate `List<SimProp>` from existing `current`, `previous`, etc
+		- populate `List<Values>` from existing `current`, `previous`, etc
 	- *5 Apr*:
 		- fully functional by buttons
 			- Select hightlight forced for button changes, will not work for dashboard
