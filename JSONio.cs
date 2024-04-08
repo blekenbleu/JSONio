@@ -21,10 +21,9 @@ namespace blekenbleu
 		private GameHandler games;
 		public string Selected_Property = "unKnown";
 		internal string gname = "";
-		private static List<Property> previous;
-		internal static List<int>steps;
-		internal static Car current;
-		public byte Select;
+		private List<Property> previous;
+		private List<int>steps;
+		private Car current;
 
 		internal List<Property> Pclone(List<Property> prop)			// deep copy
 		{
@@ -120,7 +119,6 @@ namespace blekenbleu
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
 			ui = new SettingsControl(this);
-			Select = ui.Select;
 			return ui;
 		}
 
@@ -133,17 +131,17 @@ namespace blekenbleu
 		{
 			if (0 == gname.Length || 0 == current.id.Length)
 				return;
-			int step = steps[Select];
-			int iv = (int)(0.004 + 100 * float.Parse(current.properties[Select].Value));
+			int step = steps[ui.Select];
+			int iv = (int)(0.004 + 100 * float.Parse(current.properties[ui.Select].Value));
 
 			iv += sign * step;
 			if (0 <= iv)
 			{
 				if (0 != step % 100)
-					current.properties[Select].Value = $"{(float)(0.01 * iv)}";
-				else current.properties[Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
-//				Info("property " + current.properties[Select].Name + " " + prefix + $"cremented to {current.properties[Select].Value}");
-				simprops[Select].Current = current.properties[Select].Value;
+					current.properties[ui.Select].Value = $"{(float)(0.01 * iv)}";
+				else current.properties[ui.Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
+//				Info("property " + current.properties[ui.Select].Name + " " + prefix + $"cremented to {current.properties[ui.Select].Value}");
+				simprops[ui.Select].Current = current.properties[ui.Select].Value;
 				changed = true;
 			}
 		}
@@ -159,13 +157,13 @@ namespace blekenbleu
 
 			if (next)
 			{
-				if (++Select >= current.properties.Count)
-					Select = 0;
+				if (++ui.Select >= current.properties.Count)
+					ui.Select = 0;
 			}
-			else if (0 < Select)	// prior
-				Select--;
-			else Select = (byte)(current.properties.Count - 1);
-			Selected_Property = current.properties[Select].Name;
+			else if (0 < ui.Select)	// prior
+				ui.Select--;
+			else ui.Select = (byte)(current.properties.Count - 1);
+			Selected_Property = current.properties[ui.Select].Name;
 //			Info("Selected property = " + Selected_Property);
 		}
 
@@ -311,7 +309,7 @@ namespace blekenbleu
 			{
 				if (0 == gname.Length || 0 == current.id.Length)
 					Selected_Property = "unKnown";
-				else Selected_Property = current.properties[Select].Name;
+				else Selected_Property = current.properties[ui.Select].Name;
 				this.AttachDelegate(My+"Selected", () => Selected_Property);
 				this.AttachDelegate(My+"Car", () => current.id);
 				this.AttachDelegate(My+"Game", () => gname);
@@ -357,7 +355,7 @@ namespace blekenbleu
 							for (int i = 0; i < previous.Count; i++)
 								simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
 					}
-					Selected_Property = current.properties[Select].Name;
+					Selected_Property = current.properties[ui.Select].Name;
 				}
 				else if (null == cname)
 					s += "null CarID, ";

@@ -127,6 +127,10 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 			- Select hightlight forced for button changes, will not work for dashboard
 		- `simprops` updated from original Lists, pending refactor
 			- property updates by dashboard *should work*...
+	- *7 Apr*:
+		- fully functional by buttons *and* dashboard
+			- thanks to arguably sketch code rearranging...
+			- still to do:&nbsp; fully integrate `simprops` in `JSONio.cs`
 - C# WPF XY plot:&nbsp; SimHub already uses OxyPlot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
