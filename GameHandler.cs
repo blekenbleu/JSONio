@@ -15,7 +15,7 @@ namespace blekenbleu
 	// return true if any Game changes
 	public class Car
 	{
-		public string id { get; set; }
+		public string carID { get; set; }
 		public List<Property> properties { get; set; }
 	}
 
@@ -29,7 +29,7 @@ namespace blekenbleu
 
     // programatically define DataGrid columns
     // https://wpf-tutorial.com/datagrid-control/custom-columns/
-    public class SimProp : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
+    public class Values : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
     {
 		private string _Default = "default", _Current = "current", _Previous = "previous";
 
@@ -119,7 +119,7 @@ namespace blekenbleu
 			return nl;
 		}
 
-		internal Car Clone(Car car) => new Car() { id = string.Copy(car.id), properties = Clone(car.properties) };
+		internal Car Clone(Car car) => new Car() { carID = string.Copy(car.carID), properties = Clone(car.properties) };
 
 		// append or replace a single car property
 		internal bool mod(Car c, string name, string value, bool replace)
@@ -139,7 +139,7 @@ namespace blekenbleu
 		internal bool mod(Game g, Car car)
 		{
 			bool changed;
-			int index = g.Clist.FindIndex(c => c.id == car.id);
+			int index = g.Clist.FindIndex(c => c.carID == car.carID);
 
 			if (changed = -1 == index)
 				g.Clist.Add(Clone(car));
@@ -187,7 +187,7 @@ namespace blekenbleu
 		{
 			bool changed = true;
 
-			if (null == car || null == car.id || 0 == car.id.Length)
+			if (null == car || null == car.carID || 0 == car.carID.Length)
 				return false;									// nothing to save
 
 																// search for game

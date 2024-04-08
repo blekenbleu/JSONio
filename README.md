@@ -5,21 +5,21 @@ A common list of custom SimHub properties with values potentially specific to ea
 In this example, 4 properties are managed for ShakeIt Wheel Slip haptics:  
 ![](Documentation/properties.png)
 - a C# list of games
-	- each game a name, game-specific default property values and list of cars
-		- each car a carID and its list of property values
-			- each property a name and value
-- properties to be managed are configured in `JSONio.ini`.
+	- each `Game` object a `name`, game-specific `defaults Property List<>` and `CList` of `Car` objects
+		- each `Car` object a `carID` and its `List<>` of `Property` objects
+			- each `Property` object a `Name` and `Value` 
+- Properties to be managed are configured in `JSONio.ini`.
 ## How
 - instead of just copying that SimHubPluginSdk repository
-	- Had Visual Studio create a new project, then quit
+	- created a new Visual Studio JSONio WPF project, then quit
 	- deleted everything in that project except `JSONio.sln` and `JSONio.csproj`
 	- copied `Properties/` and source files from `SimHubPluginSdk/`
 	- performed GVIM split diff on `JSONio.sln` and `JSONio.csproj`
 		to preserve new `ProjectGuid`, etc
 	- **forgot to** update namespace from `User.PluginSdk` to `JSONio` e.g. in `Properties/`...!
-- `this.AddAction("ChangeProperties",(a, b) =>` saves current properties, if changed,  
-	then loads properties for the new Car.
-	- creates new Car object from game default if no CarID match
+- `this.AddAction("ChangeProperties",(a, b) =>` saves changed `Car Property` objects,  
+	then loads `Car` matching new `CarID` and `Game name`.
+	- creates new `Car` object from `Game` matching `name` `defaults` if no `CarID` match
 	- *could* implement `this.AddEvent("CarChange");`  
 		in `public void Init(PluginManager pluginManager)`,  
 		- then `this.TriggerEvent("CarChange");`  
@@ -33,8 +33,14 @@ In this example, 4 properties are managed for ShakeIt Wheel Slip haptics:
 		- *my experience*:&nbsp; SimHub ignored this **Source** when `JSONio.ini` was first loaded...  
 ![](Documentation/mapping.png)  
 
-- in `Init()`, create a new Game object in games if none exists for current Game
-	- set game from games
+- in `JSONio.cs Init()`
+	- create `games` object
+		- populate from configured `.json` file, if existing
+	- populate `simprops Values` object from saved `Settings`, `games` and `JASONio.ini`
+	- in `this.AddAction("ChangeProperties",(a, b)`
+		- create new `Game` object in `games` when none match current `Game name`
+		- set `game` for matching `games.data.name`
+	- additional `this.AddAction()`s for modifying `Car` and `defaults` values
 
 My understanding of C# is that `games` could be a jagged array,  
 but jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) better supports

@@ -73,7 +73,7 @@ namespace blekenbleu
 		/// <summary>
 		/// DisplayGrid contents
 		/// </summary>
-		public List<SimProp> simprops = new List<SimProp>();		// must be initialized before Init()
+		public List<Values> simprops = new List<Values>();		// must be initialized before Init()
 
 		/// <summary>
 		/// Called one time per game data update, contains all normalized game data,
@@ -129,7 +129,7 @@ namespace blekenbleu
 		/// <param name="prefix"></param> should be "in" or "de"
 		public void ment(int sign, string prefix)
 		{
-			if (0 == gname.Length || 0 == current.id.Length)
+			if (0 == gname.Length || 0 == current.carID.Length)
 				return;
 			int step = steps[ui.Select];
 			int iv = (int)(0.004 + 100 * float.Parse(current.properties[ui.Select].Value));
@@ -152,7 +152,7 @@ namespace blekenbleu
 		/// <param name="next"></param> false for prior
 		public void select(bool next)
 		{
-			if (0 == gname.Length || 0 == current.id.Length)
+			if (0 == gname.Length || 0 == current.carID.Length)
 				return;
 
 			if (next)
@@ -214,10 +214,10 @@ namespace blekenbleu
 					Glist = new List<Game>() {}
 				}
 			};
-			current = new Car() {id = "", properties = Pclone(previous = Pclone(Settings.properties)) };
-			// populate DisplayGrip ItemsSource
+			current = new Car() {carID = "", properties = Pclone(previous = Pclone(Settings.properties)) };
+			// populate DisplayGrid ItemsSource
 			for (int i = 0; i < current.properties.Count; i++)
-				simprops.Add(new SimProp { Name = current.properties[i].Name, Current = current.properties[i].Value, Default = current.properties[i].Value, Previous = previous[i].Value });
+				simprops.Add(new Values { Name = current.properties[i].Name, Current = current.properties[i].Value, Default = current.properties[i].Value, Previous = previous[i].Value });
 			// highlight selected cell
 			steps = new List<int>() { } ;
 
@@ -307,15 +307,16 @@ namespace blekenbleu
 
 			if (0 < current.properties.Count)
 			{
-				if (0 == gname.Length || 0 == current.id.Length)
+				if (0 == gname.Length || 0 == current.carID.Length)
 					Selected_Property = "unKnown";
 				else Selected_Property = current.properties[ui.Select].Name;
 				this.AttachDelegate(My+"Selected", () => Selected_Property);
-				this.AttachDelegate(My+"Car", () => current.id);
+				this.AttachDelegate(My+"Car", () => current.carID);
 				this.AttachDelegate(My+"Game", () => gname);
 			}
 
-/*---------	this.AddAction("ChangeProperties",... gets invoked for CarId changes, based on this NCalcScripts/JSONio.ini entry:
+/*---------	this.AddAction("ChangeProperties",...)
+ ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
  ;			[ExportEvent]
  ;			name='CarChange'
  ;			trigger=changed(200, [DataCorePlugin.GameData.CarId])
@@ -331,20 +332,20 @@ namespace blekenbleu
 					if (gnew == gname && games.Save_Car(current, gname))	// do not save first car in game
 					{
 						changed = true;
-						s += $";  {current.id} saved";
+						s += $";  {current.carID} saved";
 					}
 					else gname = gnew;
 					previous = Pclone(current);
 					for (int i = 0; i < previous.Count; i++)
 						simprops[i].Previous = previous[i].Value;
-					current.id = cname;
+					current.carID = cname;
 
 					// properties for this car
 					int gndx = games.data.Glist.FindIndex(g => g.name == gname);
 
 					if (-1 != gndx)
 					{
-						int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.id == cname);
+						int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.carID == cname);
 						if (-1 != cndx)
 							cCopy(games.data.Glist[gndx].Clist[cndx].properties);
 						else if (null != games.data.Glist[gndx].defaults)
