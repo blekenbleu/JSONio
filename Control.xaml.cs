@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,49 +7,46 @@ using System.Windows.Controls;
 namespace blekenbleu
 {
 	/// <summary>
-	/// Interaction code for SettingsControl.xaml
+	/// Interaction code for Control.xaml
 	/// </summary>
-	public partial class SettingsControl : UserControl
-	{
+	public partial class Control : UserControl
+    {
 		public JSONio Plugin { get; }
 
-		// this gets called before simprops is initialized
-		public SettingsControl() { InitializeComponent(); }
+        // need to reference XAML control from a static method
+        public static StaticControl ui;
 
-		public SettingsControl(JSONio plugin) : this()
-		{
-			this.Plugin = plugin;
-			dg.ItemsSource = plugin.simprops;
+        // this gets called before simprops is initialized
+        public Control() {
+			ui = new StaticControl();
+			InitializeComponent();
+			this.DataContext = ui;						// StaticControl events change Control.xaml properties
 		}
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		// Raise the event
-		PropertyChangedEventArgs SCevent = new PropertyChangedEventArgs("Select");
-		protected void SelectChange()
+		public Control(JSONio plugin) : this()
 		{
-			PropertyChanged?.Invoke(this, SCevent); // this probably is not helping
-			Selected();							 // this enables dashboard changes to be seen
+			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
+			dg.ItemsSource = plugin.simprops;			// DataGrid values
+			ui.ButtonVisibility = Visibility.Hidden;	// Buttons should be hidden until carID and game are defined
+			ui.StatusText = "Launch game (or Replay) to enable property changes";
 		}
 
 		private byte _Select;
-
-		public byte Select
-		{
-
-			get { return _Select; }
-			set
-			{
-				if (_Select != value)
-				{
-					_Select = value;
-					SelectChange();
-				}
-			}
-		}
+        internal byte Select                            // fortunately changed only on UI thread
+        {
+            get { return _Select; }
+            set
+            {
+                if (_Select != value)
+                {
+                    _Select = value;
+                    Selected();                   		// force selected cell highlight
+                }
+            }
+        }
 
 		// highlights Current property value selected
-		private void Selected()	// crashes if called from other threads
+		internal void Selected()	// crashes if called from other threads
 		{
 			if ((dg.Items.Count > Select) && (dg.Columns.Count > 2))
 			{

@@ -1,29 +1,36 @@
-﻿<UserControl x:Class="blekenbleu.SettingsControl"
+﻿<UserControl x:Class="blekenbleu.Control"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:blekenbleu"
-		mc:Ignorable="d"
-		Height="300" Width="480">
-    <Grid Margin="10,10,10,10">
+        mc:Ignorable="d"
+		Width="480">
+    <Grid Margin="0,0,0,0">
         <Label x:Name="SHlabel" Content="JSONio Properties Manager" HorizontalAlignment="Center"
 				 Margin="0,10,0,0" VerticalAlignment="Top" Width="164" Height="25" Grid.Column="1"/>
-        
-        <Button Content=" Up " Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,40,0,0" Click="Prior_Click"/>
-        <Button Content="Down"  Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,40,0,0" Click="Next_Click"/>
-        <Button Content=" + "   Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="177,40,0,0" Click="Inc_Click"/>
-        <Button Content=" - "   Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="210,40,0,0" Click="Dec_Click"/>
-        <Button Content="Current&lt;>&#xa;Previous" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="240,40,0,0" Click="Swap_Click"/>
-        <Button Content="Current&#xa;>Default" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="320,40,0,0" Click="Def_Click"/>
+        <TextBlock x:Name="Status" HorizontalAlignment="Center" Margin="0,40,0,0" Text="{Binding StatusText}"
+				VerticalAlignment="Top" Height="21" Width="320" Visibility="Visible">
+        </TextBlock>
+        <Button x:Name="b0" Content=" Up " Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,70,0,0"
+                Click="Prior_Click" Visibility="{Binding ButtonVisibility}"/>
+        <Button x:Name="b1" Content="Down"  Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,70,0,0"
+                Click="Next_Click" Visibility="{Binding ButtonVisibility}"/>
+        <Button x:Name="b2" Content=" + "   Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="177,70,0,0"
+                Click="Inc_Click" Visibility="{Binding ButtonVisibility}"/>
+        <Button x:Name="b3" Content=" - "   Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="210,70,0,0"
+                Click="Dec_Click" Visibility="{Binding ButtonVisibility}"/>
+        <Button x:Name="b4" Content="Current&lt;&gt;&#xA;Previous" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left"
+                Margin="240,70,0,0" Click="Swap_Click" Visibility="{Binding ButtonVisibility}"/>
+        <Button x:Name="b5" Content="Current&#xA;&gt;Default" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left"
+                Margin="320,70,0,0" Click="Def_Click" Visibility="{Binding ButtonVisibility}"/>
 
-        <DataGrid Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
-                 SelectionUnit="Cell" SelectionMode="Single" IsSynchronizedWithCurrentItem="False" Loaded="dgSelect"
-				 Margin="0,90,0,20" HorizontalAlignment="Center" CanUserAddRows="False" Grid.Column="1">
+        <DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
+                 SelectionUnit="Cell" SelectionMode="Single" Loaded="dgSelect"
+				 Margin="0,120,0,20" HorizontalAlignment="Center" CanUserAddRows="False">
             <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
+                <Style TargetType="{x:Type DataGridCell}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Selected}"/>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="Red"/>
                         </Trigger>
@@ -34,21 +41,21 @@
                 <DataGridTextColumn Header="Property" Binding="{Binding Name}"/>
                 <DataGridTextColumn Header="Current" Binding="{Binding Current}">
                     <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
+                        <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="HorizontalAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="Previous" Binding="{Binding Previous}">
                     <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
+                        <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="HorizontalAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="Default" Binding="{Binding Default}">
                     <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
+                        <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="HorizontalAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>

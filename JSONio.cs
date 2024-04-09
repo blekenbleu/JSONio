@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using System.Windows.Media;
+using System.Windows;
+using System.ComponentModel;
 
 namespace blekenbleu
 {
@@ -23,7 +25,7 @@ namespace blekenbleu
 		internal string gname = "";
 		private List<Property> previous;
 		private List<int>steps;
-		private Car current;
+		internal Car current;
 
 		internal List<Property> Pclone(List<Property> prop)			// deep copy
 		{
@@ -115,11 +117,10 @@ namespace blekenbleu
 		/// </summary>
 		/// <param name="pluginManager"></param>
 		/// <returns></returns>
-		public SettingsControl ui;
+		private Control cx;
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
-			ui = new SettingsControl(this);
-			return ui;
+			return cx = new Control(this);		// invoked *after* Init()
 		}
 
 		/// <summary>
@@ -131,23 +132,23 @@ namespace blekenbleu
 		{
 			if (0 == gname.Length || 0 == current.carID.Length)
 				return;
-			int step = steps[ui.Select];
-			int iv = (int)(0.004 + 100 * float.Parse(current.properties[ui.Select].Value));
+			int step = steps[cx.Select];
+			int iv = (int)(0.004 + 100 * float.Parse(current.properties[cx.Select].Value));
 
 			iv += sign * step;
 			if (0 <= iv)
 			{
 				if (0 != step % 100)
-					current.properties[ui.Select].Value = $"{(float)(0.01 * iv)}";
-				else current.properties[ui.Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
-//				Info("property " + current.properties[ui.Select].Name + " " + prefix + $"cremented to {current.properties[ui.Select].Value}");
-				simprops[ui.Select].Current = current.properties[ui.Select].Value;
+					current.properties[cx.Select].Value = $"{(float)(0.01 * iv)}";
+				else current.properties[cx.Select].Value = $"{(int)(0.004 + 0.01 * iv)}";
+//				Info("property " + current.properties[cx.Select].Name + " " + prefix + $"cremented to {current.properties[cx.Select].Value}");
+				simprops[cx.Select].Current = current.properties[cx.Select].Value;
 				changed = true;
 			}
 		}
 
 		/// <summary>
-		/// select next or prior property
+		/// select next or prior property;  provokes an exception if invoked on other than Control's thread
 		/// </summary>
 		/// <param name="next"></param> false for prior
 		public void select(bool next)
@@ -157,13 +158,14 @@ namespace blekenbleu
 
 			if (next)
 			{
-				if (++ui.Select >= current.properties.Count)
-					ui.Select = 0;
+				if (++cx.Select >= current.properties.Count)
+					cx.Select = 0;
 			}
-			else if (0 < ui.Select)	// prior
-				ui.Select--;
-			else ui.Select = (byte)(current.properties.Count - 1);
-			Selected_Property = current.properties[ui.Select].Name;
+			else if (0 < cx.Select)	// prior
+				cx.Select--;
+			else cx.Select = (byte)(current.properties.Count - 1);
+			Selected_Property = current.properties[cx.Select].Name;
+					Control.ui.StatusText = gname + " " + current.carID + " " + Selected_Property;
 //			Info("Selected property = " + Selected_Property);
 		}
 
@@ -202,10 +204,10 @@ namespace blekenbleu
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-			changed = false;	// write JSON file during End() only if true
+			changed = false;    // write JSON file during End() only if true
 
-			// Load properties from settings
-			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
+            // Load properties from settings
+            Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 			games = new GameHandler()
 			{
 				data = new Games()
@@ -309,7 +311,12 @@ namespace blekenbleu
 			{
 				if (0 == gname.Length || 0 == current.carID.Length)
 					Selected_Property = "unKnown";
-				else Selected_Property = current.properties[ui.Select].Name;
+				else
+				{
+					Selected_Property = current.properties[cx.Select].Name;
+					Control.ui.StatusText = gname + " " + current.carID + " " + Selected_Property;
+				}
+
 				this.AttachDelegate(My+"Selected", () => Selected_Property);
 				this.AttachDelegate(My+"Car", () => current.carID);
 				this.AttachDelegate(My+"Game", () => gname);
@@ -355,8 +362,9 @@ namespace blekenbleu
 						if (null != games.data.Glist[gndx].defaults)
 							for (int i = 0; i < previous.Count; i++)
 								simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
+						Selected_Property = current.properties[cx.Select].Name;
+						Control.ui.StatusText = gname + " " + current.carID + " " + Selected_Property;
 					}
-					Selected_Property = current.properties[ui.Select].Name;
 				}
 				else if (null == cname)
 					s += "null CarID, ";
@@ -369,6 +377,8 @@ namespace blekenbleu
 				else gname = gnew;
 				if (10 < s.Length)
 					Info(s);
+
+				Control.ui.ButtonVisibility = Visibility.Visible;	// the usual wrong thread exception?
 			});
 
 			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in")	);
