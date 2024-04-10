@@ -1,13 +1,12 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 
 namespace blekenbleu
 {
-   	/// <summary>
-   	/// define a class with Model-view-viewmodel pattern for dynamic UI
-   	/// </summary>
-	public class StaticControl : INotifyPropertyChanged
+    /// <summary>
+    /// define a class with Model-view-viewmodel pattern for dynamic UI
+    /// </summary>
+    public class StaticControl : INotifyPropertyChanged
 	{
 		// One event handler for all property changes
 		public event PropertyChangedEventHandler PropertyChanged;

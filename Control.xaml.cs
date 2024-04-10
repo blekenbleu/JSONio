@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace blekenbleu
 {
-	/// <summary>
-	/// Interaction code for Control.xaml
-	/// </summary>
-	public partial class Control : UserControl
+    /// <summary>
+    /// Interaction code for Control.xaml
+    /// </summary>
+    public partial class Control : UserControl
     {
 		public JSONio Plugin { get; }
 
