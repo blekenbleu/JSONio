@@ -25,6 +25,7 @@ namespace blekenbleu
 		internal string gname = "";
 		private List<int>steps;
 		private List<Property> temp;
+		private List<string> props;
 		internal Car current;
 
 		internal List<Property> Pclone(List<Property> prop)			// deep copy
@@ -110,12 +111,12 @@ namespace blekenbleu
 			}
 		}
 
-        /// <summary>
-        /// Returns the settings control, return null if no settings control is required
-        /// </summary>
-        /// <param name="pluginManager"></param>
-        /// <returns> instance of UserControl </returns>
-        private Control cx;	// instance of Control.xaml.cs Control()
+		/// <summary>
+		/// Returns the settings control, return null if no settings control is required
+		/// </summary>
+		/// <param name="pluginManager"></param>
+		/// <returns> instance of UserControl </returns>
+		private Control cx;	// instance of Control.xaml.cs Control()
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
 			return cx = new Control(this);		// invoked *after* Init()
@@ -197,6 +198,20 @@ namespace blekenbleu
 					simprops[i].Default = current.properties[i].Value;
 		}
 
+		// when JSONio.ini and JSONio.json disagree
+		private List<Property> Refactor(List<Property> fold)
+		{
+			List<Property> dlist = new List<Property> {};
+			for (int p = 0; p < props.Count; p++)
+			{
+				int Index =  fold.FindIndex(j => j.Name == props[p]);
+				if (-1 == Index)
+					dlist.Add(new Property() { Name = props[p], Value = simprops[p].Default });
+				else dlist.Add(fold[Index]);
+			}
+			return dlist;
+		}
+
 		/// <summary>
 		/// Called once after plugins startup
 		/// Plugins are rebuilt at game change
@@ -204,7 +219,7 @@ namespace blekenbleu
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-			changed = false;    // write JSON file during End() only if true
+			changed = false;	// write JSON file during End() only if true
 
 			games = new GameHandler()
 			{
@@ -215,8 +230,8 @@ namespace blekenbleu
 				}
 			};
 
-            // Load properties from settings
-            Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
+			// Load properties from settings
+			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
 			// retrieve previously saved Car properties
 			temp = Pclone(Settings.properties);
@@ -234,7 +249,7 @@ namespace blekenbleu
 				 ))
 			{
 				List<Property> init = new List<Property>() {};
-				List<string> props, vals, stps;
+				List<string> vals, stps;
 
 				// JSONio.ini props determine current Properties
 				props = new List<string>(ds.Split(','));
@@ -306,27 +321,9 @@ namespace blekenbleu
 						Info($"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
 						for (i = 0; i < foo.Glist.Count; i++)
 						{
-							List<Property> dlist = new List<Property> {};
-							for (int p = 0; p < simprops.Count; p++)
-							{
-								int Index = foo.Glist[i].defaults.FindIndex(j => j.Name == simprops[p].Name);
-								if (-1 == Index)
-                                    dlist.Add(new Property() { Name = simprops[p].Name, Value = simprops[p].Default });
-                                else dlist.Add(foo.Glist[i].defaults[Index]);
-							}
-							foo.Glist[i].defaults = dlist;
+							foo.Glist[i].defaults = Refactor(foo.Glist[i].defaults);
 							for (int c = 0; c < foo.Glist[i].Clist.Count; c++)
-							{
-								List<Property> plist = new List<Property> {};
-								for (int p = 0; p < simprops.Count; p++)
-								{
-									int Index = foo.Glist[i].Clist[c].properties.FindIndex(j => j.Name == simprops[c].Name);
-									if (-1 == Index)
-										plist.Add(new Property() { Name = simprops[c].Name, Value = simprops[c].Default });
-									else plist.Add(foo.Glist[i].Clist[c].properties[Index]);
-								}
-								foo.Glist[i].Clist[c].properties = plist;
-							}
+								foo.Glist[i].Clist[c].properties = Refactor(foo.Glist[i].Clist[c].properties);
 						}
 					}
 					games.data = foo;
