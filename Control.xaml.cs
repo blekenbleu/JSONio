@@ -28,7 +28,7 @@ namespace blekenbleu
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
 			dg.ItemsSource = plugin.simprops;			// DataGrid values
 			ui.ButtonVisibility = Visibility.Hidden;	// Buttons should be hidden until carID and game are defined
-			ui.StatusText = "Launch game (or Replay) to enable property changes";
+			ui.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
 
 		private byte _Select;
