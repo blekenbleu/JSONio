@@ -11,13 +11,9 @@ namespace blekenbleu
 	{
 		// One event handler for all property changes
 		public event PropertyChangedEventHandler PropertyChanged;
-		// events to raise
-		PropertyChangedEventArgs Vevent = new PropertyChangedEventArgs("ButtonVisibility");
-		PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
-		protected void RaiseChange(PropertyChangedEventArgs ea)
-		{
-			PropertyChanged?.Invoke(this, ea);	// this probably is not helping
-		}
+        // events to raise
+        readonly PropertyChangedEventArgs Vevent = new PropertyChangedEventArgs("ButtonVisibility");
+        readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
 
 		private Visibility _visibility;
 		public Visibility ButtonVisibility	// must be public for XAML Binding
@@ -28,7 +24,7 @@ namespace blekenbleu
 				if (_visibility != value)
                 {
 					_visibility = value;
-					RaiseChange(Vevent);
+					PropertyChanged?.Invoke(this, Vevent);
 				}
 			}
 		}
@@ -36,19 +32,15 @@ namespace blekenbleu
 		private string _statusText;
 		public string StatusText			// must be public for XAML Binding
         {
-            get
-            {
-                return _statusText;
-            }
+            get { return _statusText; }
 
             set
             {
-                if (value == _statusText)
-                    return;
-
-                _statusText = value;
-
-                PropertyChanged?.Invoke(this, Tevent);
+                if (value != _statusText)
+				{
+                	_statusText = value;
+                	PropertyChanged?.Invoke(this, Tevent);
+				}
             }
         }
 	}		// public class StaticControl
