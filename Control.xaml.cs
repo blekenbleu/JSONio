@@ -29,7 +29,7 @@ namespace blekenbleu
 		}
 
 		private byte _Select;
-        internal byte Select                            // fortunately changed only on UI thread
+        internal byte Selection                            // fortunately changed only on UI thread
         {
             get { return _Select; }
             set
@@ -45,10 +45,10 @@ namespace blekenbleu
 		// highlights Current property value selected
 		internal void Selected()	// crashes if called from other threads
 		{
-			if ((dg.Items.Count > Select) && (dg.Columns.Count > 2))
+			if ((dg.Items.Count > Selection) && (dg.Columns.Count > 2))
 			{
-				//Select the item.
-				dg.CurrentCell = new DataGridCellInfo(dg.Items[Select], dg.Columns[1]);
+				//Selection the item.
+				dg.CurrentCell = new DataGridCellInfo(dg.Items[Selection], dg.Columns[1]);
 				dg.SelectedCells.Clear();
 				dg.SelectedCells.Add(dg.CurrentCell);
 			}
@@ -60,12 +60,12 @@ namespace blekenbleu
 		// handle button clicks
 		private void Prior_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.select(false);
+			Plugin.Select(false);
 		}
 
 		private void Next_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.select(true);
+			Plugin.Select(true);
 		}
 
 		private void Inc_Click(object sender, RoutedEventArgs e)
@@ -80,12 +80,12 @@ namespace blekenbleu
 
 		private void Swap_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.swap();
+			Plugin.Swap();
 		}
 
 		private void Def_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.new_defaults();
+			Plugin.New_defaults();
 		}
 	}
 }
