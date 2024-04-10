@@ -1,6 +1,7 @@
 # SimHub JSONio plugin  
  from [SimHubPluginSdk](https://github.com/blekenbleu/SimHubPluginSdk/blob/main/README.md)  
 ## What
+![](Documentation/B4launch.png) &nbsp; ![](Documentation/launch.png)  
 A common list of custom SimHub properties with values potentially specific to each sim and car.  
 In this example, 4 properties are managed for ShakeIt Wheel Slip haptics:  
 ![](Documentation/properties.png)
@@ -82,7 +83,6 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		```
 - C# [WPF DataGrid in XAML](https://blog.udemy.com/wpf-datagrid/)&nbsp; -&nbsp;
 	[more references](Documentation/index.md)  
-![](Documentation/DataGrid.png)
 	- 4 column table:
 		- property name
 		- default value
