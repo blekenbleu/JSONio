@@ -6,27 +6,6 @@ using System.Runtime.CompilerServices;
 
 namespace blekenbleu
 {
-	public class Property		// must be public for DataPluginSettings
-	{
-		public string Name { get; set; }
-		public string Value { get; set; }
-	}
-
-	// return true if any Game changes
-	public class Car
-	{
-		public string carID { get; set; }
-		public List<Property> properties { get; set; }
-	}
-
-	public class Game
-	{
-		public string name { get; set; }
-		public List<Property> defaults { get; set; }
-		public List<Car> Clist { get; set; }
-
-	}
-
     // programatically define DataGrid columns
     // https://wpf-tutorial.com/datagrid-control/custom-columns/
     public class Values : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
@@ -78,7 +57,28 @@ namespace blekenbleu
                 }
             }
         }
-    }
+    }	// class Values
+
+	public class Property		// must be public for DataPluginSettings
+	{
+		public string Name { get; set; }
+		public string Value { get; set; }
+	}
+
+	// return true if any Game changes
+	public class Car
+	{
+		public string carID { get; set; }
+		public List<Property> properties { get; set; }
+	}
+
+	public class Game
+	{
+		public string name { get; set; }
+		public List<Property> defaults { get; set; }
+		public List<Car> Clist { get; set; }
+
+	}
 
 	public class Games
 	{
@@ -121,8 +121,8 @@ namespace blekenbleu
 
 		internal Car Clone(Car car) => new Car() { carID = string.Copy(car.carID), properties = Clone(car.properties) };
 
-		// append or replace a single car property
-		internal bool mod(Car c, string name, string value, bool replace)
+		// Append or replace a single car property
+		internal bool Mod(Car c, string name, string value, bool replace)
 		{
 			int index = c.properties.FindIndex(p => p.Name == name);
 
@@ -136,7 +136,7 @@ namespace blekenbleu
 		}
 
 		// add or replace any property values for a car in a game
-		internal bool mod(Game g, Car car)
+		internal bool Mod(Game g, Car car)
 		{
 			bool changed;
 			int index = g.Clist.FindIndex(c => c.carID == car.carID);
@@ -144,7 +144,7 @@ namespace blekenbleu
 			if (changed = -1 == index)
 				g.Clist.Add(Clone(car));
 			else foreach (Property p in car.properties)
-					changed = mod(g.Clist[index], p.Name, p.Value, true) || changed;
+					changed = Mod(g.Clist[index], p.Name, p.Value, true) || changed;
 			return changed;
 		}
 
@@ -156,28 +156,28 @@ namespace blekenbleu
 			return prop;
 		}
  
-		// append a new property to all cars in all games
-		internal bool append (Property prop)
+		// Append a new property to all cars in all games
+		internal bool Append (Property prop)
 		{
 			bool changed = false;
 
 			if (null != data.Glist)
 				foreach(Game g in data.Glist)
-					changed = append(g, prop.Name, prop.Value) || changed;
+					changed = Append(g, prop.Name, prop.Value) || changed;
 
 			return changed;
 		}
 
 		// add (if missing) a value to Car properties in a game,
 		// but do not replace value if present
-		internal bool append (Game g, string name, string value)
+		internal bool Append (Game g, string name, string value)
 		{
 			Car dcar = new Car() { properties = g.defaults };
-			if(!mod(dcar, name, value, false))
+			if(!Mod(dcar, name, value, false))
 				return false;
 
 			foreach (Car c in g.Clist)
-				mod(c, name, value, false);
+				Mod(c, name, value, false);
 
 			return true;
 		}
@@ -195,7 +195,7 @@ namespace blekenbleu
 
 			if (-1 == gndex)	 								// first car for this game
 				data.Glist.Add(New_Game(gname, car));
-			else changed = mod(data.Glist[gndex], car);
+			else changed = Mod(data.Glist[gndex], car);
 
 			return changed;
 		}
