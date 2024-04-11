@@ -20,9 +20,9 @@
                 Click="Inc_Click" Visibility="{Binding ButtonVisibility}"/>
         <Button x:Name="b3" Content=" - "   Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="210,70,0,0"
                 Click="Dec_Click" Visibility="{Binding ButtonVisibility}"/>
-        <Button x:Name="b4" Content="Current&lt;&gt;&#xA;Previous" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left"
+        <Button x:Name="b4" Content="Current&lt;-&gt;&#xA;Previous" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left"
                 Margin="240,70,0,0" Click="Swap_Click" Visibility="{Binding ButtonVisibility}"/>
-        <Button x:Name="b5" Content="Current&#xA;&gt;Default" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left"
+        <Button x:Name="b5" Content="Current&#xA;-&gt;Default" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left"
                 Margin="320,70,0,0" Click="Def_Click" Visibility="{Binding ButtonVisibility}"/>
 
         <DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
