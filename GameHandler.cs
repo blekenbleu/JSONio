@@ -1,8 +1,5 @@
-﻿using SimHub.Plugins.OutputPlugins.Dash.GLCDTemplating;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace blekenbleu
 {

@@ -1,12 +1,10 @@
 ﻿using GameReaderCommon;
 using SimHub.Plugins;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using System.Windows.Media;
 using System.Windows;
-using System.ComponentModel;
 
 namespace blekenbleu
 {
