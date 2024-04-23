@@ -4,6 +4,7 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:blekenbleu"
+        d:DataContext="{d:DesignInstance Type=local:StaticModel}"
         mc:Ignorable="d"
 		Width="480">
     <Grid Margin="0,0,0,0">

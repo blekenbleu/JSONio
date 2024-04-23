@@ -11,21 +11,21 @@ namespace blekenbleu
 		public JSONio Plugin { get; }
 
         // need to reference XAML control from a static method
-        public static StaticControl ui;
+        public static StaticModel Model;
 
         // this gets called before simprops is initialized
         public Control() {
-			ui = new StaticControl();
+			Model = new StaticModel();
 			InitializeComponent();
-			this.DataContext = ui;						// StaticControl events change Control.xaml properties
+			this.DataContext = Model;						// StaticControl events change Control.xaml properties
 		}
 
 		public Control(JSONio plugin) : this()
 		{
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
 			dg.ItemsSource = plugin.simprops;			// DataGrid values
-			ui.ButtonVisibility = Visibility.Hidden;	// Buttons should be hidden until carID and game are defined
-			ui.StatusText = "Launch game (or Replay) to enable property value changes";
+			Model.ButtonVisibility = Visibility.Hidden;	// Buttons should be hidden until carID and game are defined
+			Model.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
 
 		private byte _Select;

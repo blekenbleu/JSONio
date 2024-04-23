@@ -6,7 +6,7 @@ namespace blekenbleu
     /// <summary>
     /// define a class with Model-view-viewmodel pattern for dynamic UI
     /// </summary>
-    public class StaticControl : INotifyPropertyChanged
+    public class StaticModel : INotifyPropertyChanged
 	{
 		// One event handler for all property changes
 		public event PropertyChangedEventHandler PropertyChanged;

@@ -37,7 +37,7 @@ namespace blekenbleu
 
 		internal List<Property> Pclone(Car car)	=> Pclone(car.properties);
 
-		void cCopy(List<Property> Plist)
+		void Ccopy(List<Property> Plist)
 		{
 			for(int c = 0; c < current.properties.Count; c++)
 			{
@@ -114,10 +114,10 @@ namespace blekenbleu
 		/// </summary>
 		/// <param name="pluginManager"></param>
 		/// <returns> instance of UserControl </returns>
-		private Control cx;	// instance of Control.xaml.cs Control()
+		private Control View;	// instance of Control.xaml.cs Control()
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
-			return cx = new Control(this);		// invoked *after* Init()
+			return View = new Control(this);		// invoked *after* Init()
 		}
 
 		/// <summary>
@@ -129,26 +129,26 @@ namespace blekenbleu
 		{
 			if (0 == gname.Length || 0 == current.carID.Length)
 				return;
-			int step = steps[cx.Selection];
-			int iv = (int)(0.004 + 100 * float.Parse(current.properties[cx.Selection].Value));
+			int step = steps[View.Selection];
+			int iv = (int)(0.004 + 100 * float.Parse(current.properties[View.Selection].Value));
 
 			iv += sign * step;
 			if (0 <= iv)
 			{
 				if (0 != step % 100)
-					current.properties[cx.Selection].Value = $"{(float)(0.01 * iv)}";
-				else current.properties[cx.Selection].Value = $"{(int)(0.004 + 0.01 * iv)}";
-//				Info("property " + current.properties[cx.Selection].Name + " " + prefix
-//					 + $"cremented to {current.properties[cx.Selection].Value}");
-				simprops[cx.Selection].Current = current.properties[cx.Selection].Value;
+					current.properties[View.Selection].Value = $"{(float)(0.01 * iv)}";
+				else current.properties[View.Selection].Value = $"{(int)(0.004 + 0.01 * iv)}";
+//				Info("property " + current.properties[View.Selection].Name + " " + prefix
+//					 + $"cremented to {current.properties[View.Selection].Value}");
+				simprops[View.Selection].Current = current.properties[View.Selection].Value;
 				changed = true;
 			}
 		}
 
 		private void SelectedStatus()
 		{
-			Selected_Property = current.properties[cx.Selection].Name;
-			Control.ui.StatusText = gname + " " + current.carID + " " + Selected_Property;
+			Selected_Property = current.properties[View.Selection].Name;
+			Control.Model.StatusText = gname + " " + current.carID + " " + Selected_Property;
 		}
 
 		/// <summary>
@@ -162,12 +162,12 @@ namespace blekenbleu
 
 			if (next)
 			{
-				if (++cx.Selection >= current.properties.Count)
-					cx.Selection = 0;
+				if (++View.Selection >= current.properties.Count)
+					View.Selection = 0;
 			}
-			else if (0 < cx.Selection)	// prior
-				cx.Selection--;
-			else cx.Selection = (byte)(current.properties.Count - 1);
+			else if (0 < View.Selection)	// prior
+				View.Selection--;
+			else View.Selection = (byte)(current.properties.Count - 1);
 			SelectedStatus();
 //			Info("Selected property = " + Selected_Property);
 		}
@@ -278,8 +278,8 @@ namespace blekenbleu
 
 			if (0 == simprops.Count)
 			{
-				Control.ui.StatusText = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini";
-				Info(Control.ui.StatusText);
+				Control.Model.StatusText = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini";
+				Info(Control.Model.StatusText);
 				return;
 			}
 
@@ -374,16 +374,16 @@ namespace blekenbleu
 					{
 						int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.carID == cname);
 						if (-1 != cndx)
-							cCopy(games.data.Glist[gndx].Clist[cndx].properties);
+							Ccopy(games.data.Glist[gndx].Clist[cndx].properties);
 						else if (null != games.data.Glist[gndx].defaults)
-							cCopy(games.data.Glist[gndx].defaults);
+							Ccopy(games.data.Glist[gndx].defaults);
 						for (int i = 0; i < current.properties.Count; i++)
 							simprops[i].Current = current.properties[i].Value;
 						if (null != games.data.Glist[gndx].defaults)
 							for (int i = 0; i < current.properties.Count; i++)
 								simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
 						SelectedStatus();
-						Control.ui.ButtonVisibility = Visibility.Visible;	// ready for business
+						Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 					}
 				}
 				else if (null == cname)
