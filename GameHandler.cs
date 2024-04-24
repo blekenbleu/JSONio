@@ -3,13 +3,13 @@ using System.ComponentModel;
 
 namespace blekenbleu
 {
-    // programatically define DataGrid columns
-    // https://wpf-tutorial.com/datagrid-control/custom-columns/
-    public class Values : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
-    {
+	// programatically define DataGrid columns
+	// https://wpf-tutorial.com/datagrid-control/custom-columns/
+	public class Values : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
+	{
 		private string _Default = "default", _Current = "current", _Previous = "previous";
 
-        public event PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		// Create the OnPropertyChanged method to raise the event
 		protected void OnPropertyChanged(string value)
@@ -17,44 +17,65 @@ namespace blekenbleu
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(value));
 		}
 
-        public string Name { get; set; }	// should not change
-        public string Current
-        {
-            get { return _Current; }
-            set
-            {
-                if (string.Compare(_Current, value) != 0)
-                {
-                    _Current = value;
-                    OnPropertyChanged("Current");
-                }
-            }
-        }
-        public string Default
-        {
-            get { return _Default; }
-            set
-            {
-                if (string.Compare(_Default, value) != 0)
-                {
-                    _Default = value;
-                    OnPropertyChanged("Default");
-                }
-            }
-        }
-        public string Previous
-        {
-            get { return _Previous; }
-            set
-            {
-                if (string.Compare(_Previous, value) != 0)
-                {
-                    _Previous = value;
-                    OnPropertyChanged("Previous");
-                }
-            }
-        }
-    }	// class Values
+		public string Name { get; set; }	// should not change
+		public string Current
+		{
+			get { return _Current; }
+			set
+			{
+				if (string.Compare(_Current, value) != 0)
+				{
+					_Current = value;
+					OnPropertyChanged("Current");
+				}
+			}
+		}
+		public string Default
+		{
+			get { return _Default; }
+			set
+			{
+				if (string.Compare(_Default, value) != 0)
+				{
+					_Default = value;
+					OnPropertyChanged("Default");
+				}
+			}
+		}
+		public string Previous
+		{
+			get { return _Previous; }
+			set
+			{
+				if (string.Compare(_Previous, value) != 0)
+				{
+					_Previous = value;
+					OnPropertyChanged("Previous");
+				}
+			}
+		}
+	}	// class Values
+
+//	New JSON structure ------------------------
+	internal class CarL
+	{
+		public string carID { get; set; }
+		public List<string> vList { get; set; }	// property values
+	}
+
+	internal class GameList
+	{
+		internal string gName;			// game name
+		internal List<string> defaults;	// default property values
+		internal List<CarL> cList;
+	}
+
+	internal class GamesList
+	{
+		internal string Plugin;			// Plugin name ("JSONio")
+		internal List<string> pList;	// property names, from JSONio.ini
+		internal List<GameList> gList;
+	}
 
 	public class Property		// must be public for DataPluginSettings
 	{
@@ -196,5 +217,5 @@ namespace blekenbleu
 
 			return changed;
 		}
-	}
+	}	// class GameHandler
 }
