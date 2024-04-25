@@ -9,7 +9,7 @@ namespace blekenbleu
     {
         public List<Property> properties = new List<Property>()
         {
-			// each Value stored as string of integer 10x actual value
+			// each current Value stored as string of integer 10x actual value
             new Property() {}
         };
     }
