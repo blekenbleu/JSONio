@@ -37,7 +37,7 @@ namespace blekenbleu
 
 		internal List<Property> Pclone(Car car)	=> Pclone(car.properties);
 
-		void Ccopy(List<Property> Plist)
+		void Ccopy(List<Property> Plist)	// copy matching property values from Plist into current car
 		{
 			for(int c = 0; c < current.properties.Count; c++)
 			{
@@ -305,7 +305,9 @@ namespace blekenbleu
 				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
 
 				// test for consistency between current.properties and foo
-				if (null != foo && null != foo.name && null != foo.Glist) {
+				if (null != foo && null != foo.name && null != foo.Glist)
+				{
+					int nullcarID = 0;
 					List<Property> d = foo.Glist[0].defaults;
 					int i = -1;
 
@@ -321,9 +323,25 @@ namespace blekenbleu
 						{
 							foo.Glist[i].defaults = Refactor(foo.Glist[i].defaults);
 							for (int c = 0; c < foo.Glist[i].Clist.Count; c++)
-								foo.Glist[i].Clist[c].properties = Refactor(foo.Glist[i].Clist[c].properties);
+								if (null == foo.Glist[i].Clist[c].carID)
+								{
+									nullcarID++;
+									foo.Glist[i].Clist.RemoveAt(c--);
+								}
+								else foo.Glist[i].Clist[c].properties = Refactor(foo.Glist[i].Clist[c].properties);
 						}
+					} else {	// eliminate null carIDs
+						for (i = 0; i < foo.Glist.Count; i++)
+							for (int c = 0; c < foo.Glist[i].Clist.Count;)
+								if (null == foo.Glist[i].Clist[c].carID)
+								{
+									nullcarID++;
+									foo.Glist[i].Clist.RemoveAt(c);
+								}
+								else c++;
 					}
+					if (0 < nullcarID)
+						Info($"Init(): {nullcarID} null carIDs");
 					games.data = foo;
 				}
 				else changed = Info($"Init():  empty or invalid {path}");
@@ -357,31 +375,29 @@ namespace blekenbleu
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid current car
 				{
 					s += cname;
-					if (gnew == gname && games.Save_Car(current, gname))	// do not save first car in game
+					if (0 < gname.Length && games.Save_Car(current, gname))	// do not save first car in game
 					{
 						changed = true;
 						s += $";  {current.carID} saved";
 					}
-					else gname = gnew;
 					for (int i = 0; i < current.properties.Count; i++)
 						simprops[i].Previous = current.properties[i].Value;
 					current.carID = cname;
 
 					// properties for this car
-					int gndx = games.data.Glist.FindIndex(g => g.name == gname);
+					int gndx = (0 < gnew.Length) ? games.data.Glist.FindIndex(g => g.name == gnew) : -1;
 
 					if (-1 != gndx)
 					{
 						int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.carID == cname);
 						if (-1 != cndx)
 							Ccopy(games.data.Glist[gndx].Clist[cndx].properties);
-						else if (null != games.data.Glist[gndx].defaults)
-							Ccopy(games.data.Glist[gndx].defaults);
+						else Ccopy(games.data.Glist[gndx].defaults);
 						for (int i = 0; i < current.properties.Count; i++)
+						{
 							simprops[i].Current = current.properties[i].Value;
-						if (null != games.data.Glist[gndx].defaults)
-							for (int i = 0; i < current.properties.Count; i++)
-								simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
+							simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
+						}
 						SelectedStatus();
 						Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 					}

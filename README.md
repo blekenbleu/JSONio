@@ -48,6 +48,13 @@ My understanding of C# is that `games` could be a jagged array,
 but jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) better supports
 e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/).
 
+### To Do &nbsp; *24 Apr 2024*  
+- property indicating a new car
+- manage some SimHub properties not-per car, e.g. ShakeIt frequency limits
+- new .json format storing only one instance of property names, instead of per-car
+- stop mouse click messing with selected property in UI
+- [OxyPlot integration](../OxyPlotPlugin)
+
 ## New to me
 - C# `List<>` patterns, particularly with non-trivial objects.
 	- [Here are some snippits](https://www.tutorialsteacher.com/csharp/csharp-list) with `List<Student>`
