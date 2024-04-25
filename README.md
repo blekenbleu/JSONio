@@ -49,10 +49,10 @@ but jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collecti
 e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/).
 
 ### To Do &nbsp; *24 Apr 2024*  
-- property indicating a new car
+- **done** property indicating a new car
 - manage some SimHub properties not-per car, e.g. ShakeIt frequency limits
 - new .json format storing only one instance of property names, instead of per-car
-- stop mouse click messing with selected property in UI
+- **done** stop mouse click messing with selected property in UI
 - [OxyPlot integration](../OxyPlotPlugin)
 
 ## New to me

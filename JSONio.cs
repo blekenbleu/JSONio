@@ -20,6 +20,7 @@ namespace blekenbleu
 		private bool changed;
 		private GameHandler games;
 		public string Selected_Property = "unKnown";
+		public string New_Car = "false";
 		internal string gname = "";
 		private List<int>steps;
 		private List<Property> temp;
@@ -358,6 +359,7 @@ namespace blekenbleu
 			else SelectedStatus();
 
 			this.AttachDelegate(My+"Selected", () => Selected_Property);
+			this.AttachDelegate(My+"New Car", () => New_Car);
 			this.AttachDelegate(My+"Car", () => current.carID);
 			this.AttachDelegate(My+"Game", () => gname);
 
@@ -374,22 +376,28 @@ namespace blekenbleu
 				string gnew = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid current car
 				{
+					int cndx = -1;
+					// properties for this car
+					int gndx = (0 < gnew.Length) ? games.data.Glist.FindIndex(g => g.name == gnew) : -1;
+
+					if (-1 != gndx)
+						cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.carID == cname);
+
+					New_Car = (-1 == cndx) ? "true" : "false";
+						
 					s += cname;
 					if (0 < gname.Length && games.Save_Car(current, gname))	// do not save first car in game
 					{
 						changed = true;
 						s += $";  {current.carID} saved";
 					}
+					
 					for (int i = 0; i < current.properties.Count; i++)
 						simprops[i].Previous = current.properties[i].Value;
 					current.carID = cname;
 
-					// properties for this car
-					int gndx = (0 < gnew.Length) ? games.data.Glist.FindIndex(g => g.name == gnew) : -1;
-
 					if (-1 != gndx)
 					{
-						int cndx = games.data.Glist[gndx].Clist.FindIndex(c => c.carID == cname);
 						if (-1 != cndx)
 							Ccopy(games.data.Glist[gndx].Clist[cndx].properties);
 						else Ccopy(games.data.Glist[gndx].defaults);
@@ -402,10 +410,11 @@ namespace blekenbleu
 						Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 					}
 				}
-				else if (null == cname)
+				else if (null == cname)		// carID not found
 					s += "null CarID, ";
 				else if (0 == cname.Length)
 					s += "empty CarID, ";
+
 				if (null == gnew)
 					s += "null CurrentGame name, ";
 				else if (0 == gnew.Length)

@@ -31,6 +31,7 @@
 				 Margin="0,120,0,20" HorizontalAlignment="Center" CanUserAddRows="False">
             <DataGrid.CellStyle>
                 <Style TargetType="{x:Type DataGridCell}">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="Red"/>
