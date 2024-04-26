@@ -14,9 +14,10 @@ namespace blekenbleu
 	public class JSONio : IPlugin, IDataPlugin, IWPFSettingsV2
 	{
 		public DataPluginSettings Settings;
-		internal static readonly string My = "JSONio."; 
+		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
-		private string path;															// file locations
+		internal static int pCount;								// global Property settings appended after pCount
+		private string oops = "Oops!", path;															// file locations
 		private bool changed;
 		private GameHandler games;
 		public string Selected_Property = "unKnown";
@@ -25,7 +26,12 @@ namespace blekenbleu
 		private List<int>steps;
 		private List<Property> temp;
 		private List<string> props;
-		internal Car current;
+		private CarID car = new CarID { Length = 0 };
+
+		/// <summary>
+		/// DisplayGrid contents
+		/// </summary>
+		public List<Values> simprops = new List<Values>();		// must be initialized before Init()
 
 		internal List<Property> Pclone(List<Property> prop)			// deep copy
 		{
@@ -36,16 +42,27 @@ namespace blekenbleu
 			return Plist;
 		}
 
+		internal List<Property> Pcopy(List<Values> prop)			// deep copy
+		{
+			List<Property> Plist = new List<Property> {};
+			foreach(Values p in prop)
+				if (null != p.Name && null != p.Current)
+					Plist.Add(new Property() { Name = string.Copy(p.Name), Value = string.Copy(p.Current) });
+			return Plist;
+		}
+
 		internal List<Property> Pclone(Car car)	=> Pclone(car.properties);
 
-		void Ccopy(List<Property> Plist)	// copy matching property values from Plist into current car
+		void Scopy(int gndx, int cndx)	// copy matching property values from Plist
 		{
-			for(int c = 0; c < current.properties.Count; c++)
-			{
-				int Index = Plist.FindIndex(i => i.Name == current.properties[c].Name);
-				if (-1 != Index)
-					current.properties[c].Value = Plist[Index].Value;
-			}
+			if (-1 != cndx)
+				for (int i = 0; i < pCount; i++)
+				{
+					simprops[i].Current = games.data.Glist[gndx].Clist[cndx].properties[i].Value;
+					simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
+				}
+			else for (int i = 0; i < pCount; i++)
+				simprops[i].Current = simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
 		}
 
 		/// <summary>
@@ -73,14 +90,9 @@ namespace blekenbleu
 		public string LeftMenuTitle => "JSONio plugin";
 
 		/// <summary>
-		/// DisplayGrid contents
-		/// </summary>
-		public List<Values> simprops = new List<Values>();		// must be initialized before Init()
-
-		/// <summary>
 		/// Called one time per game data update, contains all normalized game data,
-		/// raw data are intentionnally "hidden" under a generic object type (A plugin SHOULD NOT USE IT)
-		/// This method is on the critical path, it must execute as fast as possible and avoid throwing any error
+		/// raw data are intentionnally "hidden" under a generic object type (plugins SHOULD NOT USE)
+		/// This method is on the critical path, must execute as fast as possible and avoid throwing any error
 		/// </summary>
 		/// <param name="pluginManager"></param>
 		/// <param name="data">Current game data, including present and previous data frames.</param>
@@ -90,17 +102,17 @@ namespace blekenbleu
 
 		/// <summary>
 		/// Called at plugin manager stop, close/dispose anything needed here !
-		/// Plugins are rebuilt at game change
+		/// Plugins are rebuilt at game changes
 		/// </summary>
 		/// <param name="pluginManager"></param>
 		public void End(PluginManager pluginManager)
 		{
 			// Save settings
 			if (0 < gname.Length) {
-				Settings.properties = Pclone(current);
+				Settings.properties = Pcopy(simprops);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
-			if (games.Save_Car(current, gname) || changed)
+			if (games.Save_Car(car, Pcopy(simprops), gname) || changed)
 			{
 				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
 
@@ -128,28 +140,27 @@ namespace blekenbleu
 		/// <param name="prefix"></param> should be "in" or "de"
 		public void ment(int sign, string prefix)
 		{
-			if (0 == gname.Length || 0 == current.carID.Length)
+			if (0 == gname.Length || 0 == car.ID.Length)
 				return;
 			int step = steps[View.Selection];
-			int iv = (int)(0.004 + 100 * float.Parse(current.properties[View.Selection].Value));
+			int iv = (int)(0.004 + 100 * float.Parse(simprops[View.Selection].Current));
 
 			iv += sign * step;
 			if (0 <= iv)
 			{
 				if (0 != step % 100)
-					current.properties[View.Selection].Value = $"{(float)(0.01 * iv)}";
-				else current.properties[View.Selection].Value = $"{(int)(0.004 + 0.01 * iv)}";
-//				Info("property " + current.properties[View.Selection].Name + " " + prefix
-//					 + $"cremented to {current.properties[View.Selection].Value}");
-				simprops[View.Selection].Current = current.properties[View.Selection].Value;
+					simprops[View.Selection].Current = $"{(float)(0.01 * iv)}";
+				else simprops[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
+//				Info("property " + simprops[View.Selection].Name + " " + prefix
+//					 + $"cremented to {simprops[View.Selection].Value}");
 				changed = true;
 			}
 		}
 
 		private void SelectedStatus()
 		{
-			Selected_Property = current.properties[View.Selection].Name;
-			Control.Model.StatusText = gname + " " + current.carID + " " + Selected_Property;
+			Selected_Property = simprops[View.Selection].Name;
+			Control.Model.StatusText = gname + " " + car.ID + " " + Selected_Property;
 		}
 
 		/// <summary>
@@ -158,17 +169,17 @@ namespace blekenbleu
 		/// <param name="next"></param> false for prior
 		public void Select(bool next)
 		{
-			if (0 == gname.Length || 0 == current.carID.Length)
+			if (0 == gname.Length || 0 == car.ID.Length)
 				return;
 
 			if (next)
 			{
-				if (++View.Selection >= current.properties.Count)
+				if (++View.Selection >= simprops.Count)
 					View.Selection = 0;
 			}
 			else if (0 < View.Selection)	// prior
 				View.Selection--;
-			else View.Selection = (byte)(current.properties.Count - 1);
+			else View.Selection = (byte)(simprops.Count - 1);
 			SelectedStatus();
 //			Info("Selected property = " + Selected_Property);
 		}
@@ -194,14 +205,14 @@ namespace blekenbleu
 			if (-1 != Index)
 				for (int i = 0; i < simprops.Count; i++)
 					games.data.Glist[Index].defaults[i].Value =
-					simprops[i].Default = current.properties[i].Value;
+					simprops[i].Default = simprops[i].Current;
 		}
 
 		// when JSONio.ini and JSONio.json disagree
 		private List<Property> Refactor(List<Property> fold)
 		{
 			List<Property> dlist = new List<Property> {};
-			for (int p = 0; p < props.Count; p++)
+			for (int p = 0; p < pCount; p++)	// JSONio.json does not contain settings ( p >= pCount)
 			{
 				int Index =  fold.FindIndex(j => j.Name == props[p]);
 				if (-1 == Index)
@@ -209,6 +220,27 @@ namespace blekenbleu
 				else dlist.Add(fold[Index]);
 			}
 			return dlist;
+		}
+
+		// add properties and settings to simprops
+		private void populate(List<string>props, List<string> vals, List<string> stps)
+		{
+			for (int c = 0; c < props.Count; c++)
+			{
+				// populate DisplayGrid ItemsSource
+				// JSONio.ini contents may not match saved Car properties
+				int Index = temp.FindIndex(i => i.Name == props[c]);
+				string s = (c < vals.Count) ? vals[c] : "0";
+				string p = (-1 != Index) ? temp[Index].Value : s;
+				if (c >= vals.Count && -1 != Index)
+					s = p;
+
+				simprops.Add(new Values { Name = props[c], Default = s, Current = p, Previous = p });
+
+				if (c < stps.Count)
+					steps.Add((int)(100 * float.Parse(stps[c])));
+				else steps.Add(10);
+			}
 		}
 
 		/// <summary>
@@ -235,69 +267,49 @@ namespace blekenbleu
 			// retrieve previously saved Car properties
 			temp = Pclone(Settings.properties);
 
-			current = new Car() { carID = "", properties = new List<Property> {} };
 			steps = new List<int>() { };
 
-			// Load properties from JSONio.ini
+			// Load property and setting names, default values and steps from JSONio.ini
 			string pts, ds = pluginManager.GetPropertyValue(pts = Ini + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Ini + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Ini + "steps")?.ToString();
-			if (!(null == ds && Info($"Init(): '{pts}' not found")
-			   && null == vs && Info($"Init(): '{vts}' not found")
-			   && null == ss && Info($"Init(): '{sts}' not found")
-				 ))
+			string ptts, dss = pluginManager.GetPropertyValue(ptts = Ini + "settings")?.ToString();
+			string vtts, vss = pluginManager.GetPropertyValue(vtts = Ini + "setvals")?.ToString();
+			string stts, sss = pluginManager.GetPropertyValue(stts = Ini + "setsteps")?.ToString();
+			if ((!(null == ds && Info($"Init(): '{pts}' not found")))
+			 && (!(null == vs && Info($"Init(): '{vts}' not found")))
+			 && (!(null == ss && Info($"Init(): '{sts}' not found")))
+			 && (!(null == dss && Info($"Init(): '{ptts}' not found")))
+			 && (!(null == vss && Info($"Init(): '{vtts}' not found")))
+			 && (!(null == sss && Info($"Init(): '{stts}' not found")))
+				)
 			{
 				List<Property> init = new List<Property>() {};
-				List<string> vals, stps;
+				List<string> values, steps;
 
-				// JSONio.ini props determine current Properties
+				// JSONio.ini defines per-car Properties
 				props = new List<string>(ds.Split(','));
-				vals = new List<string>(vs.Split(','));
-				stps = new List<string>(ss.Split(','));
-				if (props.Count != vals.Count || props.Count != stps.Count)
-					Info($"Init(): {props.Count} properties;  {vals.Count} values;  {stps.Count} steps");
+				pCount = props.Count;						// these are per-car
+				values = new List<string>(vs.Split(','));
+				steps = new List<string>(ss.Split(','));
+				if (pCount != values.Count || props.Count != steps.Count)
+					Info($"Init(): {props.Count} properties;  {values.Count} values;  {steps.Count} steps");
+				populate(props, values, steps);
 
-				for (int c = 0; c < props.Count; c++)
-				{
-					// populate DisplayGrid ItemsSource
-					// JSONio.ini contents may not match saved Car properties
-					int Index = temp.FindIndex(i => i.Name == props[c]);
-					string s = (c < vals.Count) ? vals[c] : "0";
-					string p = (-1 != Index) ? temp[Index].Value : s;
-					if (c >= vals.Count && -1 != Index)
-						s = p;
-
-					simprops.Add(new Values { Name = props[c], Default = s, Current = p, Previous = p });
-
-					current.properties.Add( new Property {
-											Name = simprops[c].Name, Value = simprops[c].Current });
-					if (c < stps.Count)
-						steps.Add((int)(100 * float.Parse(stps[c])));
-					else steps.Add(10);
-				}
+				// JSONio.ini defines settings
+				props = new List<string>(dss.Split(','));
+				values = new List<string>(vss.Split(','));
+				steps = new List<string>(sss.Split(','));
+				if (props.Count != values.Count || props.Count != steps.Count)
+					Info($"Init(): {props.Count} properties;  {values.Count} values;  {steps.Count} steps");
+				populate(props, values, steps);
 			}
 
 			if (0 == simprops.Count)
 			{
-				Control.Model.StatusText = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini";
-				Info(Control.Model.StatusText);
+				Info(oops = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini");
 				return;
 			}
-
-/*	Hack to force settings
-			temp = Pclone(current);
-			current.properties = null;
-			foreach (Property p in temp)
-			{
-				if ("offset" == p.Name)
-					continue;
-				if ("gamma" == p.Name)
-					p.Value = "5";
-				else if ("threshold" == p.Name)
-					p.Value = "10";
-				current.properties.Add(p);
-			}
- */
 
 			// Load existing JSON
 			path = pluginManager.GetPropertyValue(Ini + "file")?.ToString();
@@ -305,19 +317,19 @@ namespace blekenbleu
 			{
 				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
 
-				// test for consistency between current.properties and foo
+				// test for consistency between simprops and foo
 				if (null != foo && null != foo.name && null != foo.Glist)
 				{
 					int nullcarID = 0;
 					List<Property> d = foo.Glist[0].defaults;
 					int i = -1;
 
-					if (simprops.Count == d.Count)
-						for (i = 0; i < simprops.Count; i++)
+					if (pCount == d.Count)
+						for (i = 0; i < pCount; i++)
 							if (d[i].Name != simprops[i].Name)
 								break;
 
-					if (i != simprops.Count) // repopulate Car properties according to NCalcScripts/JSONio.ini
+					if (i != pCount) // repopulate Car properties according to NCalcScripts/JSONio.ini
 					{
 						Info($"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
 						for (i = 0; i < foo.Glist.Count; i++)
@@ -347,20 +359,20 @@ namespace blekenbleu
 				}
 				else changed = Info($"Init():  empty or invalid {path}");
 			}
-			else changed = Info("Init()");
+			else changed = Info($"Init(): {path} not found");
 
 			// Declare available properties
 			// these get evaluated "on demand" (when shown or used in formulae)
-			foreach(Property p in current.properties)
-				this.AttachDelegate(My+p.Name, () => p.Value);
+			foreach(Values p in simprops)
+				this.AttachDelegate(My+p.Name, () => p.Current);
 
-			if (0 == gname.Length || 0 == current.carID.Length)
+			if (0 == gname.Length || 0 == car.ID.Length)
 				Selected_Property = "unKnown";
 			else SelectedStatus();
 
 			this.AttachDelegate(My+"Selected", () => Selected_Property);
 			this.AttachDelegate(My+"New Car", () => New_Car);
-			this.AttachDelegate(My+"Car", () => current.carID);
+			this.AttachDelegate(My+"Car", () => car.ID);
 			this.AttachDelegate(My+"Game", () => gname);
 
 /*---------	this.AddAction("ChangeProperties",...)
@@ -371,6 +383,11 @@ namespace blekenbleu
  ;--------------------------------------------------------------- */	
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
+				if (0 == simprops.Count)
+				{
+					Control.Model.StatusText = oops;
+					return;
+				}
 				string s = "New Car: ";
 				string cname = pluginManager.GetPropertyValue("CarID")?.ToString();
 				string gnew = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
@@ -386,26 +403,19 @@ namespace blekenbleu
 					New_Car = (-1 == cndx) ? "true" : "false";
 						
 					s += cname;
-					if (0 < gname.Length && games.Save_Car(current, gname))	// do not save first car in game
+					if (0 < gname.Length && games.Save_Car(car, Pcopy(simprops), gname))	// do not save first car in game
 					{
 						changed = true;
-						s += $";  {current.carID} saved";
+						s += $";  {car.ID} saved";
 					}
 					
-					for (int i = 0; i < current.properties.Count; i++)
-						simprops[i].Previous = current.properties[i].Value;
-					current.carID = cname;
+					for (int i = 0; i < pCount; i++)
+						simprops[i].Previous = simprops[i].Current;
+					car.ID = cname;
 
 					if (-1 != gndx)
 					{
-						if (-1 != cndx)
-							Ccopy(games.data.Glist[gndx].Clist[cndx].properties);
-						else Ccopy(games.data.Glist[gndx].defaults);
-						for (int i = 0; i < current.properties.Count; i++)
-						{
-							simprops[i].Current = current.properties[i].Value;
-							simprops[i].Default = games.data.Glist[gndx].defaults[i].Value;
-						}
+						Scopy(gndx, cndx);
 						SelectedStatus();
 						Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 					}

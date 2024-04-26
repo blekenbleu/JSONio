@@ -56,7 +56,7 @@ namespace blekenbleu
 		}
 	}	// class Values
 
-//	New JSON structure ------------------------
+//	New slim JSON structure ------------------------
 	internal class CarL
 	{
 		public string carID { get; set; }
@@ -73,9 +73,16 @@ namespace blekenbleu
 	internal class GamesList
 	{
 		internal string Plugin;			// Plugin name ("JSONio")
-		internal List<string> pList;	// property names, from JSONio.ini
-		internal List<GameList> gList;
+		internal List<string> PropertyL;	// property names, from JSONio.ini
+		internal List<GameList> GameL;
 	}
+
+// For original JSONio ---------------------------------------------------------------------
+	internal class CarID
+    {
+        public string ID { get; set; }
+        public uint Length { get; set; }
+    }
 
 	public class Property		// must be public for DataPluginSettings
 	{
@@ -83,7 +90,6 @@ namespace blekenbleu
 		public string Value { get; set; }
 	}
 
-	// return true if any Game changes
 	public class Car
 	{
 		public string carID { get; set; }
@@ -104,22 +110,24 @@ namespace blekenbleu
 		public List<Game> Glist { get; set; }
 	}
 
+	// return true if any Game changes
 	internal class GameHandler
 	{
 		internal Games data;
 
-		internal Game New_Game(string gname, Car car)
+		// so far as GameHandler is concerned, each Car has JSONio.pCount properties
+		private Game New_Game(string gname, Car car)
 		{
 			return new Game()
 			{
 				name = string.Copy(gname),
-				defaults = Pclone(car),
+				defaults = Clone(car.properties),
 				Clist = new List<Car>() { Clone(car) }
 			};
 		}
  
 		// Implement deep copy
-		internal Property Clone(Property p)
+		private Property Clone(Property p)
 		{
 			return new Property()
 			{
@@ -128,19 +136,19 @@ namespace blekenbleu
 			};
 		}
 
-		internal List<Property> Clone(List<Property> l)
+		private List<Property> Clone(List<Property> l)
 		{
 			var nl = new List<Property>() { };
 
-			foreach (Property p in l)
-				nl.Add(Clone(p));
+			for (int i = 0; i < JSONio.pCount; i++)
+				nl.Add(Clone(l[i]));
 			return nl;
 		}
 
-		internal Car Clone(Car car) => new Car() { carID = string.Copy(car.carID), properties = Clone(car.properties) };
+		private Car Clone(Car car) => new Car() { carID = string.Copy(car.carID), properties = Clone(car.properties) };
 
 		// Append or replace a single car property
-		internal bool Mod(Car c, string name, string value, bool replace)
+		private bool Mod(Car c, string name, string value, bool replace)
 		{
 			int index = c.properties.FindIndex(p => p.Name == name);
 
@@ -154,28 +162,23 @@ namespace blekenbleu
 		}
 
 		// add or replace any property values for a car in a game
-		internal bool Mod(Game g, Car car)
+		private bool Mod(Game g, Car car)
 		{
 			bool changed;
 			int index = g.Clist.FindIndex(c => c.carID == car.carID);
 
 			if (changed = -1 == index)
 				g.Clist.Add(Clone(car));
-			else foreach (Property p in car.properties)
-					changed = Mod(g.Clist[index], p.Name, p.Value, true) || changed;
+			else {
+				List<Property> p = car.properties;
+				for (int i = 0; i < JSONio.pCount; i++)
+					changed = Mod(g.Clist[index], p[i].Name, p[i].Value, true) || changed;
+			}
 			return changed;
 		}
 
-		internal List<Property> Pclone(Car c)
-		{
-			List<Property> prop = new List<Property> { };
-			foreach(Property p in c.properties)
-				prop.Add(Clone(p));
-			return prop;
-		}
- 
 		// Append a new property to all cars in all games
-		internal bool Append (Property prop)
+		private bool Append (Property prop)
 		{
 			bool changed = false;
 
@@ -188,7 +191,7 @@ namespace blekenbleu
 
 		// add (if missing) a value to Car properties in a game,
 		// but do not replace value if present
-		internal bool Append (Game g, string name, string value)
+		private bool Append (Game g, string name, string value)
 		{
 			Car dcar = new Car() { properties = g.defaults };
 			if(!Mod(dcar, name, value, false))
@@ -198,6 +201,32 @@ namespace blekenbleu
 				Mod(c, name, value, false);
 
 			return true;
+		}
+
+		private Car NewCar(CarID cid, List<Property> props)
+		{
+			Car car = new Car() { properties = new List<Property> {}, carID = cid.ID };
+			for (int i = 0; i < cid.Length; i++)
+				car.properties.Add(new Property { Name = props[i].Name, Value = props[i].Value });
+			return car;
+		}
+
+		// called when changing cars or games
+		internal bool Save_Car(CarID car, List<Property> props, string gname)
+		{
+			bool changed = true;
+
+			if (null == car || null == car.ID || 0 == car.Length || car.Length > props.Count)
+				return false;									// nothing to save
+
+																// search for game
+			int gndex = data.Glist.FindIndex(g => g.name == gname);
+
+			if (-1 == gndex)	 								// first car for this game
+				data.Glist.Add(New_Game(gname, NewCar(car, props)));
+			else changed = Mod(data.Glist[gndex], NewCar(car, props));
+
+			return changed;
 		}
 
 		// called when changing cars or games

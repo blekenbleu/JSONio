@@ -18,9 +18,10 @@ In this example, 4 properties are managed for ShakeIt Wheel Slip haptics:
 	- performed GVIM split diff on `JSONio.sln` and `JSONio.csproj`
 		to preserve new `ProjectGuid`, etc
 	- **forgot to** update namespace from `User.PluginSdk` to `JSONio` e.g. in `Properties/`...!
-- `this.AddAction("ChangeProperties",(a, b) =>` saves changed `Car Property` objects,  
-	then loads `Car` matching new `CarID` and `Game name`.
-	- creates new `Car` object from `Game` matching `name` `defaults` if no `CarID` match
+	- **easily missed** namespace in `.xaml` called `xmlns:local="clr-namespace:..."`  
+- `this.AddAction("ChangeProperties",(a, b) =>` saves changed `Car properties` list,  
+	then loads `properties` matching changed `Car.ID` and `Game gname`.
+	- updates `Values` list from `defaults` for `Game gname` if no `Car.ID` match
 	- *could* implement `this.AddEvent("CarChange");`  
 		in `public void Init(PluginManager pluginManager)`,  
 		- then `this.TriggerEvent("CarChange");`  
@@ -49,10 +50,20 @@ but jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collecti
 e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/).
 
 ### To Do &nbsp; *24 Apr 2024*  
-- **done** property indicating a new car
-- manage some SimHub properties not-per car, e.g. ShakeIt frequency limits
-- new .json format storing only one instance of property names, instead of per-car
 - **done** stop mouse click messing with selected property in UI
+- **done** property indicating a new car
+- **done** manage some SimHub properties *not-per car*, e.g. ShakeIt frequency limits
+	- some tricks:
+		- conversion to/from Car class has uses only first pCount `List<Values>`,  
+		which GameHandler class uses to save cars into `Games data` for `.json` file.
+		- JSONio knows about properties beyond pCount in `List<Values> simprops`...
+			- these are NOT saved in `.json` files
+			- these ARE available as SimHub properties e.g. for ShakeIt
+			- these ARE available for value changes in user interface  
+	- refactored to use *only* `List<Values> simprops` for user interface;
+		- using `JSONio.ini`, convert from/to `DataPluginSettings Settings` in `Init()`/`End()`
+		- restore/save simprop.Current values from/to `GameHandler games.Car` from/to `JSONio.json`
+- new *slim* .json format storing only one instance of property names, instead of redundantly per-car
 - [OxyPlot integration](../OxyPlotPlugin)
 
 ## New to me
@@ -146,7 +157,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- fully functional by buttons *and* dashboard
 			- thanks to arguably sketch code rearranging...
 			- still to do:&nbsp; fully integrate `simprops` in `JSONio.cs`
-- C# WPF XY plot:&nbsp; *yet to do*;&nbsp; SimHub already uses OxyPlot
+- [**C# WPF XY plot**](../OxyPlotPlugin):&nbsp; SimHub already uses OxyPlot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
 		- [Bart De Meyer - Blog](https://blog.bartdemeyer.be/2013/03/creating-graphs-in-wpf-using-oxyplot/)
