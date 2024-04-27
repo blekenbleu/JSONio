@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -11,12 +12,9 @@ namespace blekenbleu
 		private string _Default = "default", _Current = "current", _Previous = "previous";
 
 		public event PropertyChangedEventHandler PropertyChanged;
-
-		// Create the OnPropertyChanged method to raise the event
-		protected void OnPropertyChanged(string value)
-		{
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(value));
-		}
+		private PropertyChangedEventArgs Cevent = new PropertyChangedEventArgs("Current");
+		private PropertyChangedEventArgs Devent = new PropertyChangedEventArgs("Default");
+		private PropertyChangedEventArgs Pevent = new PropertyChangedEventArgs("Previous");
 
 		public string Name { get; set; }	// should not change
 		public string Current
@@ -27,10 +25,11 @@ namespace blekenbleu
 				if (string.Compare(_Current, value) != 0)
 				{
 					_Current = value;
-					OnPropertyChanged("Current");
+					PropertyChanged?.Invoke(this, Cevent);
 				}
 			}
 		}
+
 		public string Default
 		{
 			get { return _Default; }
@@ -39,10 +38,11 @@ namespace blekenbleu
 				if (string.Compare(_Default, value) != 0)
 				{
 					_Default = value;
-					OnPropertyChanged("Default");
+					PropertyChanged?.Invoke(this, Devent);
 				}
 			}
 		}
+
 		public string Previous
 		{
 			get { return _Previous; }
@@ -51,40 +51,91 @@ namespace blekenbleu
 				if (string.Compare(_Previous, value) != 0)
 				{
 					_Previous = value;
-					OnPropertyChanged("Previous");
+					PropertyChanged?.Invoke(this, Pevent);
 				}
 			}
 		}
 	}	// class Values
 
-//	New slim JSON structure ------------------------
-	internal class CarL
+// New slim JSON structure ------------------------------------------
+// These must all be declared public for JsonConvert.SerializeObject()
+	public class CarL
 	{
 		public string carID { get; set; }
 		public List<string> vList { get; set; }	// property values
 	}
 
-	internal class GameList
+	public class GameList
 	{
-		internal string gName;			// game name
-		internal List<string> defaults;	// default property values
-		internal List<CarL> cList;
+		public string gName;			// game name
+		public List<string> defaults;	// default property values
+		public List<CarL> cList;
 	}
 
-	internal class GamesList
+	public class GamesList
 	{
-		internal string Plugin;			// Plugin name ("JSONio")
-		internal List<string> PropertyL;	// property names, from JSONio.ini
-		internal List<GameList> GameL;
+		public string Plugin;			// Plugin name ("JSONio")
+		public List<string> PropertyL;	// property names, from JSONio.ini
+		public List<GameList> GameL;
 	}
 
-	internal class Slim
+	public class Slim
 	{
-		internal bool Load(string path)
+		public GamesList data;
+
+		private List<string> Refactor(List<Values> simprops, List<string> properties)
+		{
+			List<string> New = new List<string> {};
+
+			for (int i = 0; i < JSONio.pCount; i++)
+			{
+				int Index =  data.PropertyL.FindIndex(j => j == simprops[i].Name);
+				New.Add(string.Copy((-1 == Index) ? simprops[i].Default : properties[Index]));
+			}
+			return New;
+		}
+
+		// load Slim .json and reconcile with car-specific simprops from NCalcScripts/JSONio.ini
+		internal bool Load(string path, List<Values> simprops)
 		{
 			if (!File.Exists(path))
 				return false;
-			else return false;
+
+			data = JsonConvert.DeserializeObject<GamesList>(File.ReadAllText(path));
+			if (null == data || null == data.Plugin || null == data.PropertyL || null == data.GameL)
+				return !JSONio.Info($"Slim.Load({path}):  bad data");
+
+			int nullcarID = 0;
+			int pCount = JSONio.pCount;
+			int i = -1;
+
+			if (pCount == data.PropertyL.Count)
+				for (i = 0; i < pCount; i++)
+					if (data.PropertyL[i] != simprops[i].Name)
+						break;
+
+			if (i != pCount) // repopulate Car properties according to NCalcScripts/JSONio.ini
+			{
+				JSONio.Info($"Slim.Load({path}):  PropertyL mismatched NCalcScripts/JSONio.ini");
+				for (i = 0; i < data.GameL.Count; i++)
+				{
+					data.GameL[i].defaults = Refactor(simprops, data.GameL[i].defaults);
+					for (int c = 0; c < data.GameL[i].cList.Count; c++)
+						if (null == data.GameL[i].cList[c].carID)
+						{
+							nullcarID++;
+							data.GameL[i].cList.RemoveAt(c--);
+						}
+						else data.GameL[i].cList[c].vList = Refactor(simprops, data.GameL[i].cList[c].vList);
+				}
+				data.PropertyL = new List<string> {};
+				for (i = 0; i < pCount; i++)
+					data.PropertyL.Add(string.Copy(simprops[i].Name));
+			}
+			if (0 < nullcarID)
+				JSONio.Info($"Slim.Load({path}): {nullcarID} null carIDs");
+
+			return false;
 		}
 
 		internal GamesList Migrate(GameHandler g)
@@ -118,10 +169,10 @@ namespace blekenbleu
 
 // For original JSONio ---------------------------------------------------------------------
 	internal class CarID
-    {
-        public string ID { get; set; }
-        public uint Length { get; set; }
-    }
+	{
+		public string ID { get; set; }
+		public uint Length { get; set; }
+	}
 
 	public class Property		// must be public for DataPluginSettings
 	{
