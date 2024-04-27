@@ -89,18 +89,16 @@ namespace blekenbleu
 
 		internal GamesList Migrate(GameHandler g)
 		{
-			GamesList gsl = new GamesList { Plugin = "JSONio", PropertyL = {}, GameL  = {} };
+			GamesList gsl = new GamesList { Plugin = "JSONio", PropertyL = new List<string> {}, GameL  = new List<GameList>{} };
 			if (0 < g.data.Glist.Count)
 			{
-				int i, j, k, c, v, pc;
+				int i, k, c, v, pc;
 
 				for (i = 0; i < (pc = g.data.Glist[0].defaults.Count); i++)
 					gsl.PropertyL.Add(string.Copy(g.data.Glist[0].defaults[i].Name));
 				for (k = 0; k < g.data.Glist.Count; k++)
 				{
-					GameList gl = new GameList { gName = g.data.Glist[k].name, defaults = {}, cList = {} };
-					for (j = 0; j < g.data.Glist[k].Clist.Count; k++)
-					{
+					GameList gl = new GameList { gName = g.data.Glist[k].name, defaults = new List<string> {}, cList = new List<CarL> {} };
 						for (i = 0; i < pc; i++)
 							gl.defaults.Add(string.Copy(g.data.Glist[k].defaults[i].Value));
 						for (c = 0; c < g.data.Glist[k].Clist.Count; c++)
@@ -111,7 +109,6 @@ namespace blekenbleu
 								car.vList.Add(string.Copy(g.data.Glist[k].Clist[c].properties[v].Value));
 							gl.cList.Add(car);
 						}
-					}
 					gsl.GameL.Add(gl);
 				}
 			}
