@@ -20,7 +20,9 @@ namespace blekenbleu
 		private string oops = "Oops!", path;															// file locations
 		private bool changed;
 		private GameHandler games;
-		public string Selected_Property = "unKnown";
+		private GamesList slim;
+		private Slim Sl = new Slim();
+        public string Selected_Property = "unKnown";
 		public string New_Car = "false";
 		internal string gname = "";
 		private List<int>steps;
@@ -120,6 +122,11 @@ namespace blekenbleu
 					Info("End():  Json Serializer failure for games.data");
 				else File.WriteAllText(path, js);
 			}
+			slim = Sl.Migrate(games);
+			string sjs = JsonConvert.SerializeObject(slim, Formatting.Indented);
+			if (0 == sjs.Length || "{}" == sjs)
+				Info("End():  Json Serializer failure for slim");
+			else File.WriteAllText(pluginManager.GetPropertyValue(Ini + "slim")?.ToString(), sjs);
 		}
 
 		/// <summary>
@@ -312,8 +319,8 @@ namespace blekenbleu
 			}
 
 			// Load existing JSON
-			path = pluginManager.GetPropertyValue(Ini + "file")?.ToString();
-			if (File.Exists(path))
+			if (!Sl.Load(pluginManager.GetPropertyValue(Ini + "slim")?.ToString())
+			 && File.Exists(path = pluginManager.GetPropertyValue(Ini + "file")?.ToString()))
 			{
 				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
 

@@ -3,7 +3,7 @@
 ## What
 ![](Documentation/B4launch.png) &nbsp; ![](Documentation/launch.png)  
 A common list of custom SimHub properties with values potentially specific to each sim and car.  
-In this example, 4 properties are managed for ShakeIt Wheel Slip haptics:  
+In this example, properties are managed for ShakeIt Wheel Slip haptics:  
 ![](Documentation/properties.png)
 - a C# list of games
 	- each `Game` object a `name`, game-specific `defaults Property List<>` and `CList` of `Car` objects

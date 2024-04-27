@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 
 namespace blekenbleu
 {
@@ -75,6 +76,47 @@ namespace blekenbleu
 		internal string Plugin;			// Plugin name ("JSONio")
 		internal List<string> PropertyL;	// property names, from JSONio.ini
 		internal List<GameList> GameL;
+	}
+
+	internal class Slim
+	{
+		internal bool Load(string path)
+		{
+			if (!File.Exists(path))
+				return false;
+			else return false;
+		}
+
+		internal GamesList Migrate(GameHandler g)
+		{
+			GamesList gsl = new GamesList { Plugin = "JSONio", PropertyL = {}, GameL  = {} };
+			if (0 < g.data.Glist.Count)
+			{
+				int i, j, k, c, v, pc;
+
+				for (i = 0; i < (pc = g.data.Glist[0].defaults.Count); i++)
+					gsl.PropertyL.Add(string.Copy(g.data.Glist[0].defaults[i].Name));
+				for (k = 0; k < g.data.Glist.Count; k++)
+				{
+					GameList gl = new GameList { gName = g.data.Glist[k].name, defaults = {}, cList = {} };
+					for (j = 0; j < g.data.Glist[k].Clist.Count; k++)
+					{
+						for (i = 0; i < pc; i++)
+							gl.defaults.Add(string.Copy(g.data.Glist[k].defaults[i].Value));
+						for (c = 0; c < g.data.Glist[k].Clist.Count; c++)
+						{
+							CarL car = new CarL { carID = string.Copy(g.data.Glist[k].Clist[0].carID),
+															vList = new List<string> {} };
+							for (v = 0; v < pc; v++)
+								car.vList.Add(string.Copy(g.data.Glist[k].Clist[c].properties[v].Value));
+							gl.cList.Add(car);
+						}
+					}
+					gsl.GameL.Add(gl);
+				}
+			}
+			return gsl;
+		}
 	}
 
 // For original JSONio ---------------------------------------------------------------------
