@@ -17,11 +17,10 @@ namespace blekenbleu
 		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		internal static int pCount;								// global Property settings appended after pCount
-		private string oops = "Oops!", path;															// file locations
+		private string oops = "Oops!", path, slimPath;															// file locations
 		private bool changed;
 		private GameHandler games;
-		private GamesList slim;
-		private Slim Sl = new Slim();
+		private Slim slim;
         public string Selected_Property = "unKnown";
 		public string New_Car = "false";
 		internal string gname = "";
@@ -102,6 +101,14 @@ namespace blekenbleu
 		{
 		}
 
+		private void SlimEnd(GamesList slim)
+		{
+			string sjs = JsonConvert.SerializeObject(slim, Formatting.Indented);
+			if (0 == sjs.Length || "{}" == sjs)
+				Info("End():  Json Serializer failure for slim");
+			else File.WriteAllText(slimPath, sjs);
+		}
+
 		/// <summary>
 		/// Called at plugin manager stop, close/dispose anything needed here !
 		/// Plugins are rebuilt at game changes
@@ -121,12 +128,12 @@ namespace blekenbleu
 				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
 					Info("End():  Json Serializer failure for games.data");
 				else File.WriteAllText(path, js);
+				if (null == slim.data)
+					slim.data = slim.Migrate(games);
+				SlimEnd(slim.data);
 			}
-			slim = Sl.Migrate(games);
-			string sjs = JsonConvert.SerializeObject(slim, Formatting.Indented);
-			if (0 == sjs.Length || "{}" == sjs)
-				Info("End():  Json Serializer failure for slim");
-			else File.WriteAllText(pluginManager.GetPropertyValue(Ini + "slim")?.ToString(), sjs);
+			else if (null == slim.data)	// force migration
+				SlimEnd(slim.Migrate(games));
 		}
 
 		/// <summary>
@@ -259,6 +266,16 @@ namespace blekenbleu
 		{
 			changed = false;	// write JSON file during End() only if true
 
+			slim = new Slim()
+			{
+				data = new GamesList()
+				{
+					Plugin = "JSONio",
+					GameL = new List<GameList>() {},
+					PropertyL = new List<string> {}
+				}
+			};
+
 			games = new GameHandler()
 			{
 				data = new Games()
@@ -318,8 +335,8 @@ namespace blekenbleu
 				return;
 			}
 
-			// Load existing JSON
-			if (!Sl.Load(pluginManager.GetPropertyValue(Ini + "slim")?.ToString())
+			// Load existing JSON, first trying new slim format
+			if (!slim.Load(slimPath = pluginManager.GetPropertyValue(Ini + "slim")?.ToString(), simprops)
 			 && File.Exists(path = pluginManager.GetPropertyValue(Ini + "file")?.ToString()))
 			{
 				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
@@ -363,6 +380,7 @@ namespace blekenbleu
 					if (0 < nullcarID)
 						Info($"Init(): {nullcarID} null carIDs");
 					games.data = foo;
+					slim.data = slim.Migrate(games);
 				}
 				else changed = Info($"Init():  empty or invalid {path}");
 			}
