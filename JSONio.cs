@@ -105,7 +105,7 @@ namespace blekenbleu
 		{
 			string sjs = JsonConvert.SerializeObject(slim, Formatting.Indented);
 			if (0 == sjs.Length || "{}" == sjs)
-				Info("End():  Json Serializer failure for slim");
+				Info("SlimEnd():  Json Serializer failure");
 			else File.WriteAllText(slimPath, sjs);
 		}
 
@@ -128,12 +128,11 @@ namespace blekenbleu
 				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
 					Info("End():  Json Serializer failure for games.data");
 				else File.WriteAllText(path, js);
-				if (null == slim.data)
+				if (null == slim.data || 0 == slim.data.GameL.Count)
 					slim.data = slim.Migrate(games);
 				SlimEnd(slim.data);
 			}
-			else if (null == slim.data)	// force migration
-				SlimEnd(slim.Migrate(games));
+			else SlimEnd(slim.data);
 		}
 
 		/// <summary>
@@ -380,7 +379,6 @@ namespace blekenbleu
 					if (0 < nullcarID)
 						Info($"Init(): {nullcarID} null carIDs");
 					games.data = foo;
-					slim.data = slim.Migrate(games);
 				}
 				else changed = Info($"Init():  empty or invalid {path}");
 			}

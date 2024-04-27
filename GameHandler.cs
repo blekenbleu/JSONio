@@ -154,7 +154,7 @@ namespace blekenbleu
 							gl.defaults.Add(string.Copy(g.data.Glist[k].defaults[i].Value));
 						for (c = 0; c < g.data.Glist[k].Clist.Count; c++)
 						{
-							CarL car = new CarL { carID = string.Copy(g.data.Glist[k].Clist[0].carID),
+							CarL car = new CarL { carID = string.Copy(g.data.Glist[k].Clist[c].carID),
 															vList = new List<string> {} };
 							for (v = 0; v < pc; v++)
 								car.vList.Add(string.Copy(g.data.Glist[k].Clist[c].properties[v].Value));
