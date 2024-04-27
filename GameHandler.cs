@@ -165,6 +165,59 @@ namespace blekenbleu
 			}
 			return gsl;
 		}
+
+		bool Mod(int gi, int ci, CarL c)
+		{
+			bool ch = false;
+
+			for (int i = 0; i < JSONio.pCount; i++)
+				if (data.GameL[gi].cList[ci].vList[i] != c.vList[i])
+				{
+					ch = true;
+					data.GameL[gi].cList[ci].vList[i] = string.Copy(c.vList[i]);
+		   		}
+			return ch;
+		}
+
+		List<string> CCopy(List<Values> v)
+		{
+			List<string> New = new List<string> { };
+			for (int i = 0; i < v.Count; i++) { New.Add(string.Copy(v[i].Current)); }
+			return New;
+		}
+
+		List<string> DCopy(List<Values> v)
+		{
+			List<string> New = new List<string> { };
+			for (int i = 0; i < v.Count; i++) { New.Add(string.Copy(v[i].Default)); }
+			return New;
+		}
+
+		// called when changing cars or games
+		internal bool Save_Car(CarID car, List<Values> props, string gname)
+		{
+			bool changed = true;
+
+			if (null == car || null == car.ID || 0 == car.Length || car.Length > props.Count)
+				return false;									// nothing to save
+
+																// search for game
+			CarL newc = new CarL { carID = string.Copy(car.ID), vList = CCopy(props)};
+			int gndex = data.GameL.FindIndex(g => g.gName == gname);
+			if (-1 == gndex)	 								// first car for this game
+			{
+				gndex = data.GameL.Count;
+				data.GameL.Add(new GameList {gName = gname, defaults = DCopy(props),
+											 cList = new List<CarL> {}});
+			}
+			int cndex = data.GameL[gndex].cList.FindIndex(c => c.carID == car.ID);
+			if (-1 == cndex)
+				data.GameL[gndex].cList.Add(newc);
+			else changed = Mod(gndex, cndex, newc);
+
+			return changed;
+		}
+
 	}
 
 // For original JSONio ---------------------------------------------------------------------

@@ -21,7 +21,7 @@ namespace blekenbleu
 		private bool changed;
 		private GameHandler games;
 		private Slim slim;
-        public string Selected_Property = "unKnown";
+		public string Selected_Property = "unKnown";
 		public string New_Car = "false";
 		internal string gname = "";
 		private List<int>steps;
@@ -121,18 +121,18 @@ namespace blekenbleu
 				Settings.properties = Pcopy(simprops);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
+			if (null == slim.data || 0 == slim.data.GameL.Count)
+				slim.data = slim.Migrate(games);
 			if (games.Save_Car(car, Pcopy(simprops), gname) || changed)
 			{
+				slim.Save_Car(car, simprops, gname);
+				SlimEnd(slim.data);
 				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
 
 				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
 					Info("End():  Json Serializer failure for games.data");
 				else File.WriteAllText(path, js);
-				if (null == slim.data || 0 == slim.data.GameL.Count)
-					slim.data = slim.Migrate(games);
-				SlimEnd(slim.data);
 			}
-			else SlimEnd(slim.data);
 		}
 
 		/// <summary>
