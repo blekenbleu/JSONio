@@ -34,17 +34,16 @@ namespace blekenbleu
 		/// </summary>
 		public List<Values> simprops = new List<Values>();		// must be initialized before Init()
 
-		internal List<Property> Pcopy(List<Values> p, int count)			// deep copy
+		internal List<Property> Pcopy(List<Values> p)			// deep copy
 		{
 			List<Property> Plist = new List<Property> {};
-			for(int i = 0; i < count; i++)
+			for(int i = 0; i < p.Count; i++)
 				if (null != p[i].Name &&  null != p[i].Current)
 					Plist.Add(new Property() { Name = string.Copy(p[i].Name), Value = string.Copy(p[i].Current) });
 			return Plist;
 		}
 
-		internal List<Property> Pcopy(List<Values> p) => Pcopy(p, pCount);	// default to CurrentCar Properties
-
+		// copy per-car properties from game to simprops
 		void Scopy(int cndx, Game game)	// copy matching values from Game
 		{
 			if (0 > cndx)
@@ -121,10 +120,10 @@ namespace blekenbleu
 		{
 			// Save settings
 			if (0 < Gname.Length) {
-				Settings.properties = Pcopy(simprops, simprops.Count);
+				Settings.properties = Pcopy(simprops);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
-			if (games.Save_Car(CurrentCar, Pcopy(simprops), Gname) || changed)
+			if (games.Save_Car(CurrentCar, simprops, Gname) || changed)
 			{
 				slim.Save_Car(CurrentCar, simprops, Gname);
 				SlimEnd(slim.data);
@@ -428,27 +427,29 @@ namespace blekenbleu
 				string gnew = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
 				{
-					s += CurrentCar.ID = cname;
-					for (int i = 0; i < pCount; i++)
-						simprops[i].Previous = simprops[i].Current;
-
-					// Properties for this CurrentCar
-					int gndx, cndx = games.Car_Change(out gndx, gnew, cname);
-					New_Car = (-1 == cndx) ? "true" : "false";
-						
-					if (0 < Gname.Length								// do not save first CurrentCar in game
-					 && games.Save_Car(CurrentCar, Pcopy(simprops), Gname))
+					s += cname;
+					if (0 < Gname.Length								// do not save first (null) CurrentCar.ID in game
+					 && games.Save_Car(CurrentCar, simprops, Gname))
 					{
 						changed = true;
 						slim.Save_Car(CurrentCar, simprops, Gname);
 						s += $";  {CurrentCar.ID} saved";
 					}
-					if (0 <= gndx)
+
+					for (int i = 0; i < pCount; i++)					// copy Current to previous
+						simprops[i].Previous = simprops[i].Current;
+
+					// indices for new car
+					int gndx, cndx = games.Car_Change(out gndx, gnew, cname);
+					New_Car = (-1 == cndx) ? "true" : "false";
+						
+					CurrentCar.ID = cname;
+					if (0 <= gndx)										// else reuse current properties
 						Scopy(cndx, games.data.Glist[gndx]);
 					SelectedStatus();
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}
-				else if (null == cname)		// CarID not found
+				else if (null == cname)		// CarID verification - should make a popup
 					s += "null CarID, ";
 				else if (0 == cname.Length)
 					s += "empty CarID, ";

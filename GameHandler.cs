@@ -182,7 +182,7 @@ namespace blekenbleu
 		List<string> CCopy(List<Values> v)
 		{
 			List<string> New = new List<string> { };
-			for (int i = 0; i < v.Count; i++) { New.Add(string.Copy(v[i].Current)); }
+			for (int i = 0; i < JSONio.pCount; i++) { New.Add(string.Copy(v[i].Current)); }
 			return New;
 		}
 
@@ -314,17 +314,18 @@ namespace blekenbleu
 		}
 
 		// called when changing cars or games
-		internal bool Save_Car(CarID car, List<Property> props, string gname)
+		internal bool Save_Car(CarID car, List<Values> val, string gname)
 		{
-			bool changed = true;
-
-			if (null == car || null == car.ID || 0 == JSONio.pCount || JSONio.pCount > props.Count)
+			if (null == car || null == car.ID || 0 == JSONio.pCount || JSONio.pCount > val.Count)
 				return false;									// nothing to save
 
-																// search for game
-			int gndex = data.Glist.FindIndex(g => g.Name == gname);
+			bool changed = true;
+			int gndex = data.Glist.FindIndex(g => g.Name == gname); // search for game
+			List<Property> props = new List<Property> {};
+			for (int i = 0; i < JSONio.pCount; i++)
+				props.Add(new Property { Name = val[i].Name, Value = val[i].Current });
 
-			if (-1 == gndex)	 								// first car for this game
+			if (0 > gndex)	 								// first car for this game
 				data.Glist.Add(New_Game(gname, NewCar(car, props)));
 			else changed = Mod(data.Glist[gndex], NewCar(car, props));
 
