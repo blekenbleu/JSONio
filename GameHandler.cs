@@ -145,19 +145,19 @@ namespace blekenbleu
 			{
 				int i, k, c, v, pc;
 
-				for (i = 0; i < (pc = g.data.Glist[0].Defaults.Count); i++)
-					gsl.pList.Add(string.Copy(g.data.Glist[0].Defaults[i].Name));
+				for (i = 0; i < (pc = g.data.Glist[0].defaults.Count); i++)
+					gsl.pList.Add(string.Copy(g.data.Glist[0].defaults[i].Name));
 				for (k = 0; k < g.data.Glist.Count; k++)
 				{
-					GameList gl = new GameList { gName = g.data.Glist[k].Name, defaults = new List<string> {}, cList = new List<CarL> {} };
+					GameList gl = new GameList { gName = g.data.Glist[k].name, defaults = new List<string> {}, cList = new List<CarL> {} };
 						for (i = 0; i < pc; i++)
-							gl.defaults.Add(string.Copy(g.data.Glist[k].Defaults[i].Value));
+							gl.defaults.Add(string.Copy(g.data.Glist[k].defaults[i].Value));
 						for (c = 0; c < g.data.Glist[k].Clist.Count; c++)
 						{
-							CarL car = new CarL { CarID = string.Copy(g.data.Glist[k].Clist[c].CID),
+							CarL car = new CarL { CarID = string.Copy(g.data.Glist[k].Clist[c].carID),
 															Vlist = new List<string> {} };
 							for (v = 0; v < pc; v++)
-								car.Vlist.Add(string.Copy(g.data.Glist[k].Clist[c].Properties[v].Value));
+								car.Vlist.Add(string.Copy(g.data.Glist[k].Clist[c].properties[v].Value));
 							gl.cList.Add(car);
 						}
 					gsl.gList.Add(gl);
@@ -233,20 +233,20 @@ namespace blekenbleu
 
 	public class Car
 	{
-		public string CID { get; set; }
-		public List<Property> Properties { get; set; }
+		public string carID { get; set; }
+		public List<Property> properties { get; set; }
 	}
 
 	public class Game
 	{
-		public string Name { get; set; }
-		public List<Property> Defaults { get; set; }
+		public string name { get; set; }
+		public List<Property> defaults { get; set; }
 		public List<Car> Clist { get; set; }
 	}
 
 	public class Games
 	{
-		public string Plugin { get; set; }
+		public string name { get; set; }
 		public List<Game> Glist { get; set; }
 	}
 
@@ -260,8 +260,8 @@ namespace blekenbleu
 		{
 			return new Game()
 			{
-				Name = string.Copy(gname),
-				Defaults = Clone(car.Properties),
+				name = string.Copy(gname),
+				defaults = Clone(car.properties),
 				Clist = new List<Car>() { Clone(car) }
 			};
 		}
@@ -285,31 +285,31 @@ namespace blekenbleu
 			return nl;
 		}
 
-		private Car Clone(Car car) => new Car() { CID = string.Copy(car.CID), Properties = Clone(car.Properties) };
+		private Car Clone(Car car) => new Car() { carID = string.Copy(car.carID), properties = Clone(car.properties) };
 
 		// add or replace any property values for a car in a game
 		private bool Mod(Game game, Car car)
 		{
 			bool changed;
-			int index = game.Clist.FindIndex(c => c.CID == car.CID);
-			int gndx = data.Glist.FindIndex(f => f.Name == game.Name);
+			int index = game.Clist.FindIndex(c => c.carID == car.carID);
+			int gndx = data.Glist.FindIndex(f => f.name == game.name);
 
 			if (changed = -1 == index)
 				data.Glist[gndx].Clist.Add(Clone(car));
 			else for (int i = 0; i < JSONio.pCount; i++)
-				if (game.Clist[index].Properties[i].Value != car.Properties[i].Value)
+				if (game.Clist[index].properties[i].Value != car.properties[i].Value)
 				{
 					changed = true;
-					data.Glist[gndx].Clist[index].Properties[i].Value = string.Copy(car.Properties[i].Value);
+					data.Glist[gndx].Clist[index].properties[i].Value = string.Copy(car.properties[i].Value);
 				}
 			return changed;
 		}
 
 		private Car NewCar(CarID c, List<Property> props)
 		{
-			Car car = new Car() { Properties = new List<Property> {}, CID = c.ID };
+			Car car = new Car() { properties = new List<Property> {}, carID = c.ID };
 			for (int i = 0; i < JSONio.pCount; i++)
-				car.Properties.Add(new Property { Name = string.Copy(props[i].Name), Value = string.Copy(props[i].Value) });
+				car.properties.Add(new Property { Name = string.Copy(props[i].Name), Value = string.Copy(props[i].Value) });
 			return car;
 		}
 
@@ -320,7 +320,7 @@ namespace blekenbleu
 				return false;									// nothing to save
 
 			bool changed = true;
-			int gndex = data.Glist.FindIndex(g => g.Name == gname); // search for game
+			int gndex = data.Glist.FindIndex(g => g.name == gname); // search for game
 			List<Property> props = new List<Property> {};
 			for (int i = 0; i < JSONio.pCount; i++)
 				props.Add(new Property { Name = val[i].Name, Value = val[i].Current });
@@ -334,8 +334,8 @@ namespace blekenbleu
 
 		internal int Car_Change(out int gi, string Gnew, string Cname)
 		{
-			gi = (0 < Gnew.Length) ? data.Glist.FindIndex(g => g.Name == Gnew) : -1;
-			return (0 <= gi) ? data.Glist[gi].Clist.FindIndex(c => c.CID == Cname) : -1;
+			gi = (0 < Gnew.Length) ? data.Glist.FindIndex(g => g.name == Gnew) : -1;
+			return (0 <= gi) ? data.Glist[gi].Clist.FindIndex(c => c.carID == Cname) : -1;
 		}
 	}	// class GameHandler
 }

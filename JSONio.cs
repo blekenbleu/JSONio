@@ -48,11 +48,11 @@ namespace blekenbleu
 		{
 			if (0 > cndx)
 				for (int i = 0; i < pCount; i++)
-					simprops[i].Current = simprops[i].Default = game.Defaults[i].Value;
+					simprops[i].Current = simprops[i].Default = game.defaults[i].Value;
 			else for (int i = 0; i < pCount; i++)
 			{
-				simprops[i].Current = game.Clist[cndx].Properties[i].Value;
-				simprops[i].Default = game.Defaults[i].Value;
+				simprops[i].Current = game.Clist[cndx].properties[i].Value;
+				simprops[i].Default = game.defaults[i].Value;
 			}
 		}
 
@@ -213,12 +213,12 @@ namespace blekenbleu
 			if (0 == Gname.Length)
 				return;
 
-			int p, Index = Glist.FindIndex(i => i.Name == Gname);
+			int p, Index = Glist.FindIndex(i => i.name == Gname);
 
 			if (-1 != Index)
 			{
 				for (p = 0; p < pCount; p++)
-					Glist[Index].Defaults[p].Value =
+					Glist[Index].defaults[p].Value =
 					simprops[p].Default = simprops[p].Current;
 				for (; p < simprops.Count; p++)
 					simprops[p].Default = simprops[p].Current;
@@ -285,7 +285,7 @@ namespace blekenbleu
 			{
 				data = new Games()
 				{
-					Plugin = "JSONio",
+					name = "JSONio",
 					Glist = new List<Game>() {}
 				}
 			};
@@ -350,10 +350,10 @@ namespace blekenbleu
 				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
 
 				// test for consistency between simprops and foo
-				if (null != foo && null != foo.Plugin && null != foo.Glist)
+				if (null != foo && null != foo.name && null != foo.Glist)
 				{
 					int nullcarID = 0;
-					List<Property> d = foo.Glist[0].Defaults;
+					List<Property> d = foo.Glist[0].defaults;
 					int i = -1;
 
 					if (pCount == d.Count)
@@ -366,19 +366,19 @@ namespace blekenbleu
 						Info($"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
 						for (i = 0; i < foo.Glist.Count; i++)
 						{
-							foo.Glist[i].Defaults = Refactor(Iprops, foo.Glist[i].Defaults);
+							foo.Glist[i].defaults = Refactor(Iprops, foo.Glist[i].defaults);
 							for (int c = 0; c < foo.Glist[i].Clist.Count; c++)
-								if (null == foo.Glist[i].Clist[c].CID)
+								if (null == foo.Glist[i].Clist[c].carID)
 								{
 									nullcarID++;
 									foo.Glist[i].Clist.RemoveAt(c--);
 								}
-								else foo.Glist[i].Clist[c].Properties = Refactor(Iprops, foo.Glist[i].Clist[c].Properties);
+								else foo.Glist[i].Clist[c].properties = Refactor(Iprops, foo.Glist[i].Clist[c].properties);
 						}
 					} else {	// eliminate null carIDs
 						for (i = 0; i < foo.Glist.Count; i++)
 							for (int c = 0; c < foo.Glist[i].Clist.Count;)
-								if (null == foo.Glist[i].Clist[c].CID)
+								if (null == foo.Glist[i].Clist[c].carID)
 								{
 									nullcarID++;
 									foo.Glist[i].Clist.RemoveAt(c);
