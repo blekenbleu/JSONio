@@ -19,7 +19,7 @@ namespace blekenbleu
 		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		internal static int pCount;								// global Property settings appended after pCount
-		private string oops = "Oops!", path, slimPath;															// file locations
+		private string oops = "Oops!", path, slimPath;			// file locations
 		private string Gname = "";
 		private bool changed;
 		private GameHandler games;
@@ -60,11 +60,11 @@ namespace blekenbleu
 		{
 			if (0 > cndx)
 				for (int i = 0; i < pCount; i++)
-					simprops[i].Current = simprops[i].Default = game.defaults[i];
+					simprops[i].Current = simprops[i].Default = game.cList[0].Vlist[i];
 			else for (int i = 0; i < pCount; i++)
 			{
 				simprops[i].Current = game.cList[cndx].Vlist[i];
-				simprops[i].Default = game.defaults[i];
+				simprops[i].Default = game.cList[0].Vlist[i];
 			}
 		}
 
@@ -213,12 +213,12 @@ namespace blekenbleu
 			if (0 == Gname.Length)
 				return;
 
-			int p, Index = Glist.FindIndex(i => i.gName == Gname);
+			int p, Index = Glist.FindIndex(i => i.cList[0].Name == Gname);
 
 			if (0 <= Index)
 			{
 				for (p = 0; p < pCount; p++)
-					Glist[Index].defaults[p] =
+					Glist[Index].cList[0].Vlist[p] =
 					simprops[p].Default = simprops[p].Current;
 				for (; p < simprops.Count; p++)
 					simprops[p].Default = simprops[p].Current;
