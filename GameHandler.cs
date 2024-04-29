@@ -132,7 +132,7 @@ namespace blekenbleu
 			if (0 < nullcarID)
 				JSONio.Info($"Slim.Load({path}): {nullcarID} null carIDs");
 
-			return false;
+			return (data.gList.Count > 0 && data.gList[0].cList.Count > 1);
 		}
 
 		private List<string> pCopy (List<Property> p)

@@ -123,10 +123,10 @@ namespace blekenbleu
 				Settings.properties = Pcopy(simprops);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
-			if (games.Save_Car(CurrentCar, simprops, Gname) || changed)
-			{
-				slim.Save_Car(CurrentCar, simprops, Gname);
+			if (slim.Save_Car(CurrentCar, simprops, Gname) || changed)
 				SlimEnd(slim.data);
+			else if (games.Save_Car(CurrentCar, simprops, Gname) || changed)
+			{
 				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
 
 				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
@@ -242,7 +242,7 @@ namespace blekenbleu
 			}
 		}
 
-		public void New_defaults() => _new_defaults(games.data.Glist);
+		public void New_defaults() => _new_defaults(slim.data.gList);
 
 		// when JSONio.ini and JSONio.json disagree
 		private List<Property> Refactor(List<string> iprops, List<Property> fold)
@@ -446,7 +446,7 @@ namespace blekenbleu
 				{
 					s += cname;
 					if (0 < Gname.Length								// do not save first (null) CurrentCar.ID in game
-					 && games.Save_Car(CurrentCar, simprops, Gname))
+					 && slim.Save_Car(CurrentCar, simprops, Gname))
 					{
 						changed = true;
 						slim.Save_Car(CurrentCar, simprops, Gname);
@@ -457,12 +457,12 @@ namespace blekenbleu
 						simprops[i].Previous = simprops[i].Current;
 
 					// indices for new car
-					int gndx, cndx = games.Car_Change(out gndx, gnew, cname);
+					int gndx, cndx = slim.Car_Change(out gndx, gnew, cname);
 					New_Car = (-1 == cndx) ? "true" : "false";
 						
 					CurrentCar.ID = cname;
 					if (0 <= gndx)										// else reuse current properties
-						Scopy(cndx, games.data.Glist[gndx]);
+						Scopy(cndx, slim.data.gList[gndx]);
 					SelectedStatus();
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}
