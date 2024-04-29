@@ -208,14 +208,31 @@ namespace blekenbleu
 			}
 		}
 
-		public void games_defaults(List<Game> Glist)
+		private void _new_defaults(List<GameList> Glist)
+		{
+			if (0 == Gname.Length)
+				return;
+
+			int p, Index = Glist.FindIndex(i => i.gName == Gname);
+
+			if (0 <= Index)
+			{
+				for (p = 0; p < pCount; p++)
+					Glist[Index].defaults[p] =
+					simprops[p].Default = simprops[p].Current;
+				for (; p < simprops.Count; p++)
+					simprops[p].Default = simprops[p].Current;
+			}
+		}
+
+		private void _new_defaults(List<Game> Glist)
 		{
 			if (0 == Gname.Length)
 				return;
 
 			int p, Index = Glist.FindIndex(i => i.name == Gname);
 
-			if (-1 != Index)
+			if (0 <= Index)
 			{
 				for (p = 0; p < pCount; p++)
 					Glist[Index].defaults[p].Value =
@@ -225,7 +242,7 @@ namespace blekenbleu
 			}
 		}
 
-		public void New_defaults() => games_defaults(games.data.Glist);
+		public void New_defaults() => _new_defaults(games.data.Glist);
 
 		// when JSONio.ini and JSONio.json disagree
 		private List<Property> Refactor(List<string> iprops, List<Property> fold)

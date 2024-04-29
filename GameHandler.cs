@@ -217,6 +217,12 @@ namespace blekenbleu
 
 			return changed;
 		}
+
+		internal int Car_Change(out int gi, string Gnew, string Cname)
+		{
+			gi = (0 < Gnew.Length) ? data.gList.FindIndex(g => g.gName == Gnew) : -1;
+			return (0 <= gi) ? data.gList[gi].cList.FindIndex(c => c.CarID == Cname) : -1;
+		}
 	}		// class Slim
 
 // For original JSONio ---------------------------------------------------------------------
