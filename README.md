@@ -157,7 +157,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- fully functional by buttons *and* dashboard
 			- thanks to arguably sketch code rearranging...
 			- still to do:&nbsp; fully integrate `simprops` in `JSONio.cs`
-- [**C# WPF XY plot**](../OxyPlotPlugin):&nbsp; SimHub already uses OxyPlot
+- [**C# WPF XY plot**](https://github.com/blekenbleu/OxyPlotPlugin):&nbsp; SimHub already uses OxyPlot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
 		- [Bart De Meyer - Blog](https://blog.bartdemeyer.be/2013/03/creating-graphs-in-wpf-using-oxyplot/)
