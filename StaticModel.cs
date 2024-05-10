@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
-namespace blekenbleu
+namespace blekenbleu.jsonio
 {
     /// <summary>
     /// define a class with Model-view-viewmodel pattern for dynamic UI

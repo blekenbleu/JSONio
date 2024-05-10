@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System.Windows.Media;
 using System.Windows;
 
-namespace blekenbleu
+namespace blekenbleu.jsonio
 {
 	[PluginDescription("NCalc configured properties to/from JSON")]
 	[PluginAuthor("blekenbleu")]
@@ -323,33 +323,33 @@ namespace blekenbleu
 			string pts, ds = pluginManager.GetPropertyValue(pts = Ini + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Ini + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Ini + "steps")?.ToString();
-			string ptts, dss = pluginManager.GetPropertyValue(ptts = Ini + "settings")?.ToString();
-			string vtts, vss = pluginManager.GetPropertyValue(vtts = Ini + "setvals")?.ToString();
-			string stts, sss = pluginManager.GetPropertyValue(stts = Ini + "setsteps")?.ToString();
 			if ((!(null == ds && Info($"Init(): '{pts}' not found")))
 			 && (!(null == vs && Info($"Init(): '{vts}' not found")))
 			 && (!(null == ss && Info($"Init(): '{sts}' not found")))
-			 && (!(null == dss && Info($"Init(): '{ptts}' not found")))
+				)
+			{
+				// JSONio.ini defines per-car Properties
+				Iprops = new List<string>(ds.Split(','));
+				pCount = Iprops.Count;						// these are per-car
+				List<string> values = new List<string>(vs.Split(','));
+				List<string> steps = new List<string>(ss.Split(','));
+				if (pCount != values.Count || Iprops.Count != steps.Count)
+					Info(Msg = $"Init(): {Iprops.Count} properties;  {values.Count} values;  {steps.Count} steps");
+				populate(Iprops, values, steps);
+			}
+
+			// JSONio.ini also optionally defines settings (NOT per-car)
+			string ptts, dss = pluginManager.GetPropertyValue(ptts = Ini + "settings")?.ToString();
+			string vtts, vss = pluginManager.GetPropertyValue(vtts = Ini + "setvals")?.ToString();
+			string stts, sss = pluginManager.GetPropertyValue(stts = Ini + "setsteps")?.ToString();
+			if ((!(null == dss && Info($"Init(): '{ptts}' not found")))
 			 && (!(null == vss && Info($"Init(): '{vtts}' not found")))
 			 && (!(null == sss && Info($"Init(): '{stts}' not found")))
 				)
 			{
-				List<Property> init = new List<Property>() {};
-				List<string> values, steps;
-
-				// JSONio.ini defines per-car Properties
-				Iprops = new List<string>(ds.Split(','));
-				pCount = Iprops.Count;						// these are per-car
-				values = new List<string>(vs.Split(','));
-				steps = new List<string>(ss.Split(','));
-				if (pCount != values.Count || Iprops.Count != steps.Count)
-					Info(Msg = $"Init(): {Iprops.Count} properties;  {values.Count} values;  {steps.Count} steps");
-				populate(Iprops, values, steps);
-
-				// JSONio.ini defines settings
 				List<string> Sprops = new List<string>(dss.Split(','));
-				values = new List<string>(vss.Split(','));
-				steps = new List<string>(sss.Split(','));
+				List<string> values = new List<string>(vss.Split(','));
+				List<string> steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Iprops.Count != steps.Count)
 					Info(Msg = $"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
 				populate(Sprops, values, steps);

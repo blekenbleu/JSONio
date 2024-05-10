@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace blekenbleu
+namespace blekenbleu.jsonio
 {
     /// <summary>
     /// Settings class, make sure it can be correctly serialized using JSON.net

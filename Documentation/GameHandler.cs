@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace blekenbleu
+namespace blekenbleu.jsonio
 {
 	public class Property		// must be public for DataPluginSettings
 	{

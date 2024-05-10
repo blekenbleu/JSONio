@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace blekenbleu
+namespace blekenbleu.jsonio
 {
     /// <summary>
     /// Interaction code for Control.xaml

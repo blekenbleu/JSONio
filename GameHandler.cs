@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
-namespace blekenbleu
+namespace blekenbleu.jsonio
 {
 	// programatically define DataGrid columns
 	// https://wpf-tutorial.com/datagrid-control/custom-columns/
