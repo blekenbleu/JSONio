@@ -64,7 +64,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- using `JSONio.ini`, convert from/to `DataPluginSettings Settings` in `Init()`/`End()`
 		- restore/save simprop.Current values from/to `GameHandler games.Car` from/to `JSONio.json`
 - new *slim* .json format storing only one instance of property names, instead of redundantly per-car
-- [OxyPlot integration](../OxyPlotPlugin)
+- [OxyPlot integration](https://github.com/blekenbleu/OxyPlotPlugin)
 
 ## New to me
 - C# `List<>` patterns, particularly with non-trivial objects.
