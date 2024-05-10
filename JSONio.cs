@@ -16,6 +16,7 @@ namespace blekenbleu
 		public DataPluginSettings Settings;
 		public string Selected_Property = "unKnown";
 		public string New_Car = "false";
+		public string Msg = "";
 		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		internal static int pCount;								// global Property settings appended after pCount
@@ -107,7 +108,7 @@ namespace blekenbleu
 		{
 			string sjs = JsonConvert.SerializeObject(slim, Formatting.Indented);
 			if (0 == sjs.Length || "{}" == sjs)
-				Info("SlimEnd():  Json Serializer failure");
+				Info(Msg = "SlimEnd():  Json Serializer failure");
 			else File.WriteAllText(slimPath, sjs);
 		}
 
@@ -123,14 +124,14 @@ namespace blekenbleu
 				Settings.properties = Pcopy(simprops);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
-			if (slim.Save_Car(CurrentCar, simprops, Gname) || changed)
+			if (changed = slim.Save_Car(CurrentCar, simprops, Gname) || changed)
 				SlimEnd(slim.data);
-			else if (games.Save_Car(CurrentCar, simprops, Gname) || changed)
+			else if (null != path && changed && games.Save_Car(CurrentCar, simprops, Gname))
 			{
 				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
 
 				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
-					Info("End():  Json Serializer failure for games.data");
+					Info(Msg = "End():  Json Serializer failure for games.data");
 				else File.WriteAllText(path, js);
 			}
 		}
@@ -342,7 +343,7 @@ namespace blekenbleu
 				values = new List<string>(vs.Split(','));
 				steps = new List<string>(ss.Split(','));
 				if (pCount != values.Count || Iprops.Count != steps.Count)
-					Info($"Init(): {Iprops.Count} properties;  {values.Count} values;  {steps.Count} steps");
+					Info(Msg = $"Init(): {Iprops.Count} properties;  {values.Count} values;  {steps.Count} steps");
 				populate(Iprops, values, steps);
 
 				// JSONio.ini defines settings
@@ -350,67 +351,72 @@ namespace blekenbleu
 				values = new List<string>(vss.Split(','));
 				steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Iprops.Count != steps.Count)
-					Info($"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
+					Info(Msg = $"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
 				populate(Sprops, values, steps);
 			}
 
 			if (0 == simprops.Count)
 			{
-				Info(oops = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini");
+				Info(Msg = oops = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini");
 				return;
 			}
 
+			path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString();
 			// Load existing JSON, first trying new slim format
-			if (!slim.Load(slimPath = pluginManager.GetPropertyValue(Ini + "slim")?.ToString(), simprops)
-			 && File.Exists(path = pluginManager.GetPropertyValue(Ini + "file")?.ToString()))
+			if (!slim.Load(slimPath = pluginManager.GetPropertyValue(Msg = Ini + "slim")?.ToString(), simprops))
 			{
-				Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
-
-				// test for consistency between simprops and foo
-				if (null != foo && null != foo.name && null != foo.Glist)
+				changed = Info(Msg = $"Init(): {Msg} not found");
+				if (File.Exists(path))
 				{
-					int nullcarID = 0;
-					List<Property> d = foo.Glist[0].defaults;
-					int i = -1;
+					Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
 
-					if (pCount == d.Count)
-						for (i = 0; i < pCount; i++)
-							if (d[i].Name != simprops[i].Name)
-								break;
-
-					if (i != pCount) // repopulate Car properties according to NCalcScripts/JSONio.ini
+					// test for consistency between simprops and foo
+					if (null != foo && null != foo.name && null != foo.Glist)
 					{
-						Info($"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
-						for (i = 0; i < foo.Glist.Count; i++)
+						int nullcarID = 0;
+						List<Property> d = foo.Glist[0].defaults;
+						int i = -1;
+
+						if (pCount == d.Count)
+							for (i = 0; i < pCount; i++)
+								if (d[i].Name != simprops[i].Name)
+									break;
+
+						if (i != pCount) // repopulate Car properties according to NCalcScripts/JSONio.ini
 						{
-							foo.Glist[i].defaults = Refactor(Iprops, foo.Glist[i].defaults);
-							for (int c = 0; c < foo.Glist[i].Clist.Count; c++)
-								if (null == foo.Glist[i].Clist[c].carID)
-								{
-									nullcarID++;
-									foo.Glist[i].Clist.RemoveAt(c--);
-								}
-								else foo.Glist[i].Clist[c].properties = Refactor(Iprops, foo.Glist[i].Clist[c].properties);
+							Info(Msg = $"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
+							for (i = 0; i < foo.Glist.Count; i++)
+							{
+								foo.Glist[i].defaults = Refactor(Iprops, foo.Glist[i].defaults);
+								for (int c = 0; c < foo.Glist[i].Clist.Count; c++)
+									if (null == foo.Glist[i].Clist[c].carID)
+									{
+										nullcarID++;
+										foo.Glist[i].Clist.RemoveAt(c--);
+									}
+									else foo.Glist[i].Clist[c].properties = Refactor(Iprops, foo.Glist[i].Clist[c].properties);
+							}
+						} else {	// eliminate null carIDs
+							for (i = 0; i < foo.Glist.Count; i++)
+								for (int c = 0; c < foo.Glist[i].Clist.Count;)
+									if (null == foo.Glist[i].Clist[c].carID)
+									{
+										nullcarID++;
+										foo.Glist[i].Clist.RemoveAt(c);
+									}
+									else c++;
 						}
-					} else {	// eliminate null carIDs
-						for (i = 0; i < foo.Glist.Count; i++)
-							for (int c = 0; c < foo.Glist[i].Clist.Count;)
-								if (null == foo.Glist[i].Clist[c].carID)
-								{
-									nullcarID++;
-									foo.Glist[i].Clist.RemoveAt(c);
-								}
-								else c++;
+						if (0 < nullcarID)
+							Info(Msg = $"Init(): {nullcarID} null carIDs");
+						games.data = foo;
+						if (null == slim.data || 0 == slim.data.gList.Count)
+							SlimEnd(slim.data = slim.Migrate(games));
 					}
-					if (0 < nullcarID)
-						Info($"Init(): {nullcarID} null carIDs");
-					games.data = foo;
-					if (null == slim.data || 0 == slim.data.gList.Count)
-						SlimEnd(slim.data = slim.Migrate(games));
+					else changed = Info(Msg = $"Init():  empty or invalid {Msg}");
 				}
-				else changed = Info($"Init():  empty or invalid {path}");
+				else changed = Info(Msg = $"Init(): {Msg} file not found");
 			}
-			else changed = Info($"Init(): {path} not found");
+			else Msg = "Init():  " + Msg + " loaded";
 
 			// Declare available properties
 			// these get evaluated "on demand" (when shown or used in formulae)
@@ -425,6 +431,7 @@ namespace blekenbleu
 			this.AttachDelegate(My+"New Car", () => New_Car);
 			this.AttachDelegate(My+"Car", () => CurrentCar.ID);
 			this.AttachDelegate(My+"Game", () => Gname);
+			this.AttachDelegate(My+"Msg", () => Msg);
 
 /*---------	this.AddAction("ChangeProperties",...)
  ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
@@ -439,18 +446,18 @@ namespace blekenbleu
 					Control.Model.StatusText = oops;
 					return;
 				}
-				string s = "New Car: ";
+				Msg = "Current Car: ";
 				string cname = pluginManager.GetPropertyValue("CarID")?.ToString();
 				string gnew = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
 				{
-					s += cname;
+					Msg += cname;
 					if (0 < Gname.Length								// do not save first (null) CurrentCar.ID in game
 					 && slim.Save_Car(CurrentCar, simprops, Gname))
 					{
 						changed = true;
 						slim.Save_Car(CurrentCar, simprops, Gname);
-						s += $";  {CurrentCar.ID} saved";
+						Msg += $";  {CurrentCar.ID} saved";
 					}
 
 					for (int i = 0; i < pCount; i++)					// copy Current to previous
@@ -467,17 +474,17 @@ namespace blekenbleu
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}
 				else if (null == cname)		// CarID verification - should make a popup
-					s += "null CarID, ";
+					Msg += "null CarID, ";
 				else if (0 == cname.Length)
-					s += "empty CarID, ";
+					Msg += "empty CarID, ";
 
 				if (null == gnew)
-					s += "null CurrentGame Name, ";
+					Msg += "null CurrentGame Name, ";
 				else if (0 == gnew.Length)
-					s += "empty CurrentGame Name, ";
+					Msg += "empty CurrentGame Name, ";
 				else Gname = gnew;
-				if (10 < s.Length)
-					Info(s);
+				if (10 < Msg.Length)
+					Info(Msg);
 			});
 
 			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in")	);
