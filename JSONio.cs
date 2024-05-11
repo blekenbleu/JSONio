@@ -5,6 +5,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Windows.Media;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace blekenbleu.jsonio
 {
@@ -16,17 +17,16 @@ namespace blekenbleu.jsonio
 		public DataPluginSettings Settings;
 		public string Selected_Property = "unKnown";
 		public string New_Car = "false";
-		public string Msg = "";
+		internal static string Msg = "";
 		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		internal static int pCount;								// global Property settings appended after pCount
-		private string oops = "Oops!", path, slimPath;			// file locations
+		private string path, slimPath;			// file locations
 		private string Gname = "";
 		private bool changed;
 		private GameHandler games;
 		private Slim slim;
 		private List<int> Steps;
-		private List<string> Iprops;
 		private List<Property> SetProps;
 		private CarID CurrentCar = new CarID {};
 
@@ -78,6 +78,16 @@ namespace blekenbleu.jsonio
 			return true;
 		}
 
+		internal static bool OOps(string str)
+		{
+			if (0 < str.Length)
+				Msg = str;
+			System.Windows.Forms.MessageBox.Show(Msg, "JSONio", MessageBoxButtons.OK);
+			if (0 < str.Length)
+				return Info(Msg);
+			else return true;
+		}
+
 		/// <summary>
 		/// Instance of the plugin manager
 		/// </summary>
@@ -108,7 +118,7 @@ namespace blekenbleu.jsonio
 		{
 			string sjs = JsonConvert.SerializeObject(slim, Formatting.Indented);
 			if (0 == sjs.Length || "{}" == sjs)
-				Info(Msg = "SlimEnd():  Json Serializer failure");
+				OOps("SlimEnd():  Json Serializer failure");
 			else File.WriteAllText(slimPath, sjs);
 		}
 
@@ -131,7 +141,7 @@ namespace blekenbleu.jsonio
 				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
 
 				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
-					Info(Msg = "End():  Json Serializer failure for games.data");
+					OOps("End():  Json Serializer failure for games.data");
 				else File.WriteAllText(path, js);
 			}
 		}
@@ -287,6 +297,8 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
+			List<string> Iprops = new List<string> { "" };
+
 			changed = false;	// write JSON file during End() only if true
 
 			slim = new Slim()
@@ -311,6 +323,9 @@ namespace blekenbleu.jsonio
 			// Load Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
+			// Declare an event
+            this.AddEvent("JSONioOOps");
+
 			// restore previously saved car properties
 			SetProps = new List<Property> {};				// deep copy
 			foreach(Property p in Settings.properties)
@@ -323,9 +338,9 @@ namespace blekenbleu.jsonio
 			string pts, ds = pluginManager.GetPropertyValue(pts = Ini + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Ini + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Ini + "steps")?.ToString();
-			if ((!(null == ds && Info($"Init(): '{pts}' not found")))
-			 && (!(null == vs && Info($"Init(): '{vts}' not found")))
-			 && (!(null == ss && Info($"Init(): '{sts}' not found")))
+			if ((!(null == ds && OOps($"Init(): '{pts}' not found")))
+			 && (!(null == vs && OOps($"Init(): '{vts}' not found")))
+			 && (!(null == ss && OOps($"Init(): '{sts}' not found")))
 				)
 			{
 				// JSONio.ini defines per-car Properties
@@ -333,8 +348,8 @@ namespace blekenbleu.jsonio
 				pCount = Iprops.Count;						// these are per-car
 				List<string> values = new List<string>(vs.Split(','));
 				List<string> steps = new List<string>(ss.Split(','));
-				if (pCount != values.Count || Iprops.Count != steps.Count)
-					Info(Msg = $"Init(): {Iprops.Count} properties;  {values.Count} values;  {steps.Count} steps");
+				if (pCount != values.Count || pCount != steps.Count)
+					OOps($"Init(): {pCount} per-car properties;  {values.Count} values;  {steps.Count} steps");
 				populate(Iprops, values, steps);
 			}
 
@@ -342,22 +357,22 @@ namespace blekenbleu.jsonio
 			string ptts, dss = pluginManager.GetPropertyValue(ptts = Ini + "settings")?.ToString();
 			string vtts, vss = pluginManager.GetPropertyValue(vtts = Ini + "setvals")?.ToString();
 			string stts, sss = pluginManager.GetPropertyValue(stts = Ini + "setsteps")?.ToString();
-			if ((!(null == dss && Info($"Init(): '{ptts}' not found")))
-			 && (!(null == vss && Info($"Init(): '{vtts}' not found")))
-			 && (!(null == sss && Info($"Init(): '{stts}' not found")))
+			if ((!(null == dss && OOps($"Init(): '{ptts}' not found")))
+			 && (!(null == vss && OOps($"Init(): '{vtts}' not found")))
+			 && (!(null == sss && OOps($"Init(): '{stts}' not found")))
 				)
 			{
 				List<string> Sprops = new List<string>(dss.Split(','));
 				List<string> values = new List<string>(vss.Split(','));
 				List<string> steps = new List<string>(sss.Split(','));
-				if (Sprops.Count != values.Count || Iprops.Count != steps.Count)
-					Info(Msg = $"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
+				if (Sprops.Count != values.Count || Sprops.Count != steps.Count)
+					OOps($"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
 				populate(Sprops, values, steps);
 			}
 
 			if (0 == simprops.Count)
 			{
-				Info(Msg = oops = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini");
+				OOps(Control.Model.StatusText = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini");
 				return;
 			}
 
@@ -365,7 +380,7 @@ namespace blekenbleu.jsonio
 			// Load existing JSON, first trying new slim format
 			if (!slim.Load(slimPath = pluginManager.GetPropertyValue(Msg = Ini + "slim")?.ToString(), simprops))
 			{
-				changed = Info(Msg = $"Init(): {Msg} not found");
+				changed = OOps($"Init(): {Msg} not found");
 				if (File.Exists(path))
 				{
 					Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
@@ -384,7 +399,7 @@ namespace blekenbleu.jsonio
 
 						if (i != pCount) // repopulate Car properties according to NCalcScripts/JSONio.ini
 						{
-							Info(Msg = $"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
+							OOps($"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
 							for (i = 0; i < foo.Glist.Count; i++)
 							{
 								foo.Glist[i].defaults = Refactor(Iprops, foo.Glist[i].defaults);
@@ -407,14 +422,14 @@ namespace blekenbleu.jsonio
 									else c++;
 						}
 						if (0 < nullcarID)
-							Info(Msg = $"Init(): {nullcarID} null carIDs");
+							OOps($"Init(): {nullcarID} null carIDs");
 						games.data = foo;
 						if (null == slim.data || 0 == slim.data.gList.Count)
 							SlimEnd(slim.data = slim.Migrate(games));
 					}
-					else changed = Info(Msg = $"Init():  empty or invalid {Msg}");
+					else changed = OOps($"Init():  empty or invalid {Msg}");
 				}
-				else changed = Info(Msg = $"Init(): {Msg} file not found");
+				else changed = OOps($"Init(): {Msg} file not found");
 			}
 			else Msg = "Init():  " + Msg + " loaded";
 
@@ -442,22 +457,22 @@ namespace blekenbleu.jsonio
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
 				if (0 == simprops.Count)
-				{
-					Control.Model.StatusText = oops;
 					return;
-				}
-				Msg = "Current Car: ";
+
+				int ml = 0;
 				string cname = pluginManager.GetPropertyValue("CarID")?.ToString();
 				string gnew = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
 				{
-					Msg += cname;
+					Msg = "Current Car: " + cname;
+					ml = Msg.Length;
 					if (0 < Gname.Length								// do not save first (null) CurrentCar.ID in game
 					 && slim.Save_Car(CurrentCar, simprops, Gname))
 					{
 						changed = true;
 						slim.Save_Car(CurrentCar, simprops, Gname);
 						Msg += $";  {CurrentCar.ID} saved";
+						ml = Msg.Length;
 					}
 
 					for (int i = 0; i < pCount; i++)					// copy Current to previous
@@ -474,17 +489,18 @@ namespace blekenbleu.jsonio
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}
 				else if (null == cname)		// CarID verification - should make a popup
-					Msg += "null CarID, ";
+					Msg = "null CarID, ";
 				else if (0 == cname.Length)
-					Msg += "empty CarID, ";
+					Msg = "empty CarID, ";
 
 				if (null == gnew)
 					Msg += "null CurrentGame Name, ";
 				else if (0 == gnew.Length)
 					Msg += "empty CurrentGame Name, ";
 				else Gname = gnew;
-				if (10 < Msg.Length)
-					Info(Msg);
+				Info(Msg);
+				if (ml < Msg.Length)
+					this.TriggerEvent("JSONioOOps");
 			});
 
 			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in")	);
@@ -493,6 +509,7 @@ namespace blekenbleu.jsonio
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => New_defaults());
+			this.AddAction("Oops",						(a, b) => OOps(""));
 		}	// Init()
 	}		// class JSONio
 }

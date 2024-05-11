@@ -101,7 +101,7 @@ namespace blekenbleu.jsonio
 
 			data = JsonConvert.DeserializeObject<GamesList>(File.ReadAllText(path));
 			if (null == data || null == data.Plugin || null == data.pList || null == data.gList)
-				return !JSONio.Info($"Slim.Load({path}):  bad data");
+				return !JSONio.OOps($"Slim.Load({path}):  bad data");
 
 			int nullcarID = 0;
 			int pCount = JSONio.pCount;
@@ -114,7 +114,7 @@ namespace blekenbleu.jsonio
 
 			if (i != pCount) // repopulate car properties according to NCalcScripts/JSONio.ini
 			{
-				JSONio.Info($"Slim.Load({path}):  pList mismatched NCalcScripts/JSONio.ini");
+				JSONio.OOps($"Slim.Load({path}):  pList mismatched NCalcScripts/JSONio.ini");
 				for (i = 0; i < data.gList.Count; i++)
 				{
 					for (int c = 0; c < data.gList[i].cList.Count; c++)
@@ -130,7 +130,7 @@ namespace blekenbleu.jsonio
 					data.pList.Add(string.Copy(simprops[i].Name));
 			}
 			if (0 < nullcarID)
-				JSONio.Info($"Slim.Load({path}): {nullcarID} null carIDs");
+				JSONio.OOps($"Slim.Load({path}): {nullcarID} null carIDs");
 
 			return (data.gList.Count > 0 && data.gList[0].cList.Count > 1);
 		}
