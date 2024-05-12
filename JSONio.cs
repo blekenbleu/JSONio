@@ -78,14 +78,17 @@ namespace blekenbleu.jsonio
 			return true;
 		}
 
-		internal static bool OOps(string str)
+		internal void OOpsMB()
+		{
+			System.Windows.Forms.MessageBox.Show(Msg, "JSONio", MessageBoxButtons.OK);
+		}
+
+		internal bool OOps(string str)
 		{
 			if (0 < str.Length)
 				Msg = str;
-			System.Windows.Forms.MessageBox.Show(Msg, "JSONio", MessageBoxButtons.OK);
-			if (0 < str.Length)
-				return Info(Msg);
-			else return true;
+			OOpsMB();
+			return (0 == str.Length) || Info(Msg);
 		}
 
 		/// <summary>
@@ -219,7 +222,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		private void _new_defaults(List<GameList> Glist)
+		private void New_defaults(List<GameList> Glist)
 		{
 			if (0 == Gname.Length)
 				return;
@@ -236,7 +239,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		private void _new_defaults(List<Game> Glist)
+		private void New_defaults(List<Game> Glist)
 		{
 			if (0 == Gname.Length)
 				return;
@@ -253,7 +256,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		public void New_defaults() => _new_defaults(slim.data.gList);
+		public void New_defaults() => New_defaults(slim.data.gList);
 
 		// when JSONio.ini and JSONio.json disagree
 		private List<Property> Refactor(List<string> iprops, List<Property> fold)
@@ -301,7 +304,7 @@ namespace blekenbleu.jsonio
 
 			changed = false;	// write JSON file during End() only if true
 
-			slim = new Slim()
+			slim = new Slim(this)
 			{
 				data = new GamesList()
 				{
@@ -323,8 +326,9 @@ namespace blekenbleu.jsonio
 			// Load Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
-			// Declare an event
+			// Declare an event and corresponding action
             this.AddEvent("JSONioOOps");
+			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
 
 			// restore previously saved car properties
 			SetProps = new List<Property> {};				// deep copy
@@ -465,15 +469,14 @@ namespace blekenbleu.jsonio
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
 				{
 					Msg = "Current Car: " + cname;
-					ml = Msg.Length;
 					if (0 < Gname.Length								// do not save first (null) CurrentCar.ID in game
 					 && slim.Save_Car(CurrentCar, simprops, Gname))
 					{
 						changed = true;
 						slim.Save_Car(CurrentCar, simprops, Gname);
 						Msg += $";  {CurrentCar.ID} saved";
-						ml = Msg.Length;
 					}
+					ml = Msg.Length;
 
 					for (int i = 0; i < pCount; i++)					// copy Current to previous
 						simprops[i].Previous = simprops[i].Current;
@@ -489,18 +492,20 @@ namespace blekenbleu.jsonio
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}
 				else if (null == cname)		// CarID verification - should make a popup
-					Msg = "null CarID, ";
+					Msg = "null CarID";
 				else if (0 == cname.Length)
-					Msg = "empty CarID, ";
+					Msg = "empty CarID";
 
 				if (null == gnew)
-					Msg += "null CurrentGame Name, ";
+					Msg += ", null CurrentGame Name, ";
 				else if (0 == gnew.Length)
-					Msg += "empty CurrentGame Name, ";
+					Msg += ", empty CurrentGame Name, ";
 				else Gname = gnew;
-				Info(Msg);
-				if (ml < Msg.Length)
+
+				if (ml < Msg.Length) {
+					Info(Msg);
 					this.TriggerEvent("JSONioOOps");
+				}
 			});
 
 			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in")	);
@@ -509,7 +514,6 @@ namespace blekenbleu.jsonio
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => New_defaults());
-			this.AddAction("Oops",						(a, b) => OOps(""));
 		}	// Init()
 	}		// class JSONio
 }

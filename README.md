@@ -163,3 +163,10 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- [Bart De Meyer - Blog](https://blog.bartdemeyer.be/2013/03/creating-graphs-in-wpf-using-oxyplot/)
 		- [CodeProject](https://www.codeproject.com/Articles/1164395/Wpf-application-with-real-time-data-in-OxyPlot-cha)
 		- [stackoverflow example](https://stackoverflow.com/questions/44697701/create-an-oxyplot-in-wpf)
+
+- **MessageBox** &nbsp; *12 May 2024*
+	- SimHub Event triggers do not work from plugin `Init()`
+	- `MessageBox()` during `Init()` (e.g. for `JASONio.ini` configuration errors)  
+		provokes extensive SimHub log error message.
+	- for game runtime, added "JSONioOOps" `TriggerEvent` and  
+		`this.AddAction("OopsMessageBox", (a, b) => OOpsMB());` 
