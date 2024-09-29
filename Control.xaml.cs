@@ -70,12 +70,12 @@ namespace blekenbleu.jsonio
 
 		private void Inc_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.ment(1, "in");
+			Plugin.Ment(1);
 		}
 
 		private void Dec_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.ment(-1, "de");
+			Plugin.Ment(-1);
 		}
 
 		private void Swap_Click(object sender, RoutedEventArgs e)

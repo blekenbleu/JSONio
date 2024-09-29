@@ -29,6 +29,7 @@ namespace blekenbleu.jsonio
 		private List<int> Steps;
 		private List<Property> SetProps;
 		private CarID CurrentCar = new CarID {};
+		public ShakeIt S = new ShakeIt {};
 
 		/// <summary>
 		/// DisplayGrid contents
@@ -44,7 +45,7 @@ namespace blekenbleu.jsonio
 			return Plist;
 		}
 
-		// copy per-car properties from game to simprops
+/*		// copy per-car properties from game to simprops
 		void Scopy(int cndx, Game game)	// copy matching values from Game
 		{
 			if (0 > cndx)
@@ -56,7 +57,7 @@ namespace blekenbleu.jsonio
 				simprops[i].Default = game.defaults[i].Value;
 			}
 		}
-
+ */
 		void Scopy(int cndx, GameList game)	// copy matching values from GameList
 		{
 			if (0 > cndx)
@@ -165,7 +166,7 @@ namespace blekenbleu.jsonio
 		/// </summary>
 		/// <param name="sign"></param> should be 1 or -1
 		/// <param name="prefix"></param> should be "in" or "de"
-		public void ment(int sign, string prefix)
+		public void Ment(int sign)
 		{
 			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
 				return;
@@ -238,7 +239,7 @@ namespace blekenbleu.jsonio
 					simprops[p].Default = simprops[p].Current;
 			}
 		}
-
+/*
 		private void New_defaults(List<Game> Glist)
 		{
 			if (0 == Gname.Length)
@@ -255,7 +256,7 @@ namespace blekenbleu.jsonio
 					simprops[p].Default = simprops[p].Current;
 			}
 		}
-
+ */
 		public void New_defaults() => New_defaults(slim.data.gList);
 
 		// when JSONio.ini and JSONio.json disagree
@@ -273,7 +274,7 @@ namespace blekenbleu.jsonio
 		}
 
 		// add properties and settings to simprops
-		private void populate(List<string>props, List<string> vals, List<string> stps)
+		private void Populate(List<string>props, List<string> vals, List<string> stps)
 		{
 			for (int c = 0; c < props.Count; c++)
 			{
@@ -354,7 +355,7 @@ namespace blekenbleu.jsonio
 				List<string> steps = new List<string>(ss.Split(','));
 				if (pCount != values.Count || pCount != steps.Count)
 					OOps($"Init(): {pCount} per-car properties;  {values.Count} values;  {steps.Count} steps");
-				populate(Iprops, values, steps);
+				Populate(Iprops, values, steps);
 			}
 
 			// JSONio.ini also optionally defines settings (NOT per-car)
@@ -371,7 +372,7 @@ namespace blekenbleu.jsonio
 				List<string> steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Sprops.Count != steps.Count)
 					OOps($"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
-				populate(Sprops, values, steps);
+				Populate(Sprops, values, steps);
 			}
 
 			if (0 == simprops.Count)
@@ -508,12 +509,14 @@ namespace blekenbleu.jsonio
 				}
 			});
 
-			this.AddAction("IncrementSelectedProperty", (a, b) => ment(1, "in")	);
-			this.AddAction("DecrementSelectedProperty", (a, b) => ment(-1, "de"));
+			this.AddAction("IncrementSelectedProperty", (a, b) => Ment(1));
+			this.AddAction("DecrementSelectedProperty", (a, b) => Ment(-1));
 			this.AddAction("NextProperty",				(a, b) => Select(true)	);
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => New_defaults());
+
+			S.Init(this, pluginManager);
 		}	// Init()
 	}		// class JSONio
 }

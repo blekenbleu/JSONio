@@ -94,6 +94,7 @@
     <Compile Include="Control.xaml.cs">
       <DependentUpon>Control.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ShakeIt.cs" />
     <Compile Include="StaticModel.cs" />
   </ItemGroup>
   <ItemGroup>
