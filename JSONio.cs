@@ -28,7 +28,7 @@ namespace blekenbleu.jsonio
 		private Slim slim;
 		private List<int> Steps;
 		private List<Property> SetProps;
-		private CarID CurrentCar = new CarID {};
+		private readonly CarID CurrentCar = new CarID {};
 		public ShakeIt S = new ShakeIt {};
 
 		/// <summary>

@@ -28,7 +28,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		private string _statusText;
+		private string _statusText = "Waiting for Car Change";
 		public string StatusText			// must be public for XAML Binding
         {
             get { return _statusText; }
