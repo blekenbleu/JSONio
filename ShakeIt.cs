@@ -17,21 +17,21 @@ namespace blekenbleu.jsonio
     public class ShakeIt
     {
 		private JSONio J;
-		private PluginManager P;
+		private PluginManager pluginManager;
 		Random random;
 
 		private int EffectStrength, gamma, SlipGain, threshold, Gscale;	// simprop indices
 
 		private double Shaken(string pname)
 		{
-			var o = P.GetPropertyValue("ShakeITBSV3Plugin.Export." + pname);
+			var o = pluginManager.GetPropertyValue("ShakeITBSV3Plugin.Export." + pname);
 		
             return (null == o) ? 0 : Convert.ToDouble(o);
 		}
 
 		private double Prop(string pname)
 		{
-			var o = P.GetPropertyValue("DataCorePlugin.GameData." + pname);
+			var o = pluginManager.GetPropertyValue("DataCorePlugin.GameData." + pname);
 
             return (null == o) ? 0 : Convert.ToDouble(o);
 		}
@@ -44,7 +44,7 @@ namespace blekenbleu.jsonio
 		internal void Init(JSONio j, PluginManager p)
 		{
 			J = j;
-			P = p;
+			pluginManager = p;
 			random = new Random();	// random.NextDouble() returns a double between 0 and 1
 
 			gamma = J.simprops.FindIndex(i => i.Name == "gamma");					// ProxyS() applies it to wslip
@@ -72,33 +72,43 @@ namespace blekenbleu.jsonio
 			J.AttachDelegate("Grip.RearRight", () => Grip(Prop("AccelerationHeave"),
 												Prop("AccelerationSway"),
 												-Prop("AccelerationSurge")));
-			J.AttachDelegate("SHslipGrip.FrontLeft", () =>	SHslipGrip(ProxyS("wSlip.FrontLeft"),
+
+			J.AttachDelegate("GameName", () => pluginManager.GameName);
+
+			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
+			{
+				J.AttachDelegate("ACslipGrip.FrontLeft", () =>	ACslipGrip(ProxyS("wSlip.FrontLeft"),	Raw("Physics.WheelLoad01")));
+				J.AttachDelegate("ACslipGrip.FrontRight", () =>	ACslipGrip(ProxyS("wSlip.FrontRight"), 	Raw("Physics.WheelLoad02")));
+				J.AttachDelegate("ACslipGrip.RearLeft", () =>	ACslipGrip(ProxyS("wSlip.RearLeft"), 	Raw("Physics.WheelLoad03")));
+				J.AttachDelegate("ACslipGrip.RearRight", () =>	ACslipGrip(ProxyS("wSlip.RearRight"),	Raw("Physics.WheelLoad04")));
+			} else {
+				J.AttachDelegate("SHslipGrip.FrontLeft", () =>	SHslipGrip(ProxyS("wSlip.FrontLeft"),
 																		Grip(Prop("AccelerationHeave"),
 																			Prop("AccelerationSway"),
 																			Prop("AccelerationSurge"))));
-			J.AttachDelegate("SHslipGrip.FrontRight", () =>	SHslipGrip(ProxyS("wSlip.FrontRight"),
+				J.AttachDelegate("SHslipGrip.FrontRight", () =>	SHslipGrip(ProxyS("wSlip.FrontRight"),
 																		Grip(Prop("AccelerationHeave"),
 																			-Prop("AccelerationSway"),
 																			Prop("AccelerationSurge"))));
-			J.AttachDelegate("SHslipGrip.RearLeft", () =>	SHslipGrip(ProxyS("wSlip.RearLeft"),
+				J.AttachDelegate("SHslipGrip.RearLeft", () =>	SHslipGrip(ProxyS("wSlip.RearLeft"),
 																		Grip(Prop("AccelerationHeave"),
 																			Prop("AccelerationSway"),
 																			-Prop("AccelerationSurge"))));
-			J.AttachDelegate("SHslipGrip.RearRight", () =>	SHslipGrip(ProxyS("wSlip.RearRight"),
+				J.AttachDelegate("SHslipGrip.RearRight", () =>	SHslipGrip(ProxyS("wSlip.RearRight"),
 																		Grip(Prop("AccelerationHeave"),
 																 			-Prop("AccelerationSway"),
 																 			-Prop("AccelerationSurge"))));
-/*
-			J.AttachDelegate("ACslipGrip.FrontLeft", () =>	ACslipGrip(ProxyS("wSlip.FrontLeft"),	Raw("Physics.WheelLoad01")));
-			J.AttachDelegate("ACslipGrip.FrontRight", () =>	ACslipGrip(ProxyS("wSlip.FrontRight"), 	Raw("Physics.WheelLoad02")));
-			J.AttachDelegate("ACslipGrip.RearLeft", () =>	ACslipGrip(ProxyS("wSlip.RearLeft"), 	Raw("Physics.WheelLoad03")));
-			J.AttachDelegate("ACslipGrip.RearRight", () =>	ACslipGrip(ProxyS("wSlip.RearRight"),	Raw("Physics.WheelLoad04")));
- */
+			}	// pluginManager.GameName
 		}
 
 		private double RSS(double x, double y)
 		{
 			return Math.Pow(x*x + y*y, 0.5);
+		}
+
+		private double RSS1(double x, double y)
+		{
+			return Math.Max(0.11, Math.Pow(x*x + y*y, 0.5));
 		}
 
 		public double Haccel(double surge, double sway)
@@ -126,12 +136,15 @@ namespace blekenbleu.jsonio
 
 		private double Raw(string physics)
 		{
-			return (double)P.GetPropertyValue("GameRawData." + physics);
+			var o = pluginManager.GetPropertyValue("GameRawData." + physics);
+
+			return (null == o) ? 0 : Convert.ToDouble(o);
 		}
 
 		public double ACslipGrip(double proxyS, double Whload)
 		{
-			return 0.0005 * Current(EffectStrength) * proxyS * Whload / RSS(Raw("Physics.AccG01"), Raw("Physics.AccG02"));
+			double sg = 0.000005 * Current(EffectStrength) * proxyS * Whload / RSS1(Raw("Physics.AccG01"), Raw("Physics.AccG02"));
+			return 100 * Math.Pow(sg, 0.5);
 		}
 
 		private double SlipGate(string sg)

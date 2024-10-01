@@ -171,8 +171,10 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 	- for game runtime, added "JSONioOOps" `TriggerEvent` and  
 		`this.AddAction("OopsMessageBox", (a, b) => OOpsMB());` 
 
-## SlipGrip - *28 Sep 2024*
+## SlipGrip - *28 Sep - 2 Oct 2024*
 - Port ShakeIt CUSTOM EFFECTS JavaScript to C#
 	- better performance, easier to maintain
 	- Version 2.0: add version TextBlock
 	- Version 2.1: added ShakeIt.cs with first JavaScript approximations
+	- Version 2.2: JSONio.ini comment strings; ShakeIt.cs random, Grip, Raw, FF, LoadedSlipGrip
+	- Version 2.3: GameName-dependent slipGrip; debug ACslipGrip()
