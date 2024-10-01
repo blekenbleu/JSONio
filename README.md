@@ -178,3 +178,5 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 	- Version 2.1: added ShakeIt.cs with first JavaScript approximations
 	- Version 2.2: JSONio.ini comment strings; ShakeIt.cs random, Grip, Raw, FF, LoadedSlipGrip
 	- Version 2.3: GameName-dependent slipGrip; debug ACslipGrip()
+    - Version 2.4: Mostly coded; SlipGrip output amplitudes nearly match, but FF do not;  
+		suspect high/low indexing...  Temporarily forced `random[0-3]` constant for debugging.

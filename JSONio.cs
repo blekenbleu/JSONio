@@ -21,6 +21,8 @@ namespace blekenbleu.jsonio
 		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		internal static int pCount;								// global Property settings appended after pCount
+		internal int[] Low, High;
+		internal string[] Fmin, Fmax;
 		private string path, slimPath;			// file locations
 		private string Gname = "";
 		private bool changed;
@@ -30,6 +32,7 @@ namespace blekenbleu.jsonio
 		private List<Property> SetProps;
 		private readonly CarID CurrentCar = new CarID {};
 		public ShakeIt S = new ShakeIt {};
+		public double random0, random1, random2, random3;
 
 		/// <summary>
 		/// DisplayGrid contents
@@ -116,6 +119,10 @@ namespace blekenbleu.jsonio
 		/// <param name="data">Current game data, including present and previous data frames.</param>
 		public void DataUpdate(PluginManager pluginManager, ref GameData data)
 		{
+			random0 = 0.2; // S.random.NextDouble();
+			random1 = 0.4; // S.random.NextDouble();
+			random2 = 0.6; // S.random.NextDouble();
+			random3 = 0.8; // S.random.NextDouble();
 		}
 
 		private void SlimEnd(GamesList slim)
@@ -302,6 +309,10 @@ namespace blekenbleu.jsonio
 		public void Init(PluginManager pluginManager)
 		{
 			List<string> Iprops = new List<string> { "" };
+			Low = new int[] {0,0,0,0};
+			High = new int[] {0,0,0,0};
+			Fmax = new string[] {"Fmax.FrontLeft", "Fmax.FrontRight", "Fmax.RearLeft", "Fmax.RearRight"};
+			Fmin = new string[] {"Fmin.FrontLeft", "Fmin.FrontRight", "Fmin.RearLeft", "Fmin.RearRight"};
 
 			changed = false;	// write JSON file during End() only if true
 
@@ -381,6 +392,17 @@ namespace blekenbleu.jsonio
 				return;
 			}
 
+			// find Fmin, Fmax settings
+			for (int i = 0; i < Fmin.Length; i++)
+			{
+				int j = simprops.FindIndex(k => k.Name == Fmin[i]);
+				if (0 <= j)
+					Low[i] = j;
+				j = simprops.FindIndex(k => k.Name == Fmax[i]);
+				if (0 <= j)
+                    High[i] = j;
+			}
+
 			path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString();
 			// Load existing JSON, first trying new slim format
 			if (!slim.Load(slimPath = pluginManager.GetPropertyValue(Msg = Ini + "slim")?.ToString(), simprops))
@@ -452,6 +474,10 @@ namespace blekenbleu.jsonio
 			this.AttachDelegate(My+"Car", () => CurrentCar.ID);
 			this.AttachDelegate(My+"Game", () => Gname);
 			this.AttachDelegate(My+"Msg", () => Msg);
+			this.AttachDelegate("random0", () => random0);
+			this.AttachDelegate("random1", () => random1);
+			this.AttachDelegate("random2", () => random2);
+			this.AttachDelegate("random3", () => random3);
 
 /*---------	this.AddAction("ChangeProperties",...)
  ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
