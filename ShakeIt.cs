@@ -178,7 +178,7 @@ namespace blekenbleu.jsonio
 			double low = Current(J.Low[corner]), high = Current(J.High[corner]);
 			double range = 0.01 * (high - low) * 3 / (1 + 3);	// scale based on 3 and range
 			sg = low + range * (100 - sg);
-			return (sg + noise * sg / 3) / 10;
+			return sg + noise * sg / 3;
 		}
     }
 }
