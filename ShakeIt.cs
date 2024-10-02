@@ -62,11 +62,11 @@ namespace blekenbleu.jsonio
 			J.AttachDelegate("Surge", () =>			Prop("AccelerationSurge"));
 			J.AttachDelegate("Sway", () =>			Prop("AccelerationSway"));
 			J.AttachDelegate("Haccel", () => 		Haccel(Prop("AccelerationSurge"), Prop("AccelerationSway")));
+ */
 			J.AttachDelegate("Grip"+corner[0], () => Grip(-1,  1));
 			J.AttachDelegate("Grip"+corner[1], () => Grip( 1,  1));
 			J.AttachDelegate("Grip"+corner[2], () => Grip(-1, -1));
 			J.AttachDelegate("Grip"+corner[3], () => Grip( 1, -1));
- */
 
 			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
 			{
