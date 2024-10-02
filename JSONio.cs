@@ -463,17 +463,17 @@ namespace blekenbleu.jsonio
 			// Declare available properties
 			// these get evaluated "on demand" (when shown or used in formulae)
 			foreach(Values p in simprops)
-				this.AttachDelegate(My+p.Name, () => p.Current);
+				this.AttachDelegate(p.Name, () => p.Current);
 
 			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
 				Selected_Property = "unKnown";
 			else SelectedStatus();
 
-			this.AttachDelegate(My+"Selected", () => Selected_Property);
-			this.AttachDelegate(My+"New Car", () => New_Car);
-			this.AttachDelegate(My+"Car", () => CurrentCar.ID);
-			this.AttachDelegate(My+"Game", () => Gname);
-			this.AttachDelegate(My+"Msg", () => Msg);
+			this.AttachDelegate("Selected", () => Selected_Property);
+			this.AttachDelegate("New Car", () => New_Car);
+			this.AttachDelegate("Car", () => CurrentCar.ID);
+			this.AttachDelegate("Game", () => Gname);
+			this.AttachDelegate("Msg", () => Msg);
 			this.AttachDelegate("random0", () => random0);
 			this.AttachDelegate("random1", () => random1);
 			this.AttachDelegate("random2", () => random2);

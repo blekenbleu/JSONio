@@ -109,12 +109,19 @@ namespace blekenbleu.jsonio
 
 		private double RSS1(double x, double y)
 		{
-			return Math.Max(0.11, Math.Pow(x*x + y*y, 0.5));
+			return Math.Max(0.11, RSS(x, y));
 		}
-
+/*
 		public double Haccel(double surge, double sway)
 		{
 			return 1 + 0.99 * RSS(surge, sway);
+		}
+ */
+		private double Raw(string physics)
+		{
+			var o = pluginManager.GetPropertyValue("GameRawData." + physics);
+
+			return (null == o) ? 0 : Convert.ToDouble(o);
 		}
 
 		public double Grip(double sway, double surge)
@@ -123,9 +130,7 @@ namespace blekenbleu.jsonio
 			sway *= Prop("AccelerationSway");
 			surge *= Prop("AccelerationSurge");
 			double load = 25 + heave + sway + surge * 0.67;
-			if (25 > load)
-				load = 25;
-			return 1 + 0.99 * 25 * Haccel(surge, sway) / load;
+			return 1 + 0.99 * 25 * RSS(surge, sway) / (25 > load ? 25 : load);
 		}
 
 		private double ProxyS(int c)
@@ -138,13 +143,6 @@ namespace blekenbleu.jsonio
 			return 100 * Current(EffectStrength) * ProxyS(corner) / grip; 
 		}
 
-		private double Raw(string physics)
-		{
-			var o = pluginManager.GetPropertyValue("GameRawData." + physics);
-
-			return (null == o) ? 0 : Convert.ToDouble(o);
-		}
-
 		public double ACslipGrip(int proxyS)
 		{
 			string Whload = (1 + proxyS).ToString();
@@ -153,29 +151,20 @@ namespace blekenbleu.jsonio
 			return Math.Min(100, 100 * Math.Pow(sg, 0.5));
 		}
 
-		private double SlipGate(double sgL)
+		private double Acc(double s)	// fractional power, preserving sign
 		{
-			return Math.Max(0, Math.Min(1, 0.2 * sgL));
+			return (0 < s) ? Math.Pow(.05 * s, 0.3) : -Math.Pow(-.05 * s, 0.3);
 		}
 
-		private double AbsAcc(double a)
-		{
-			return 100 * Math.Pow(Math.Abs(.05 * a), 0.3);
-		}
-
-		// this corresponds to OutputSlip CUSTOM EFFECT
+		// this corresponds to JavaScript in LoadedSlipGrip CUSTOM EFFECT
 		public double LoadedSlipGrip(double sg, double sway, double surge)
 		{
-			sway *= Prop("AccelerationSway");
-			surge *= Prop("AccelerationSurge");
-			double d = (0 < sway) ? 4 : -4;		// ProxyL
-			double L = 25  + AbsAcc(sway) / d;	// 25 +/-25% left-right distribution
-			d = (0 < surge) ? 100 : -100;
-			L *= (1 + AbsAcc(surge) / d); // fore-aft distribution
-			return Current(Gscale) * (SlipGate(sg) * L - Current(threshold));
+			double L = 25  + 25 * sway * Acc(Prop("AccelerationSway"));	// 25 +/-25% left-right distribution
+			L *= (1 + surge * Acc(Prop("AccelerationSurge")));			// fore-aft distribution
+			return Current(Gscale) * (Math.Max(0, Math.Min(1, 0.2 * sg)) * L - Current(threshold));
 		}
 
-		// forced frequency
+		// forced frequency tire squeal to be amplitude-modulated by LoadedSlipGrip()
 		double FF(double sg, int corner, double noise)	// which: ACslipGrip() or SHslipGrip()
 		{
 			double low = Current(J.Low[corner]), high = Current(J.High[corner]);

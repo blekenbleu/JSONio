@@ -70,6 +70,6 @@
             </DataGrid.Columns>
         </DataGrid>
         <TextBlock x:Name="Version" HorizontalAlignment="Left" Margin="330,18,0,0"
-		 Text="Version 2.7" VerticalAlignment="Top" FontSize="10"/>
+		 Text="Version 2.8" VerticalAlignment="Top" FontSize="10"/>
     </Grid>
 </UserControl>
