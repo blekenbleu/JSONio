@@ -19,6 +19,8 @@ namespace blekenbleu.jsonio
 		private JSONio J;
 		private PluginManager pluginManager;
 		internal Random random;
+		internal double Surge, Sway, Heave, RAccG;
+		internal double[] G, SG;
 		private string[] corner;
 
 		private int EffectStrength, gamma, SlipGain, threshold, Gscale;	// simprop indices
@@ -30,7 +32,7 @@ namespace blekenbleu.jsonio
             return (null == o) ? 0 : Convert.ToDouble(o);
 		}
 
-		private double Prop(string pname)
+		internal double Prop(string pname)
 		{
 			var o = pluginManager.GetPropertyValue("DataCorePlugin.GameData." + pname);
 
@@ -48,6 +50,8 @@ namespace blekenbleu.jsonio
 			pluginManager = p;
 			random = new Random();	// random.NextDouble() returns a double between 0 and 1
 			corner = new string[] {".FrontLeft", ".FrontRight", ".RearLeft", ".RearRight" };
+			G = new double[] { 0, 0, 0, 0 };
+			SG = new double[] { 0, 0, 0, 0 };
 
 			gamma = J.simprops.FindIndex(i => i.Name == "gamma");					// ProxyS() applies it to wslip
 			SlipGain = J.simprops.FindIndex(i => i.Name == "SlipGain");				// ProxyS() applies it to wslip
@@ -59,47 +63,37 @@ namespace blekenbleu.jsonio
 			J.AttachDelegate("S.EffectStrength", () =>	Current(EffectStrength));
 			J.AttachDelegate("S.gamma", () => 			Current(gamma));
 			J.AttachDelegate("S.SlipGain", () =>		Current(SlipGain));
-			J.AttachDelegate("Surge", () =>			Prop("AccelerationSurge"));
-			J.AttachDelegate("Sway", () =>			Prop("AccelerationSway"));
-			J.AttachDelegate("Haccel", () => 		Haccel(Prop("AccelerationSurge"), Prop("AccelerationSway")));
+			J.AttachDelegate("Surge", () =>				Surge);
+			J.AttachDelegate("Sway", () =>				Sway);
+			J.AttachDelegate("Haccel", () => 			Haccel(Surge, Sway)
  */
-			J.AttachDelegate("Grip"+corner[0], () => Grip(-1,  1));
-			J.AttachDelegate("Grip"+corner[1], () => Grip( 1,  1));
-			J.AttachDelegate("Grip"+corner[2], () => Grip(-1, -1));
-			J.AttachDelegate("Grip"+corner[3], () => Grip( 1, -1));
+			J.AttachDelegate("Grip"+corner[0], () => G[0]);
+			J.AttachDelegate("Grip"+corner[1], () => G[1]);
+			J.AttachDelegate("Grip"+corner[2], () => G[2]);
+			J.AttachDelegate("Grip"+corner[3], () => G[3]);
 
+/*
 			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
 			{
-/*
-				J.AttachDelegate("ACslipGrip"+corner[0], () => ACslipGrip(0));
-				J.AttachDelegate("ACslipGrip"+corner[1], () => ACslipGrip(1));
-				J.AttachDelegate("ACslipGrip"+corner[2], () => ACslipGrip(2));
-				J.AttachDelegate("ACslipGrip"+corner[3], () => ACslipGrip(3));
- */
-				J.AttachDelegate("FF"+corner[0], () => FF(ACslipGrip(0), 0, J.random0));
-				J.AttachDelegate("FF"+corner[1], () => FF(ACslipGrip(1), 1, J.random1));
-				J.AttachDelegate("FF"+corner[2], () => FF(ACslipGrip(2), 2, J.random2));
-				J.AttachDelegate("FF"+corner[3], () => FF(ACslipGrip(3), 3, J.random3));
-				J.AttachDelegate("LoadedSlipGrip"+corner[0], () => LoadedSlipGrip(ACslipGrip(0), -1,  1));
-				J.AttachDelegate("LoadedSlipGrip"+corner[1], () => LoadedSlipGrip(ACslipGrip(1),  1,  1));
-				J.AttachDelegate("LoadedSlipGrip"+corner[2], () => LoadedSlipGrip(ACslipGrip(2), -1, -1));
-				J.AttachDelegate("LoadedSlipGrip"+corner[3], () => LoadedSlipGrip(ACslipGrip(3),  1, -1));
+				J.AttachDelegate("ACslipGrip"+corner[0], () => SG[0]);
+				J.AttachDelegate("ACslipGrip"+corner[1], () => SG[1]);
+				J.AttachDelegate("ACslipGrip"+corner[2], () => SG[2]);
+				J.AttachDelegate("ACslipGrip"+corner[3], () => SG[3]);
 			} else {
-/*
-				J.AttachDelegate("SHslipGrip"+corner[0], () => SHslipGrip(0, Grip(-1,  1)));
-				J.AttachDelegate("SHslipGrip"+corner[1], () => SHslipGrip(1, Grip( 1,  1)));
-				J.AttachDelegate("SHslipGrip"+corner[2], () => SHslipGrip(2, Grip(-1, -1)));
-				J.AttachDelegate("SHslipGrip"+corner[3], () => SHslipGrip(3, Grip( 1, -1)));
- */
-				J.AttachDelegate("FF"+corner[0], () => FF(SHslipGrip(0, Grip(-1,  1)), 0, J.random0));
-				J.AttachDelegate("FF"+corner[1], () => FF(SHslipGrip(1, Grip( 1,  1)), 1, J.random1));
-				J.AttachDelegate("FF"+corner[2], () => FF(SHslipGrip(2, Grip(-1, -1)), 2, J.random2));
-				J.AttachDelegate("FF"+corner[3], () => FF(SHslipGrip(3, Grip( 1, -1)), 3, J.random3));
-				J.AttachDelegate("LoadedSlipGrip"+corner[0], () => LoadedSlipGrip(SHslipGrip(0, Grip(-1,  1)), -1,  1));
-				J.AttachDelegate("LoadedSlipGrip"+corner[1], () => LoadedSlipGrip(SHslipGrip(1, Grip( 1,  1)),  1,  1));
-				J.AttachDelegate("LoadedSlipGrip"+corner[2], () => LoadedSlipGrip(SHslipGrip(2, Grip(-1, -1)), -1, -1));
-				J.AttachDelegate("LoadedSlipGrip"+corner[3], () => LoadedSlipGrip(SHslipGrip(3, Grip( 1, -1)),  1, -1));
+				J.AttachDelegate("SHslipGrip"+corner[0], () => SHslipGrip(0));
+				J.AttachDelegate("SHslipGrip"+corner[1], () => SHslipGrip(1));
+				J.AttachDelegate("SHslipGrip"+corner[2], () => SHslipGrip(2));
+				J.AttachDelegate("SHslipGrip"+corner[3], () => SHslipGrip(3));
             }	// pluginManager.GameName
+ */
+			J.AttachDelegate("FF"+corner[0], () => FF(0));
+			J.AttachDelegate("FF"+corner[1], () => FF(1));
+			J.AttachDelegate("FF"+corner[2], () => FF(2));
+			J.AttachDelegate("FF"+corner[3], () => FF(3));
+			J.AttachDelegate("LoadedSlipGrip"+corner[0], () => LoadedSlipGrip(SG[0], -1,  1));
+			J.AttachDelegate("LoadedSlipGrip"+corner[1], () => LoadedSlipGrip(SG[1],  1,  1));
+			J.AttachDelegate("LoadedSlipGrip"+corner[2], () => LoadedSlipGrip(SG[2], -1, -1));
+			J.AttachDelegate("LoadedSlipGrip"+corner[3], () => LoadedSlipGrip(SG[3],  1, -1));
 		}
 
 		private double RSS(double x, double y)
@@ -107,9 +101,9 @@ namespace blekenbleu.jsonio
 			return Math.Pow(x*x + y*y, 0.5);
 		}
 
-		private double RSS1(double x, double y)
+		internal double RSS1()
 		{
-			return Math.Max(0.11, RSS(x, y));
+			return Math.Max(0.11, RSS(Raw("Physics.AccG01"), Raw("Physics.AccG02")));
 		}
 /*
 		public double Haccel(double surge, double sway)
@@ -126,10 +120,9 @@ namespace blekenbleu.jsonio
 
 		public double Grip(double sway, double surge)
 		{
-			double heave = Prop("AccelerationHeave");
-			sway *= Prop("AccelerationSway");
-			surge *= Prop("AccelerationSurge");
-			double load = 25 + heave + sway + surge * 0.67;
+			sway *= Sway;
+			surge *= Surge;
+			double load = 25 + Heave + sway + surge * 0.67;
 			return 1 + 0.99 * 25 * RSS(surge, sway) / (25 > load ? 25 : load);
 		}
 
@@ -138,16 +131,15 @@ namespace blekenbleu.jsonio
 			return 100 * Math.Pow(0.01 * Shaken("wSlip"+corner[c]) * Current(SlipGain), 1 / Current(gamma));
 		}
 
-		public double SHslipGrip(int corner, double grip)
+		public double SHslipGrip(int corner)
 		{
-			return 100 * Current(EffectStrength) * ProxyS(corner) / grip; 
+			return 100 * Current(EffectStrength) * ProxyS(corner) / G[corner];
 		}
 
 		public double ACslipGrip(int proxyS)
 		{
 			string Whload = (1 + proxyS).ToString();
-			double sg = 0.000005 * Current(EffectStrength) * ProxyS(proxyS) * Raw("Physics.WheelLoad0"+Whload)
-						 / RSS1(Raw("Physics.AccG01"), Raw("Physics.AccG02"));
+			double sg = 0.000005 * Current(EffectStrength) * ProxyS(proxyS) * Raw("Physics.WheelLoad0"+Whload) / RAccG;
 			return Math.Min(100, 100 * Math.Pow(sg, 0.5));
 		}
 
@@ -157,20 +149,20 @@ namespace blekenbleu.jsonio
 		}
 
 		// this corresponds to JavaScript in LoadedSlipGrip CUSTOM EFFECT
-		public double LoadedSlipGrip(double sg, double sway, double surge)
+		public double LoadedSlipGrip(double sg, int sway, int surge)
 		{
-			double L = 25  + 25 * sway * Acc(Prop("AccelerationSway"));	// 25 +/-25% left-right distribution
-			L *= (1 + surge * Acc(Prop("AccelerationSurge")));			// fore-aft distribution
+			double L = 25  + 25 * sway * Acc(Sway);	// 25 +/-25% left-right distribution
+			L *= (1 + surge * Acc(Surge));			// fore-aft distribution
 			return Current(Gscale) * (Math.Max(0, Math.Min(1, 0.2 * sg)) * L - Current(threshold));
 		}
 
 		// forced frequency tire squeal to be amplitude-modulated by LoadedSlipGrip()
-		double FF(double sg, int corner, double noise)	// which: ACslipGrip() or SHslipGrip()
+		double FF(int corner)	// which: ACslipGrip() or SHslipGrip()
 		{
 			double low = Current(J.Low[corner]), high = Current(J.High[corner]);
 			double range = 0.01 * (high - low) * 3 / (1 + 3);	// scale based on 3 and range
-			sg = low + range * (100 - sg);
-			return sg + noise * sg / 3;
+			double sg = low + range * (100 - SG[corner]);
+			return sg + J.random[corner] * sg / 3;
 		}
     }
 }

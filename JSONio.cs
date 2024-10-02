@@ -32,7 +32,7 @@ namespace blekenbleu.jsonio
 		private List<Property> SetProps;
 		private readonly CarID CurrentCar = new CarID {};
 		public ShakeIt S = new ShakeIt {};
-		public double random0, random1, random2, random3;
+		public double[] random;
 
 		/// <summary>
 		/// DisplayGrid contents
@@ -119,10 +119,30 @@ namespace blekenbleu.jsonio
 		/// <param name="data">Current game data, including present and previous data frames.</param>
 		public void DataUpdate(PluginManager pluginManager, ref GameData data)
 		{
-			random0 = S.random.NextDouble();
-			random1 = S.random.NextDouble();
-			random2 = S.random.NextDouble();
-			random3 = S.random.NextDouble();
+			random[0] = S.random.NextDouble();
+			random[1] = S.random.NextDouble();
+			random[2] = S.random.NextDouble();
+			random[3] = S.random.NextDouble();
+			S.Surge = S.Prop("AccelerationSurge");
+			S.Sway = S.Prop("AccelerationSway");
+			S.Heave = S.Prop("AccelerationHeave");
+			S.RAccG = S.RSS1();
+			S.G[0] = S.Grip(-1,  1);
+			S.G[1] = S.Grip( 1,  1);
+			S.G[2] = S.Grip(-1, -1);
+			S.G[3] = S.Grip( 1, -1);
+			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
+			{
+				S.SG[0] = S.ACslipGrip(0);
+				S.SG[1] = S.ACslipGrip(1);
+				S.SG[2] = S.ACslipGrip(2);
+				S.SG[3] = S.ACslipGrip(3);
+			} else {
+				S.SG[0] = S.SHslipGrip(0);
+				S.SG[1] = S.SHslipGrip(1);
+				S.SG[2] = S.SHslipGrip(2);
+				S.SG[3] = S.SHslipGrip(3);
+			}
 		}
 
 		private void SlimEnd(GamesList slim)
@@ -313,6 +333,7 @@ namespace blekenbleu.jsonio
 			High = new int[] {0,0,0,0};
 			Fmax = new string[] {"Fmax.FrontLeft", "Fmax.FrontRight", "Fmax.RearLeft", "Fmax.RearRight"};
 			Fmin = new string[] {"Fmin.FrontLeft", "Fmin.FrontRight", "Fmin.RearLeft", "Fmin.RearRight"};
+			random = new double[] { 0, 0, 0, 0 };
 
 			changed = false;	// write JSON file during End() only if true
 
@@ -474,10 +495,10 @@ namespace blekenbleu.jsonio
 			this.AttachDelegate("Car", () => CurrentCar.ID);
 			this.AttachDelegate("Game", () => Gname);
 			this.AttachDelegate("Msg", () => Msg);
-			this.AttachDelegate("random0", () => random0);
-			this.AttachDelegate("random1", () => random1);
-			this.AttachDelegate("random2", () => random2);
-			this.AttachDelegate("random3", () => random3);
+			this.AttachDelegate("random0", () => random[0]);
+			this.AttachDelegate("random1", () => random[1]);
+			this.AttachDelegate("random2", () => random[2]);
+			this.AttachDelegate("random3", () => random[3]);
 
 /*---------	this.AddAction("ChangeProperties",...)
  ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
