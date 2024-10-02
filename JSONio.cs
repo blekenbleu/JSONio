@@ -119,10 +119,10 @@ namespace blekenbleu.jsonio
 		/// <param name="data">Current game data, including present and previous data frames.</param>
 		public void DataUpdate(PluginManager pluginManager, ref GameData data)
 		{
-			random0 = 0.2; // S.random.NextDouble();
-			random1 = 0.4; // S.random.NextDouble();
-			random2 = 0.6; // S.random.NextDouble();
-			random3 = 0.8; // S.random.NextDouble();
+			random0 = S.random.NextDouble();
+			random1 = S.random.NextDouble();
+			random2 = S.random.NextDouble();
+			random3 = S.random.NextDouble();
 		}
 
 		private void SlimEnd(GamesList slim)
