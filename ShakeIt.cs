@@ -21,7 +21,7 @@ namespace blekenbleu.jsonio
 		internal Random random;
 		private string[] corner;
 
-		private int EffectStrength, gamma, SlipGain, threshold; // Gscale;	// simprop indices
+		private int EffectStrength, gamma, SlipGain, threshold, Gscale;	// simprop indices
 
 		private double Shaken(string pname)
 		{
@@ -53,18 +53,18 @@ namespace blekenbleu.jsonio
 			SlipGain = J.simprops.FindIndex(i => i.Name == "SlipGain");				// ProxyS() applies it to wslip
 			EffectStrength = J.simprops.FindIndex(i => i.Name == "EffectStrength");	// SlipGrip amplitude
 			threshold = J.simprops.FindIndex(i => i.Name == "threshold");			// LoadedSlipGrip() applies it
+			Gscale = J.simprops.FindIndex(i => i.Name == "Gscale");					// LoadedSlipGrip() applies it
 /*
-			Gscale = J.simprops.FindIndex(i => i.Name == "Gscale");
 			J.AttachDelegate("S.EffectStrength", () => Current(EffectStrength));
 			J.AttachDelegate("S.gamma", () => Current(gamma));
 			J.AttachDelegate("S.SlipGain", () => Current(SlipGain));
 			J.AttachDelegate("Surge", () => Prop("AccelerationSurge"));
 			J.AttachDelegate("Sway", () => Prop("AccelerationSway"));
 			J.AttachDelegate("Haccel", () => Haccel(Prop("AccelerationSurge"), Prop("AccelerationSway")));
-			J.AttachDelegate("Grip"+corner[0], () => Grip(-1, 1));
-			J.AttachDelegate("Grip"+corner[1], () => Grip(1, 1));
+			J.AttachDelegate("Grip"+corner[0], () => Grip(-1,  1));
+			J.AttachDelegate("Grip"+corner[1], () => Grip( 1,  1));
 			J.AttachDelegate("Grip"+corner[2], () => Grip(-1, -1));
-			J.AttachDelegate("Grip"+corner[3], () => Grip(1, -1));
+			J.AttachDelegate("Grip"+corner[3], () => Grip( 1, -1));
 
 			J.AttachDelegate("GameName", () => pluginManager.GameName);
  */
@@ -169,7 +169,7 @@ namespace blekenbleu.jsonio
 			double L = 25  + AbsAcc(sway) / d;	// 25 +/-25% left-right distribution
 			d = (0 < surge) ? 100 : -100;
 			L *= (1 + AbsAcc(surge) / d); // fore-aft distribution
-			return SlipGate(sg) * L - Current(threshold);
+			return Current(Gscale) * (SlipGate(sg) * L - Current(threshold));
 		}
 
 		// forced frequency
