@@ -54,27 +54,28 @@ namespace blekenbleu.jsonio
 			EffectStrength = J.simprops.FindIndex(i => i.Name == "EffectStrength");	// SlipGrip amplitude
 			threshold = J.simprops.FindIndex(i => i.Name == "threshold");			// LoadedSlipGrip() applies it
 			Gscale = J.simprops.FindIndex(i => i.Name == "Gscale");					// LoadedSlipGrip() applies it
-/*
-			J.AttachDelegate("S.EffectStrength", () => Current(EffectStrength));
-			J.AttachDelegate("S.gamma", () => Current(gamma));
-			J.AttachDelegate("S.SlipGain", () => Current(SlipGain));
-			J.AttachDelegate("Surge", () => Prop("AccelerationSurge"));
-			J.AttachDelegate("Sway", () => Prop("AccelerationSway"));
-			J.AttachDelegate("Haccel", () => Haccel(Prop("AccelerationSurge"), Prop("AccelerationSway")));
+/*			------- used for debugging -----------------
+			J.AttachDelegate("GameName", () => pluginManager.GameName);
+			J.AttachDelegate("S.EffectStrength", () =>	Current(EffectStrength));
+			J.AttachDelegate("S.gamma", () => 			Current(gamma));
+			J.AttachDelegate("S.SlipGain", () =>		Current(SlipGain));
+			J.AttachDelegate("Surge", () =>			Prop("AccelerationSurge"));
+			J.AttachDelegate("Sway", () =>			Prop("AccelerationSway"));
+			J.AttachDelegate("Haccel", () => 		Haccel(Prop("AccelerationSurge"), Prop("AccelerationSway")));
 			J.AttachDelegate("Grip"+corner[0], () => Grip(-1,  1));
 			J.AttachDelegate("Grip"+corner[1], () => Grip( 1,  1));
 			J.AttachDelegate("Grip"+corner[2], () => Grip(-1, -1));
 			J.AttachDelegate("Grip"+corner[3], () => Grip( 1, -1));
-
-			J.AttachDelegate("GameName", () => pluginManager.GameName);
  */
 
 			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
 			{
+/*
 				J.AttachDelegate("ACslipGrip"+corner[0], () => ACslipGrip(0));
 				J.AttachDelegate("ACslipGrip"+corner[1], () => ACslipGrip(1));
 				J.AttachDelegate("ACslipGrip"+corner[2], () => ACslipGrip(2));
 				J.AttachDelegate("ACslipGrip"+corner[3], () => ACslipGrip(3));
+ */
 				J.AttachDelegate("FF"+corner[0], () => FF(ACslipGrip(0), 0, J.random0));
 				J.AttachDelegate("FF"+corner[1], () => FF(ACslipGrip(1), 1, J.random1));
 				J.AttachDelegate("FF"+corner[2], () => FF(ACslipGrip(2), 2, J.random2));
@@ -84,10 +85,12 @@ namespace blekenbleu.jsonio
 				J.AttachDelegate("LoadedSlipGrip"+corner[2], () => LoadedSlipGrip(ACslipGrip(2), -1, -1));
 				J.AttachDelegate("LoadedSlipGrip"+corner[3], () => LoadedSlipGrip(ACslipGrip(3),  1, -1));
 			} else {
+/*
 				J.AttachDelegate("SHslipGrip"+corner[0], () => SHslipGrip(0, Grip(-1,  1)));
 				J.AttachDelegate("SHslipGrip"+corner[1], () => SHslipGrip(1, Grip( 1,  1)));
 				J.AttachDelegate("SHslipGrip"+corner[2], () => SHslipGrip(2, Grip(-1, -1)));
 				J.AttachDelegate("SHslipGrip"+corner[3], () => SHslipGrip(3, Grip( 1, -1)));
+ */
 				J.AttachDelegate("FF"+corner[0], () => FF(SHslipGrip(0, Grip(-1,  1)), 0, J.random0));
 				J.AttachDelegate("FF"+corner[1], () => FF(SHslipGrip(1, Grip( 1,  1)), 1, J.random1));
 				J.AttachDelegate("FF"+corner[2], () => FF(SHslipGrip(2, Grip(-1, -1)), 2, J.random2));
