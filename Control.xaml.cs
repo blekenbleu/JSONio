@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace blekenbleu.jsonio
 {
@@ -42,6 +43,18 @@ namespace blekenbleu.jsonio
             }
         }
 
+		// handle slider changes
+        private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
+        {
+            TBL.Text = "Gscale:  " + (Plugin.simprops[Plugin.S.Gscale].Current = (0.02 * (double)((Slider)sender).Value).ToString());
+        }
+
+		internal void Slslider_Point()
+		{
+			SL.Value = 50 * Plugin.S.Current(Plugin.S.Gscale);
+			TBL.Text = "Gscale:  " + Plugin.simprops[Plugin.S.Gscale].Current;
+		}
+
 		// highlights Current property value selected
 		internal void Selected()	// crashes if called from other threads
 		{
@@ -55,7 +68,7 @@ namespace blekenbleu.jsonio
 		}
 
 		// highlights selected cell when plugin first displays
-		private void dgSelect(object sender, RoutedEventArgs e) { Selected(); }
+		private void DgSelect(object sender, RoutedEventArgs e) { Selected(); }
 
 		// handle button clicks
 		private void Prior_Click(object sender, RoutedEventArgs e)

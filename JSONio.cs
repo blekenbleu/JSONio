@@ -209,6 +209,8 @@ namespace blekenbleu.jsonio
 //				Info("property " + simprops[View.Selection].Name + " " + prefix
 //					 + $"cremented to {simprops[View.Selection].Value}");
 				changed = true;
+				if (S.Gscale == View.Selection)
+					View.Slslider_Point();
 			}
 		}
 

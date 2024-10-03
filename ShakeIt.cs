@@ -23,7 +23,8 @@ namespace blekenbleu.jsonio
 		internal double[] G, SG;
 		private string[] corner;
 
-		private int EffectStrength, gamma, SlipGain, threshold, Gscale;	// simprop indices
+		private int EffectStrength, gamma, SlipGain, threshold;
+		internal int Gscale;	// simprop indices
 
 		private double Shaken(string pname)
 		{
@@ -39,7 +40,7 @@ namespace blekenbleu.jsonio
             return (null == o) ? 0 : Convert.ToDouble(o);
 		}
 
-		float Current (int prop)
+		internal float Current (int prop)
 		{
 			return float.Parse(J.simprops[prop].Current);
 		}
