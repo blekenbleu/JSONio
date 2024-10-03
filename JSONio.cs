@@ -23,11 +23,11 @@ namespace blekenbleu.jsonio
 		internal static int pCount;								// global Property settings appended after pCount
 		internal int[] Low, High;
 		internal string[] Fmin, Fmax;
-		private string path, slimPath;			// file locations
+		private string path;			// JSON file location
 		private string Gname = "";
 		private bool changed;
 		private GameHandler games;
-		private Slim slim;
+		private Slim slim;				// in GameHandler.cs
 		private List<int> Steps;
 		private List<Property> SetProps;
 		private readonly CarID CurrentCar = new CarID {};
@@ -48,19 +48,6 @@ namespace blekenbleu.jsonio
 			return Plist;
 		}
 
-/*		// copy per-car properties from game to simprops
-		void Scopy(int cndx, Game game)	// copy matching values from Game
-		{
-			if (0 > cndx)
-				for (int i = 0; i < pCount; i++)
-					simprops[i].Current = simprops[i].Default = game.defaults[i].Value;
-			else for (int i = 0; i < pCount; i++)
-			{
-				simprops[i].Current = game.Clist[cndx].properties[i].Value;
-				simprops[i].Default = game.defaults[i].Value;
-			}
-		}
- */
 		void Scopy(int cndx, GameList game)	// copy matching values from GameList
 		{
 			if (0 > cndx)
@@ -145,14 +132,6 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		private void SlimEnd(GamesList slim)
-		{
-			string sjs = JsonConvert.SerializeObject(slim, Formatting.Indented);
-			if (0 == sjs.Length || "{}" == sjs)
-				OOps("SlimEnd():  Json Serializer failure");
-			else File.WriteAllText(slimPath, sjs);
-		}
-
 		/// <summary>
 		/// Called at plugin manager stop, close/dispose anything needed here !
 		/// Plugins are rebuilt at game changes
@@ -166,14 +145,11 @@ namespace blekenbleu.jsonio
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
 			if (changed = slim.Save_Car(CurrentCar, simprops, Gname) || changed)
-				SlimEnd(slim.data);
-			else if (null != path && changed && games.Save_Car(CurrentCar, simprops, Gname))
 			{
-				string js = JsonConvert.SerializeObject(games.data, Formatting.Indented);
-
-				if ((0 == js.Length || "{}" == js) && 0 < games.data.Glist.Count)
-					OOps("End():  Json Serializer failure for games.data");
-				else File.WriteAllText(path, js);
+				string sjs = JsonConvert.SerializeObject(slim.data, Formatting.Indented);
+				if (0 == sjs.Length || "{}" == sjs)
+					OOps("End():  Json Serializer failure");
+				else File.WriteAllText(path, sjs);
 			}
 		}
 
@@ -206,8 +182,6 @@ namespace blekenbleu.jsonio
 				if (0 != step % 100)
 					simprops[View.Selection].Current = $"{(float)(0.01 * iv)}";
 				else simprops[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
-//				Info("property " + simprops[View.Selection].Name + " " + prefix
-//					 + $"cremented to {simprops[View.Selection].Value}");
 				changed = true;
 				if (S.Gscale == View.Selection)
 					View.Slslider_Point();
@@ -238,7 +212,6 @@ namespace blekenbleu.jsonio
 				View.Selection--;
 			else View.Selection = (byte)(simprops.Count - 1);
 			SelectedStatus();
-//			Info("Selected property = " + Selected_Property);
 		}
 
 		public void Swap()
@@ -268,24 +241,7 @@ namespace blekenbleu.jsonio
 					simprops[p].Default = simprops[p].Current;
 			}
 		}
-/*
-		private void New_defaults(List<Game> Glist)
-		{
-			if (0 == Gname.Length)
-				return;
 
-			int p, Index = Glist.FindIndex(i => i.name == Gname);
-
-			if (0 <= Index)
-			{
-				for (p = 0; p < pCount; p++)
-					Glist[Index].defaults[p].Value =
-					simprops[p].Default = simprops[p].Current;
-				for (; p < simprops.Count; p++)
-					simprops[p].Default = simprops[p].Current;
-			}
-		}
- */
 		public void New_defaults() => New_defaults(slim.data.gList);
 
 		// when JSONio.ini and JSONio.json disagree
@@ -427,61 +383,11 @@ namespace blekenbleu.jsonio
 			}
 
 			path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString();
-			// Load existing JSON, first trying new slim format
-			if (!slim.Load(slimPath = pluginManager.GetPropertyValue(Msg = Ini + "slim")?.ToString(), simprops))
-			{
+			// Load existing JSON, using slim format
+			if (slim.Load(path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString(), simprops))
+				Msg = "Init():  " + Msg + " loaded";
+			else
 				changed = OOps($"Init(): {Msg} not found");
-				if (File.Exists(path))
-				{
-					Games foo = JsonConvert.DeserializeObject<Games>(File.ReadAllText(path));
-
-					// test for consistency between simprops and foo
-					if (null != foo && null != foo.name && null != foo.Glist)
-					{
-						int nullcarID = 0;
-						List<Property> d = foo.Glist[0].defaults;
-						int i = -1;
-
-						if (pCount == d.Count)
-							for (i = 0; i < pCount; i++)
-								if (d[i].Name != simprops[i].Name)
-									break;
-
-						if (i != pCount) // repopulate Car properties according to NCalcScripts/JSONio.ini
-						{
-							OOps($"Init(): {path} properties mismatched NCalcScripts/JSONio.ini");
-							for (i = 0; i < foo.Glist.Count; i++)
-							{
-								foo.Glist[i].defaults = Refactor(Iprops, foo.Glist[i].defaults);
-								for (int c = 0; c < foo.Glist[i].Clist.Count; c++)
-									if (null == foo.Glist[i].Clist[c].carID)
-									{
-										nullcarID++;
-										foo.Glist[i].Clist.RemoveAt(c--);
-									}
-									else foo.Glist[i].Clist[c].properties = Refactor(Iprops, foo.Glist[i].Clist[c].properties);
-							}
-						} else {	// eliminate null carIDs
-							for (i = 0; i < foo.Glist.Count; i++)
-								for (int c = 0; c < foo.Glist[i].Clist.Count;)
-									if (null == foo.Glist[i].Clist[c].carID)
-									{
-										nullcarID++;
-										foo.Glist[i].Clist.RemoveAt(c);
-									}
-									else c++;
-						}
-						if (0 < nullcarID)
-							OOps($"Init(): {nullcarID} null carIDs");
-						games.data = foo;
-						if (null == slim.data || 0 == slim.data.gList.Count)
-							SlimEnd(slim.data = slim.Migrate(games));
-					}
-					else changed = OOps($"Init():  empty or invalid {Msg}");
-				}
-				else changed = OOps($"Init(): {Msg} file not found");
-			}
-			else Msg = "Init():  " + Msg + " loaded";
 
 			// Declare available properties
 			// these get evaluated "on demand" (when shown or used in formulae)
