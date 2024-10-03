@@ -7,39 +7,40 @@
              mc:Ignorable="d"
 		Width="480">
     <Grid Margin="0,0,0,0">
-        <Label x:Name="SHlabel" Content="JSONio Properties Manager" HorizontalAlignment="Center"
-				 Margin="-30,10,0,0" VerticalAlignment="Top" Width="164" Height="25" Grid.Column="1"/>
-        <TextBlock x:Name="Version" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="330,18,0,0"/>
-        <TextBlock x:Name="Status" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,40,0,0"
-				Text="{Binding StatusText}" Height="21" Width="350" Visibility="Visible">
-        </TextBlock>
-        <Button x:Name="b0" Content=" Up " Height="40" VerticalAlignment="Top"
-				HorizontalAlignment="Left" Margin="80,70,0,0"
-                Click="Prior_Click" Visibility="{Binding ButtonVisibility}"/>
-        <Button x:Name="b1" Content="Down"  Height="40" VerticalAlignment="Top"
-				HorizontalAlignment="Left" Margin="120,70,0,0"
-                Click="Next_Click" Visibility="{Binding ButtonVisibility}"/>
-        <Button x:Name="b2" Content=" + "   Height="40" VerticalAlignment="Top"
-				HorizontalAlignment="Left" Margin="177,70,0,0"
-                Click="Inc_Click" Visibility="{Binding ButtonVisibility}"/>
-        <Button x:Name="b3" Content=" - "   Height="40" VerticalAlignment="Top"
-				HorizontalAlignment="Left" Margin="210,70,0,0"
-                Click="Dec_Click" Visibility="{Binding ButtonVisibility}"/>
+        <Label x:Name="SHlabel" Content="JSONio Properties Manager" Width="164" Height="25"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,10,0,0"/>
+        <TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="310,18,0,0"/>
+        <TextBlock x:Name="Status" Text="{Binding StatusText}" Height="21" Width="350"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,40,0,0"/>
+        <Button x:Name="b0" Content=" Up " Height="40" Click="Prior_Click"
+				Visibility="{Binding ButtonVisibility}"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,70,0,0"/>
+        <Button x:Name="b1" Content="Down" Height="40" Click="Next_Click"
+				Visibility="{Binding ButtonVisibility}"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,70,0,0"/>
+        <Button x:Name="b2" Content=" + " Height="40" Click="Inc_Click"
+				Visibility="{Binding ButtonVisibility}"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="177,70,0,0"/>
+        <Button x:Name="b3" Content=" - " Height="40" Click="Dec_Click"
+				Visibility="{Binding ButtonVisibility}"
+				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,70,0,0"/>
         <Button x:Name="b4" Content="Current&lt;-&gt;&#xA;Previous" Height="40"
-				VerticalAlignment="Top" HorizontalAlignment="Left"
-                Margin="240,70,0,0" Click="Swap_Click" Visibility="{Binding ButtonVisibility}"/>
+				Click="Swap_Click" Visibility="{Binding ButtonVisibility}"
+				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="240,70,0,0"/>
         <Button x:Name="b5" Content="Current&#xA;-&gt;Default" Height="40"
-				VerticalAlignment="Top" HorizontalAlignment="Left"
-                Margin="320,70,0,0" Click="Def_Click" Visibility="{Binding ButtonVisibility}"/>
+				Click="Def_Click" Visibility="{Binding ButtonVisibility}"
+				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="320,70,0,0"/>
         <Slider Maximum="100" Minimum="0" TickPlacement="BottomRight" TickFrequency="3"
-                VerticalAlignment="Top" HorizontalAlignment="Left"
-				IsSnapToTickEnabled="True" Width="250" Height="20" Margin="80,115,0,0"
-				Name="SL" Value="40" PreviewMouseUp="SLslider_DragCompleted"/>
-        <TextBox Name="TBL" Text="Gscale" Width="95" Margin="330,112,0,0" Height="22"
-                 VerticalAlignment="Top" HorizontalAlignment="Left"/>
+				Name="SL" Value="40" PreviewMouseUp="SLslider_DragCompleted"
+				IsSnapToTickEnabled="True" Width="250" Height="20"
+                VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,115,0,0"/>
+        <TextBox Name="TBL" Text="Gscale" Width="95" Height="22"
+				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="330,112,0,0"/>
+
         <DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
-                 SelectionUnit="Cell" SelectionMode="Single" Loaded="DgSelect"
-				 Margin="0,140,0,20" HorizontalAlignment="Center" CanUserAddRows="False">
+				SelectionUnit="Cell" SelectionMode="Single" Loaded="DgSelect" CanUserAddRows="False"
+				VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,140,0,20">
             <DataGrid.CellStyle>
                 <Style TargetType="{x:Type DataGridCell}">
                     <Setter Property="IsHitTestVisible" Value="False"/>
