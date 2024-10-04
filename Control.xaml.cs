@@ -19,7 +19,7 @@ namespace blekenbleu.jsonio
 			Model = new StaticModel();
 			InitializeComponent();
 			this.DataContext = Model;						// StaticControl events change Control.xaml properties
-			Version.Text = "Version 2.13";
+			Version.Text = "Version 2.14";
 		}
 
 		public Control(JSONio plugin) : this()
@@ -47,7 +47,7 @@ namespace blekenbleu.jsonio
 		// handle slider changes
         private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
         {
-            TBL.Text = "Gscale:  " + (Plugin.simprops[Plugin.S.Gscale].Current = (0.02 * (double)((Slider)sender).Value).ToString());
+            TBL.Text = "Gscale:  " + (Plugin.simprops[Plugin.S.Gscale].Current = (0.02 * (float)(int)(0.5 + ((Slider)sender).Value)).ToString());
         }
 
 		internal void Slslider_Point()
