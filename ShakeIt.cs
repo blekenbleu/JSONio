@@ -20,7 +20,7 @@ namespace blekenbleu.jsonio
 		private PluginManager pluginManager;
 		internal Random random;
 		internal double Surge, Sway, Heave, RAccG;
-		internal double[] G, SG;
+		internal double[] SG;
 		private string[] corner;
 
 		private int EffectStrength, gamma, SlipGain, threshold;
@@ -51,7 +51,6 @@ namespace blekenbleu.jsonio
 			pluginManager = p;
 			random = new Random();	// random.NextDouble() returns a double between 0 and 1
 			corner = new string[] {".FrontLeft", ".FrontRight", ".RearLeft", ".RearRight" };
-			G = new double[] { 0, 0, 0, 0 };
 			SG = new double[] { 0, 0, 0, 0 };
 
 			gamma = J.simprops.FindIndex(i => i.Name == "gamma");					// ProxyS() applies it to wslip
@@ -68,29 +67,21 @@ namespace blekenbleu.jsonio
 			J.AttachDelegate("Sway", () =>				Sway);
 			J.AttachDelegate("Haccel", () => 			Haccel(Surge, Sway)
  */
-			J.AttachDelegate("Grip"+corner[0], () => G[0]);
-			J.AttachDelegate("Grip"+corner[1], () => G[1]);
-			J.AttachDelegate("Grip"+corner[2], () => G[2]);
-			J.AttachDelegate("Grip"+corner[3], () => G[3]);
+			J.AttachDelegate("ProxyS"+corner[0], () => ProxyS(0));
+			J.AttachDelegate("ProxyS"+corner[1], () => ProxyS(1));
+			J.AttachDelegate("ProxyS"+corner[2], () => ProxyS(2));
+			J.AttachDelegate("ProxyS"+corner[3], () => ProxyS(3));
 
-/*
-			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
-			{
-				J.AttachDelegate("ACslipGrip"+corner[0], () => SG[0]);
-				J.AttachDelegate("ACslipGrip"+corner[1], () => SG[1]);
-				J.AttachDelegate("ACslipGrip"+corner[2], () => SG[2]);
-				J.AttachDelegate("ACslipGrip"+corner[3], () => SG[3]);
-			} else {
-				J.AttachDelegate("SHslipGrip"+corner[0], () => SHslipGrip(0));
-				J.AttachDelegate("SHslipGrip"+corner[1], () => SHslipGrip(1));
-				J.AttachDelegate("SHslipGrip"+corner[2], () => SHslipGrip(2));
-				J.AttachDelegate("SHslipGrip"+corner[3], () => SHslipGrip(3));
-            }	// pluginManager.GameName
- */
+			J.AttachDelegate("SlipGrip"+corner[0], () => SG[0]);
+			J.AttachDelegate("SlipGrip"+corner[1], () => SG[1]);
+			J.AttachDelegate("SlipGrip"+corner[2], () => SG[2]);
+			J.AttachDelegate("SlipGrip"+corner[3], () => SG[3]);
+
 			J.AttachDelegate("FF"+corner[0], () => FF(0));
 			J.AttachDelegate("FF"+corner[1], () => FF(1));
 			J.AttachDelegate("FF"+corner[2], () => FF(2));
 			J.AttachDelegate("FF"+corner[3], () => FF(3));
+
 			J.AttachDelegate("LoadedSlipGrip"+corner[0], () => LoadedSlipGrip(SG[0], -1,  1));
 			J.AttachDelegate("LoadedSlipGrip"+corner[1], () => LoadedSlipGrip(SG[1],  1,  1));
 			J.AttachDelegate("LoadedSlipGrip"+corner[2], () => LoadedSlipGrip(SG[2], -1, -1));
@@ -119,29 +110,30 @@ namespace blekenbleu.jsonio
 			return (null == o) ? 0 : Convert.ToDouble(o);
 		}
 
-		public double Grip(double sway, double surge)
+		private readonly int[,] g = new int[,] { { -1, 1 }, { 1, 1 }, { -1, -1 }, { -1, 1 } }; 
+		private double Grip(int i)
 		{
-			sway *= Sway;
-			surge *= Surge;
+			double sway = Sway * g[i, 0];
+			double surge = Surge * g[i, 1];
 			double load = 25 + Heave + sway + surge * 0.67;
 			return 1 + 0.99 * 25 * RSS(surge, sway) / (25 > load ? 25 : load);
 		}
 
 		private double ProxyS(int c)
 		{
-			return 100 * Math.Pow(0.01 * Shaken("wSlip"+corner[c]) * Current(SlipGain), 1 / Current(gamma));
+			return 100 * Math.Pow(Math.Min(1, 0.01 * Shaken("wSlip"+corner[c]) * Current(SlipGain)), 1 / Current(gamma));
 		}
 
 		public double SHslipGrip(int corner)
 		{
-			return 100 * Current(EffectStrength) * ProxyS(corner) / G[corner];
+			return 100 * Math.Min(1, Current(EffectStrength) * 0.1 * ProxyS(corner) / Grip(corner));
 		}
 
 		public double ACslipGrip(int proxyS)
 		{
 			string Whload = (1 + proxyS).ToString();
 			double sg = 0.000005 * Current(EffectStrength) * ProxyS(proxyS) * Raw("Physics.WheelLoad0"+Whload) / RAccG;
-			return Math.Min(100, 100 * Math.Pow(sg, 0.5));
+			return 100 * Math.Pow(Math.Min(1, sg), 0.5);
 		}
 
 		private double Acc(double s)	// fractional power, preserving sign
@@ -149,7 +141,7 @@ namespace blekenbleu.jsonio
 			return (0 < s) ? Math.Pow(.05 * s, 0.3) : -Math.Pow(-.05 * s, 0.3);
 		}
 
-		// this corresponds to JavaScript in LoadedSlipGrip CUSTOM EFFECT
+		// this corresponds to JavaScript in LoadedSlipGrip CUSTOM effect
 		public double LoadedSlipGrip(double sg, int sway, int surge)
 		{
 			double L = 25  + 25 * sway * Acc(Sway);	// 25 +/-25% left-right distribution
@@ -162,7 +154,7 @@ namespace blekenbleu.jsonio
 		{
 			double low = Current(J.Low[corner]), high = Current(J.High[corner]);
 			double range = 0.01 * (high - low) * 3 / (1 + 3);	// scale based on 3 and range
-			double sg = low + range * (100 - SG[corner]);
+			double sg = low + range * (100 - Math.Min(100, SG[corner]));
 			return sg + J.random[corner] * sg / 3;
 		}
     }

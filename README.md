@@ -180,3 +180,26 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 	- Version 2.3: GameName-dependent slipGrip; debug ACslipGrip()
     - Version 2.4: Mostly coded; SlipGrip output amplitudes nearly match, but FF do not;  
 		suspect high/low indexing...  Temporarily forced `random[0-3]` constant for debugging.
+	- Version 2.5: [**Dash**](https://github.com/blekenbleu/SimHub-Profiles/blob/main/SlipGrip_5.1.simhubdash)  
+		![](Documentation/JSONio.dash.png)  
+		- `green` tire plots are slips; &nbsp; `red` plots are Slip/Grip
+		- `purple bars` are output amplitudes; &nbsp; `numbers` are haptic frequencies
+		- ![](Documentation/default.png) = use current settings as game defaults
+		- ![](Documentation/swap.png) = swap current settings with those of previous car (reversible)  
+
+  **internal changes**:  
+
+		- `JSONio.JSONio.` to `JSONio.` for
+			- `Fmin`, `Fmax`
+			- `EffectStrength`, `gamma`, `SlipGain`, `threshold`
+			- `IncrementSelectedProperty`, `DecrementSelectedProperty`
+			- `SwapCurrentPrevious`, `CurrentAsDefaults`
+			- `Selected`, `NextProperty`, `PreviousProperty`
+		- `ShakeITBSV3Plugin.Export.ProxyS` to `JSONio.ProxyS`
+		- `ShakeITBSV3Plugin.Export.slip/grip` to `JSONio.SlipGrip`
+		- `ShakeITBSV3Plugin.Export.forcedHz` to `JSONio.FF`
+		- `ShakeITBSV3Plugin.Export.OutputSlip` to `JSONio.LoadedSlipGrip`
+
+		- **EffectStrength** controls `SlipGrip` amplitude
+		- **SlipGain** and **gamma** control `ProxyS`
+		- **Gscale** and **threshold** affect `LoadedSlipGrip` values

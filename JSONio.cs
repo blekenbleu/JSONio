@@ -114,10 +114,6 @@ namespace blekenbleu.jsonio
 			S.Sway = S.Prop("AccelerationSway");
 			S.Heave = S.Prop("AccelerationHeave");
 			S.RAccG = S.RSS1();
-			S.G[0] = S.Grip(-1,  1);
-			S.G[1] = S.Grip( 1,  1);
-			S.G[2] = S.Grip(-1, -1);
-			S.G[3] = S.Grip( 1, -1);
 			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
 			{
 				S.SG[0] = S.ACslipGrip(0);
