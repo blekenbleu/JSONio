@@ -72,6 +72,11 @@ namespace blekenbleu.jsonio
 			J.AttachDelegate("ProxyS"+corner[2], () => ProxyS(2));
 			J.AttachDelegate("ProxyS"+corner[3], () => ProxyS(3));
 
+			J.AttachDelegate("Grip"+corner[0], () => Current(Gscale) * 5 * Grip(0));
+			J.AttachDelegate("Grip"+corner[1], () => Current(Gscale) * 5 * Grip(1));
+			J.AttachDelegate("Grip"+corner[2], () => Current(Gscale) * 5 * Grip(2));
+			J.AttachDelegate("Grip"+corner[3], () => Current(Gscale) * 5 * Grip(3));
+
 			J.AttachDelegate("SlipGrip"+corner[0], () => SG[0]);
 			J.AttachDelegate("SlipGrip"+corner[1], () => SG[1]);
 			J.AttachDelegate("SlipGrip"+corner[2], () => SG[2]);
@@ -111,7 +116,7 @@ namespace blekenbleu.jsonio
 		}
 
 		private readonly int[,] g = new int[,] { { -1, 1 }, { 1, 1 }, { -1, -1 }, { -1, 1 } }; 
-		private double Grip(int i)
+		public double Grip(int i)
 		{
 			double sway = Sway * g[i, 0];
 			double surge = Surge * g[i, 1];
@@ -146,7 +151,7 @@ namespace blekenbleu.jsonio
 		{
 			double L = 25  + 25 * sway * Acc(Sway);	// 25 +/-25% left-right distribution
 			L *= (1 + surge * Acc(Surge));			// fore-aft distribution
-			return Current(Gscale) * (Math.Max(0, Math.Min(1, 0.2 * sg)) * L - Current(threshold));
+			return Math.Max(0, Math.Min(1, 0.2 * sg)) * L - Current(threshold);
 		}
 
 		// forced frequency tire squeal to be amplitude-modulated by LoadedSlipGrip()
