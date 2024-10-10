@@ -202,4 +202,5 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 
 		- **EffectStrength** controls `SlipGrip` amplitude
 		- **SlipGain** and **gamma** control `ProxyS`
-		- **Gscale** and **threshold** affect `LoadedSlipGrip` values
+		- **threshold** affects `LoadedSlipGrip` values
+		- **Gscale** affects `Grip` values
