@@ -1,6 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
+/*
+ ; Model-View-ViewModel (MVVM)
+ ; https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/?view=netdesktop-8.0
+ ; https://www.c-sharpcorner.com/article/datacontext-autowire-in-wpf/
+ ; https://learn.microsoft.com/en-us/archive/msdn-magazine/2009/february/patterns-wpf-apps-with-the-model-view-viewmodel-design-pattern
+ ; https://scottlilly.com/c-design-patterns-mvvm-model-view-viewmodel/
+ */ 
 namespace blekenbleu.jsonio
 {
     /// <summary>
@@ -28,7 +35,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		private string _statusText;
+		private string _statusText = "Waiting for Car Change";
 		public string StatusText			// must be public for XAML Binding
         {
             get { return _statusText; }
