@@ -1,8 +1,6 @@
 ﻿using System.Windows;
-using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System;
 
 namespace blekenbleu.jsonio
 {
@@ -11,8 +9,6 @@ namespace blekenbleu.jsonio
 	/// </summary>
 	public partial class Control : UserControl
 	{
-		public event EventHandler PropertyChanged;
-
         public JSONio Plugin { get; }
 
 		// need to reference XAML control from a static method
@@ -22,11 +18,11 @@ namespace blekenbleu.jsonio
 		public Control() {
 			Model = new StaticModel(this);
 			InitializeComponent();
-//	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
-//  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
+			//	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
+			//  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
 			this.DataContext = Model;						// StaticControl events change Control.xaml properties
-// alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
-			Version.Text = "Version 2.17";
+			// alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
+			Version.Text = "Version 2.18";
 		}
 
 		public Control(JSONio plugin) : this()
@@ -37,29 +33,7 @@ namespace blekenbleu.jsonio
 			Model.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
 
-        // https://stackoverflow.com/a/7825054
-        public void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			switch (e.PropertyName)
-			{
-				case "Selected_Property":
-					Selected();
-					break;
-			}
-		}
-
-		private byte _Select;
-		internal byte Selection							// fortunately changed only on UI thread
-		{
-			get { return _Select; }
-			set
-			{
-				if (_Select != value)
-				{
-					_Select = value;
-				}
-			}
-		}
+		internal byte Selection;							// fortunately changed only on UI thread
 
 		// handle slider changes
 		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)

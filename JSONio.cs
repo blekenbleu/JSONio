@@ -15,7 +15,6 @@ namespace blekenbleu.jsonio
 	public class JSONio : IPlugin, IDataPlugin, IWPFSettingsV2
 	{
 		public DataPluginSettings Settings;
-		public string Selected_Property = "unKnown";
 		public string New_Car = "false";
 		internal static string Msg = "";
 		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
@@ -26,7 +25,6 @@ namespace blekenbleu.jsonio
 		private string path;			// JSON file location
 		private string Gname = "";
 		private bool changed;
-		private GameHandler games;
 		private Slim slim;				// in GameHandler.cs
 		private List<int> Steps;
 		private List<Property> SetProps;
@@ -185,9 +183,10 @@ namespace blekenbleu.jsonio
 
 		private void SelectedStatus()
 		{
-			Selected_Property = simValues[View.Selection].Name;
+			if (null == Control.Model)
+				return;
 			Control.Model.Selected_Property = simValues[View.Selection].Name;
-			Control.Model.StatusText = Gname + " " + CurrentCar.ID + " " + Selected_Property;
+			Control.Model.StatusText = Gname + " " + CurrentCar.ID + " " + Control.Model.Selected_Property;
 		}
 
 		/// <summary>
@@ -240,7 +239,7 @@ namespace blekenbleu.jsonio
 
 		public void New_defaults() => New_defaults(slim.data.gList);
 
-		// when JSONio.ini and JSONio.json disagree
+		/* when JSONio.ini and JSONio.json disagree
 		private List<Property> Refactor(List<string> iprops, List<Property> fold)
 		{
 			List<Property> dlist = new List<Property> {};
@@ -252,7 +251,7 @@ namespace blekenbleu.jsonio
 				else dlist.Add(fold[Index]);
 			}
 			return dlist;
-		}
+		} */
 
 		// add properties and settings to simprops
 		private void Populate(List<string>props, List<string> vals, List<string> stps)
@@ -280,6 +279,7 @@ namespace blekenbleu.jsonio
 		/// Plugins are rebuilt at game change
 		/// </summary>
 		/// <param name="pluginManager"></param>
+//		GameHandler games;
 		public void Init(PluginManager pluginManager)
 		{
 			List<string> Iprops = new List<string> { "" };
@@ -301,7 +301,7 @@ namespace blekenbleu.jsonio
 				}
 			};
 
-			games = new GameHandler()
+/*			games = new GameHandler()
 			{
 				data = new Games()
 				{
@@ -309,7 +309,7 @@ namespace blekenbleu.jsonio
 					Glist = new List<Game>() {}
 				}
 			};
-
+ */
 			// Load Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
@@ -390,12 +390,8 @@ namespace blekenbleu.jsonio
 			foreach(Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
 
-			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
-			{
-				if (null != Control.Model)
-					Control.Model.Selected_Property = Selected_Property = "unKnown";
-				else Selected_Property = "unKnown";
-			}
+			if ((0 == Gname.Length || 0 == CurrentCar.ID.Length) && null != Control.Model)
+					Control.Model.Selected_Property = "unKnown";
 			else SelectedStatus();
 
 			this.AttachDelegate("Selected", () => Control.Model.Selected_Property);

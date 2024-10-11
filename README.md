@@ -204,3 +204,5 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- **SlipGain** and **gamma** control `ProxyS`
 		- **threshold** affects `LoadedSlipGrip` values
 		- **Gscale** affects `Grip` values
+	- Version 2.18: enable **PREV** and **NEXT** from iPhone - *11 Oct*  
+		[`Dispatcher.Invoke(() => Ctrl.Selected())`](https://www.webdevtutor.net/blog/c-sharp-wpf-update-ui-from-another-thread) // update DataGrid from another thread

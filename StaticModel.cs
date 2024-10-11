@@ -7,7 +7,7 @@ using System.Windows;
  ; https://www.c-sharpcorner.com/article/datacontext-autowire-in-wpf/
  ; https://learn.microsoft.com/en-us/archive/msdn-magazine/2009/february/patterns-wpf-apps-with-the-model-view-viewmodel-design-pattern
  ; https://scottlilly.com/c-design-patterns-mvvm-model-view-viewmodel/
- */ 
+ */
 namespace blekenbleu.jsonio
 {
     /// <summary>
@@ -15,12 +15,12 @@ namespace blekenbleu.jsonio
     /// </summary>
     public class StaticModel : INotifyPropertyChanged
 	{
-		Control Ctrl;
+        readonly Control Ctrl;
 		public StaticModel(Control C)
 		{
 			Ctrl = C;
-			this.PropertyChanged += Ctrl.OnPropertyChanged;
 		}
+
 		// One event handler for all property changes
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -54,6 +54,8 @@ namespace blekenbleu.jsonio
 				{
                 	_selected_Property = value;
                 	PropertyChanged?.Invoke(this, Sevent);
+					// update xaml DataGrid from another thread
+                    Ctrl.Dispatcher.Invoke(() => Ctrl.Selected());
 				}
             }
         }
