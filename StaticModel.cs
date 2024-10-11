@@ -15,11 +15,19 @@ namespace blekenbleu.jsonio
     /// </summary>
     public class StaticModel : INotifyPropertyChanged
 	{
+		Control Ctrl;
+		public StaticModel(Control C)
+		{
+			Ctrl = C;
+			this.PropertyChanged += Ctrl.OnPropertyChanged;
+		}
 		// One event handler for all property changes
 		public event PropertyChangedEventHandler PropertyChanged;
+
         // events to raise
         readonly PropertyChangedEventArgs Vevent = new PropertyChangedEventArgs("ButtonVisibility");
         readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
+        readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("Selected_Property");
 
 		private Visibility _visibility;
 		public Visibility ButtonVisibility	// must be public for XAML Binding
@@ -34,6 +42,21 @@ namespace blekenbleu.jsonio
 				}
 			}
 		}
+
+		private string _selected_Property = "unKnown";
+		public string Selected_Property			// must be public for XAML Binding
+        {
+            get { return _selected_Property; }
+
+            set
+            {
+                if (value != _selected_Property)
+				{
+                	_selected_Property = value;
+                	PropertyChanged?.Invoke(this, Sevent);
+				}
+            }
+        }
 
 		private string _statusText = "Waiting for Car Change";
 		public string StatusText			// must be public for XAML Binding

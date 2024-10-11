@@ -186,6 +186,7 @@ namespace blekenbleu.jsonio
 		private void SelectedStatus()
 		{
 			Selected_Property = simValues[View.Selection].Name;
+			Control.Model.Selected_Property = simValues[View.Selection].Name;
 			Control.Model.StatusText = Gname + " " + CurrentCar.ID + " " + Selected_Property;
 		}
 
@@ -390,10 +391,14 @@ namespace blekenbleu.jsonio
 				this.AttachDelegate(p.Name, () => p.Current);
 
 			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
-				Selected_Property = "unKnown";
+			{
+				if (null != Control.Model)
+					Control.Model.Selected_Property = Selected_Property = "unKnown";
+				else Selected_Property = "unKnown";
+			}
 			else SelectedStatus();
 
-			this.AttachDelegate("Selected", () => Selected_Property);
+			this.AttachDelegate("Selected", () => Control.Model.Selected_Property);
 			this.AttachDelegate("New Car", () => New_Car);
 			this.AttachDelegate("Car", () => CurrentCar.ID);
 			this.AttachDelegate("Game", () => Gname);

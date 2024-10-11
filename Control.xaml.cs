@@ -1,22 +1,26 @@
 ﻿using System.Windows;
+using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System;
 
 namespace blekenbleu.jsonio
 {
-    /// <summary>
-    /// Interaction code for Control.xaml
-    /// </summary>
-    public partial class Control : UserControl
-    {
-		public JSONio Plugin { get; }
+	/// <summary>
+	/// Interaction code for Control.xaml
+	/// </summary>
+	public partial class Control : UserControl
+	{
+		public event EventHandler PropertyChanged;
 
-        // need to reference XAML control from a static method
-        public static StaticModel Model;
+        public JSONio Plugin { get; }
 
-        // this gets called before simprops is initialized
-        public Control() {
-			Model = new StaticModel();
+		// need to reference XAML control from a static method
+		public static StaticModel Model;
+
+		// this gets called before simprops is initialized
+		public Control() {
+			Model = new StaticModel(this);
 			InitializeComponent();
 //	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
 //  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
@@ -33,25 +37,35 @@ namespace blekenbleu.jsonio
 			Model.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
 
+        // https://stackoverflow.com/a/7825054
+        public void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			switch (e.PropertyName)
+			{
+				case "Selected_Property":
+					Selected();
+					break;
+			}
+		}
+
 		private byte _Select;
-        internal byte Selection                            // fortunately changed only on UI thread
-        {
-            get { return _Select; }
-            set
-            {
-                if (_Select != value)
-                {
-                    _Select = value;
-                    Selected();                   		// force selected cell highlight
-                }
-            }
-        }
+		internal byte Selection							// fortunately changed only on UI thread
+		{
+			get { return _Select; }
+			set
+			{
+				if (_Select != value)
+				{
+					_Select = value;
+				}
+			}
+		}
 
 		// handle slider changes
-        private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
-        {
-            TBL.Text = "Gscale:  " + (Plugin.simValues[Plugin.S.Gscale].Current = (0.02 * (float)(int)(0.5 + ((Slider)sender).Value)).ToString());
-        }
+		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
+		{
+			TBL.Text = "Gscale:  " + (Plugin.simValues[Plugin.S.Gscale].Current = (0.02 * (float)(int)(0.5 + ((Slider)sender).Value)).ToString());
+		}
 
 		internal void Slslider_Point()
 		{

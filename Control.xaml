@@ -4,76 +4,76 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:blekenbleu.jsonio"
-             mc:Ignorable="d"
+			 mc:Ignorable="d"
 		Width="480">
-    <Grid Margin="0,0,0,0">
-        <Label x:Name="SHlabel" Content="JSONio Properties Manager" Width="164" Height="25"
+	<Grid Margin="0,0,0,0">
+		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Width="164" Height="25"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,10,0,0"/>
-        <TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
+		<TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="310,18,0,0"/>
-        <TextBlock x:Name="Status" Text="{Binding StatusText}" Height="21" Width="350"
+		<TextBlock x:Name="Status" Text="{Binding StatusText}" Height="21" Width="350"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,40,0,0"/>
-        <Button x:Name="b0" Content=" Up " Height="40" Click="Prior_Click"
+		<Button x:Name="b0" Content=" Up " Height="40" Click="Prior_Click"
 				Visibility="{Binding ButtonVisibility}"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,70,0,0"/>
-        <Button x:Name="b1" Content="Down" Height="40" Click="Next_Click"
+		<Button x:Name="b1" Content="Down" Height="40" Click="Next_Click"
 				Visibility="{Binding ButtonVisibility}"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,70,0,0"/>
-        <Button x:Name="b2" Content=" + " Height="40" Click="Inc_Click"
+		<Button x:Name="b2" Content=" + " Height="40" Click="Inc_Click"
 				Visibility="{Binding ButtonVisibility}"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="177,70,0,0"/>
-        <Button x:Name="b3" Content=" - " Height="40" Click="Dec_Click"
+		<Button x:Name="b3" Content=" - " Height="40" Click="Dec_Click"
 				Visibility="{Binding ButtonVisibility}"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,70,0,0"/>
-        <Button x:Name="b4" Content="Current&lt;-&gt;&#xA;Previous" Height="40"
+		<Button x:Name="b4" Content="Current&lt;-&gt;&#xA;Previous" Height="40"
 				Click="Swap_Click" Visibility="{Binding ButtonVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="240,70,0,0"/>
-        <Button x:Name="b5" Content="Current&#xA;-&gt;Default" Height="40"
+		<Button x:Name="b5" Content="Current&#xA;-&gt;Default" Height="40"
 				Click="Def_Click" Visibility="{Binding ButtonVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="320,70,0,0"/>
-        <Slider Maximum="100" Minimum="0" TickPlacement="BottomRight" TickFrequency="3"
+		<Slider Maximum="100" Minimum="0" TickPlacement="BottomRight" TickFrequency="3"
 				Name="SL" Value="40" PreviewMouseUp="SLslider_DragCompleted" Width="250" Height="20"
-                VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,115,0,0"/>
-        <TextBox Name="TBL" Text="Gscale" Width="95" Height="22"
+				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,115,0,0"/>
+		<TextBox Name="TBL" Text="Gscale" Width="95" Height="22"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="330,112,0,0"/>
 
-        <DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
+		<DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
 				SelectionUnit="Cell" SelectionMode="Single" Loaded="DgSelect" CanUserAddRows="False"
 				VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,140,0,20">
-            <DataGrid.CellStyle>
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="IsHitTestVisible" Value="False"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="Red"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.CellStyle>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Property" Binding="{Binding Name}"/>
-                <DataGridTextColumn Header="Current" Binding="{Binding Current}">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Previous" Binding="{Binding Previous}">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Default" Binding="{Binding Default}">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="HorizontalAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+			<DataGrid.CellStyle>
+				<Style TargetType="{x:Type DataGridCell}">
+					<Setter Property="IsHitTestVisible" Value="False"/>
+					<Style.Triggers>
+						<Trigger Property="IsSelected" Value="True">
+							<Setter Property="Background" Value="Red"/>
+						</Trigger>
+					</Style.Triggers>
+				</Style>
+			</DataGrid.CellStyle>
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Property" Binding="{Binding Name}"/>
+				<DataGridTextColumn Header="Current" Binding="{Binding Current}">
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="{x:Type TextBlock}">
+							<Setter Property="HorizontalAlignment" Value="Center" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Previous" Binding="{Binding Previous}">
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="{x:Type TextBlock}">
+							<Setter Property="HorizontalAlignment" Value="Center" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Header="Default" Binding="{Binding Default}">
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="{x:Type TextBlock}">
+							<Setter Property="HorizontalAlignment" Value="Center" />
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+	</Grid>
 </UserControl>
