@@ -18,7 +18,10 @@ namespace blekenbleu.jsonio
         public Control() {
 			Model = new StaticModel();
 			InitializeComponent();
+//	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
+//  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
 			this.DataContext = Model;						// StaticControl events change Control.xaml properties
+// alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
 			Version.Text = "Version 2.17";
 		}
 
