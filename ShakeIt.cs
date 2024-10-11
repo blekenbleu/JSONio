@@ -42,7 +42,7 @@ namespace blekenbleu.jsonio
 
 		internal float Current (int prop)
 		{
-			return float.Parse(J.simprops[prop].Current);
+			return float.Parse(J.simValues[prop].Current);
 		}
 
 		internal void Init(JSONio j, PluginManager p)
@@ -53,11 +53,11 @@ namespace blekenbleu.jsonio
 			corner = new string[] {".FrontLeft", ".FrontRight", ".RearLeft", ".RearRight" };
 			SG = new double[] { 0, 0, 0, 0 };
 
-			gamma = J.simprops.FindIndex(i => i.Name == "gamma");					// ProxyS() applies it to wslip
-			SlipGain = J.simprops.FindIndex(i => i.Name == "SlipGain");				// ProxyS() applies it to wslip
-			EffectStrength = J.simprops.FindIndex(i => i.Name == "EffectStrength");	// SlipGrip amplitude
-			threshold = J.simprops.FindIndex(i => i.Name == "threshold");			// LoadedSlipGrip() applies it
-			Gscale = J.simprops.FindIndex(i => i.Name == "Gscale");					// LoadedSlipGrip() applies it
+			gamma = J.simValues.FindIndex(i => i.Name == "gamma");					// ProxyS() applies it to wslip
+			SlipGain = J.simValues.FindIndex(i => i.Name == "SlipGain");				// ProxyS() applies it to wslip
+			EffectStrength = J.simValues.FindIndex(i => i.Name == "EffectStrength");	// SlipGrip amplitude
+			threshold = J.simValues.FindIndex(i => i.Name == "threshold");			// LoadedSlipGrip() applies it
+			Gscale = J.simValues.FindIndex(i => i.Name == "Gscale");					// LoadedSlipGrip() applies it
 /*			------- used for debugging -----------------
 			J.AttachDelegate("GameName", () => pluginManager.GameName);
 			J.AttachDelegate("S.EffectStrength", () =>	Current(EffectStrength));

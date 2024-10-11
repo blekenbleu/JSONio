@@ -19,13 +19,13 @@ namespace blekenbleu.jsonio
 			Model = new StaticModel();
 			InitializeComponent();
 			this.DataContext = Model;						// StaticControl events change Control.xaml properties
-			Version.Text = "Version 2.16";
+			Version.Text = "Version 2.17";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
-			dg.ItemsSource = plugin.simprops;			// DataGrid values
+			dg.ItemsSource = plugin.simValues;			// DataGrid values
 			Model.ButtonVisibility = Visibility.Hidden;	// Buttons should be hidden until carID and game are defined
 			Model.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
@@ -47,13 +47,13 @@ namespace blekenbleu.jsonio
 		// handle slider changes
         private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
         {
-            TBL.Text = "Gscale:  " + (Plugin.simprops[Plugin.S.Gscale].Current = (0.02 * (float)(int)(0.5 + ((Slider)sender).Value)).ToString());
+            TBL.Text = "Gscale:  " + (Plugin.simValues[Plugin.S.Gscale].Current = (0.02 * (float)(int)(0.5 + ((Slider)sender).Value)).ToString());
         }
 
 		internal void Slslider_Point()
 		{
 			SL.Value = 50 * Plugin.S.Current(Plugin.S.Gscale);
-			TBL.Text = "Gscale:  " + Plugin.simprops[Plugin.S.Gscale].Current;
+			TBL.Text = "Gscale:  " + Plugin.simValues[Plugin.S.Gscale].Current;
 		}
 
 		// highlights Current property value selected

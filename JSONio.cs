@@ -37,26 +37,25 @@ namespace blekenbleu.jsonio
 		/// <summary>
 		/// DisplayGrid contents
 		/// </summary>
-		public List<Values> simprops = new List<Values>();		// must be initialized before Init()
+		public List<Values> simValues = new List<Values>();		// must be initialized before Init()
 
-		internal List<Property> Pcopy(List<Values> p)			// deep copy
+		internal void Psave(List<Values> p)			// deep copy for Settings.properties
 		{
-			List<Property> Plist = new List<Property> {};
+			Settings.properties = new List<Property> {};
 			for(int i = 0; i < p.Count; i++)
 				if (null != p[i].Name &&  null != p[i].Current)
-					Plist.Add(new Property() { Name = string.Copy(p[i].Name), Value = string.Copy(p[i].Current) });
-			return Plist;
+					Settings.properties.Add(new Property() { Name = string.Copy(p[i].Name), Value = string.Copy(p[i].Current) });
 		}
 
 		void Scopy(int cndx, GameList game)	// copy matching values from GameList
 		{
 			if (0 > cndx)
 				for (int i = 0; i < pCount; i++)
-					simprops[i].Current = simprops[i].Default = game.cList[0].Vlist[i];
+					simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
 			else for (int i = 0; i < pCount; i++)
 			{
-				simprops[i].Current = game.cList[cndx].Vlist[i];
-				simprops[i].Default = game.cList[0].Vlist[i];
+				simValues[i].Current = game.cList[cndx].Vlist[i];
+				simValues[i].Default = game.cList[0].Vlist[i];
 			}
 		}
 
@@ -137,10 +136,10 @@ namespace blekenbleu.jsonio
 		{
 			// Save settings
 			if (0 < Gname.Length) {
-				Settings.properties = Pcopy(simprops);
+				Psave(simValues);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
-			if (changed = slim.Save_Car(CurrentCar, simprops, Gname) || changed)
+			if (changed = slim.Save_Car(CurrentCar, simValues, Gname) || changed)
 			{
 				string sjs = JsonConvert.SerializeObject(slim.data, Formatting.Indented);
 				if (0 == sjs.Length || "{}" == sjs)
@@ -170,14 +169,14 @@ namespace blekenbleu.jsonio
 			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
 				return;
 			int step = Steps[View.Selection];
-			int iv = (int)(0.004 + 100 * float.Parse(simprops[View.Selection].Current));
+			int iv = (int)(0.004 + 100 * float.Parse(simValues[View.Selection].Current));
 
 			iv += sign * step;
 			if (0 <= iv)
 			{
 				if (0 != step % 100)
-					simprops[View.Selection].Current = $"{(float)(0.01 * iv)}";
-				else simprops[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
+					simValues[View.Selection].Current = $"{(float)(0.01 * iv)}";
+				else simValues[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
 				changed = true;
 				if (S.Gscale == View.Selection)
 					View.Slslider_Point();
@@ -186,7 +185,7 @@ namespace blekenbleu.jsonio
 
 		private void SelectedStatus()
 		{
-			Selected_Property = simprops[View.Selection].Name;
+			Selected_Property = simValues[View.Selection].Name;
 			Control.Model.StatusText = Gname + " " + CurrentCar.ID + " " + Selected_Property;
 		}
 
@@ -201,23 +200,23 @@ namespace blekenbleu.jsonio
 
 			if (next)
 			{
-				if (++View.Selection >= simprops.Count)
+				if (++View.Selection >= simValues.Count)
 					View.Selection = 0;
 			}
 			else if (0 < View.Selection)	// prior
 				View.Selection--;
-			else View.Selection = (byte)(simprops.Count - 1);
+			else View.Selection = (byte)(simValues.Count - 1);
 			SelectedStatus();
 		}
 
 		public void Swap()
 		{
 			string temp;
-			for (int i = 0; i < simprops.Count; i++)
+			for (int i = 0; i < simValues.Count; i++)
 			{
-				temp = simprops[i].Previous;
-				simprops[i].Previous = simprops[i].Current;
-				simprops[i].Current = temp;
+				temp = simValues[i].Previous;
+				simValues[i].Previous = simValues[i].Current;
+				simValues[i].Current = temp;
 			}
 		}
 
@@ -232,9 +231,9 @@ namespace blekenbleu.jsonio
 			{
 				for (p = 0; p < pCount; p++)
 					Glist[Index].cList[0].Vlist[p] =
-					simprops[p].Default = simprops[p].Current;
-				for (; p < simprops.Count; p++)
-					simprops[p].Default = simprops[p].Current;
+					simValues[p].Default = simValues[p].Current;
+				for (; p < simValues.Count; p++)
+					simValues[p].Default = simValues[p].Current;
 			}
 		}
 
@@ -248,7 +247,7 @@ namespace blekenbleu.jsonio
 			{
 				int Index =  fold.FindIndex(j => j.Name == iprops[p]);
 				if (-1 == Index)
-					dlist.Add(new Property() { Name = iprops[p], Value = simprops[p].Default });
+					dlist.Add(new Property() { Name = iprops[p], Value = simValues[p].Default });
 				else dlist.Add(fold[Index]);
 			}
 			return dlist;
@@ -267,7 +266,7 @@ namespace blekenbleu.jsonio
 				if (c >= vals.Count && -1 != Index)
 					s = p;
 
-				simprops.Add(new Values { Name = props[c], Default = s, Current = p, Previous = p });
+				simValues.Add(new Values { Name = props[c], Default = s, Current = p, Previous = p });
 
 				if (c < stps.Count)
 					Steps.Add((int)(100 * float.Parse(stps[c])));
@@ -361,7 +360,7 @@ namespace blekenbleu.jsonio
 				Populate(Sprops, values, steps);
 			}
 
-			if (0 == simprops.Count)
+			if (0 == simValues.Count)
 			{
 				OOps(Control.Model.StatusText = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini");
 				return;
@@ -370,24 +369,24 @@ namespace blekenbleu.jsonio
 			// find Fmin, Fmax settings
 			for (int i = 0; i < Fmin.Length; i++)
 			{
-				int j = simprops.FindIndex(k => k.Name == Fmin[i]);
+				int j = simValues.FindIndex(k => k.Name == Fmin[i]);
 				if (0 <= j)
 					Low[i] = j;
-				j = simprops.FindIndex(k => k.Name == Fmax[i]);
+				j = simValues.FindIndex(k => k.Name == Fmax[i]);
 				if (0 <= j)
                     High[i] = j;
 			}
 
 			path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString();
 			// Load existing JSON, using slim format
-			if (slim.Load(path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString(), simprops))
+			if (slim.Load(path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString(), simValues))
 				Msg = "Init():  " + Msg + " loaded";
 			else
 				changed = OOps($"Init(): {Msg} not found");
 
 			// Declare available properties
 			// these get evaluated "on demand" (when shown or used in formulae)
-			foreach(Values p in simprops)
+			foreach(Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
 
 			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
@@ -412,7 +411,7 @@ namespace blekenbleu.jsonio
  ;--------------------------------------------------------------- */	
 			this.AddAction("ChangeProperties",(a, b) =>
 			{
-				if (0 == simprops.Count)
+				if (0 == simValues.Count)
 					return;
 
 				int ml = 0;
@@ -422,16 +421,16 @@ namespace blekenbleu.jsonio
 				{
 					Msg = "Current Car: " + cname;
 					if (0 < Gname.Length								// do not save first (null) CurrentCar.ID in game
-					 && slim.Save_Car(CurrentCar, simprops, Gname))
+					 && slim.Save_Car(CurrentCar, simValues, Gname))
 					{
 						changed = true;
-						slim.Save_Car(CurrentCar, simprops, Gname);
+						slim.Save_Car(CurrentCar, simValues, Gname);
 						Msg += $";  {CurrentCar.ID} saved";
 					}
 					ml = Msg.Length;
 
 					for (int i = 0; i < pCount; i++)					// copy Current to previous
-						simprops[i].Previous = simprops[i].Current;
+						simValues[i].Previous = simValues[i].Current;
 
 					// indices for new car
 					int gndx, cndx = slim.Car_Change(out gndx, gnew, cname);
