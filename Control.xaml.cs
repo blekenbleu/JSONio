@@ -22,7 +22,7 @@ namespace blekenbleu.jsonio
 			//  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
 			this.DataContext = Model;						// StaticControl events change Control.xaml properties
 			// alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
-			Version.Text = "Version 2.18";
+			Version.Text = "Version 2.19";
 		}
 
 		public Control(JSONio plugin) : this()
@@ -33,7 +33,7 @@ namespace blekenbleu.jsonio
 			Model.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
 
-		internal byte Selection;							// fortunately changed only on UI thread
+		internal byte Selection;							// changed only in JSONio.Select() on UI thread
 
 		// handle slider changes
 		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
@@ -52,7 +52,7 @@ namespace blekenbleu.jsonio
 		{
 			if ((dg.Items.Count > Selection) && (dg.Columns.Count > 2))
 			{
-				//Selection the item.
+				//Select the item.
 				dg.CurrentCell = new DataGridCellInfo(dg.Items[Selection], dg.Columns[1]);
 				dg.SelectedCells.Clear();
 				dg.SelectedCells.Add(dg.CurrentCell);

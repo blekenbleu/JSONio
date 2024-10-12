@@ -15,7 +15,7 @@ namespace blekenbleu.jsonio
     /// </summary>
     public class StaticModel : INotifyPropertyChanged
 	{
-        readonly Control Ctrl;
+        readonly Control Ctrl;				// Dispatcher.Invoke(Ctrl.Selected())
 		public StaticModel(Control C)
 		{
 			Ctrl = C;

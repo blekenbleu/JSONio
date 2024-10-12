@@ -220,11 +220,12 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		private void New_defaults(List<GameList> Glist)
+		internal void New_defaults()	// List<GameList> Glist)
 		{
 			if (0 == Gname.Length)
 				return;
 
+			List<GameList> Glist = slim.data.gList;
 			int p, Index = Glist.FindIndex(i => i.cList[0].Name == Gname);
 
 			if (0 <= Index)
@@ -236,22 +237,6 @@ namespace blekenbleu.jsonio
 					simValues[p].Default = simValues[p].Current;
 			}
 		}
-
-		public void New_defaults() => New_defaults(slim.data.gList);
-
-		/* when JSONio.ini and JSONio.json disagree
-		private List<Property> Refactor(List<string> iprops, List<Property> fold)
-		{
-			List<Property> dlist = new List<Property> {};
-			for (int p = 0; p < pCount; p++)	// JSONio.json does not contain settings ( p >= pCount)
-			{
-				int Index =  fold.FindIndex(j => j.Name == iprops[p]);
-				if (-1 == Index)
-					dlist.Add(new Property() { Name = iprops[p], Value = simValues[p].Default });
-				else dlist.Add(fold[Index]);
-			}
-			return dlist;
-		} */
 
 		// add properties and settings to simprops
 		private void Populate(List<string>props, List<string> vals, List<string> stps)
@@ -279,7 +264,6 @@ namespace blekenbleu.jsonio
 		/// Plugins are rebuilt at game change
 		/// </summary>
 		/// <param name="pluginManager"></param>
-//		GameHandler games;
 		public void Init(PluginManager pluginManager)
 		{
 			List<string> Iprops = new List<string> { "" };
@@ -301,15 +285,6 @@ namespace blekenbleu.jsonio
 				}
 			};
 
-/*			games = new GameHandler()
-			{
-				data = new Games()
-				{
-					name = "JSONio",
-					Glist = new List<Game>() {}
-				}
-			};
- */
 			// Load Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
@@ -399,11 +374,12 @@ namespace blekenbleu.jsonio
 			this.AttachDelegate("Car", () => CurrentCar.ID);
 			this.AttachDelegate("Game", () => Gname);
 			this.AttachDelegate("Msg", () => Msg);
+/*
 			this.AttachDelegate("random0", () => random[0]);
 			this.AttachDelegate("random1", () => random[1]);
 			this.AttachDelegate("random2", () => random[2]);
 			this.AttachDelegate("random3", () => random[3]);
-
+ */
 /*---------	this.AddAction("ChangeProperties",...)
  ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
  ;			[ExportEvent]
