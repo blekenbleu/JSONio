@@ -22,7 +22,7 @@ namespace blekenbleu.jsonio
 			//  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
 			this.DataContext = Model;						// StaticControl events change Control.xaml properties
 			// alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
-			Version.Text = "Version 2.20";
+			Version.Text = "Version 2.21";
 		}
 
 		public Control(JSONio plugin) : this()
