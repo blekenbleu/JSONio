@@ -9,7 +9,7 @@ namespace blekenbleu.jsonio
 	/// </summary>
 	public partial class Control : UserControl
 	{
-        public JSONio Plugin { get; }
+		public JSONio Plugin { get; }
 
 		// need to reference XAML control from a static method
 		public static StaticModel Model;
@@ -33,7 +33,7 @@ namespace blekenbleu.jsonio
 			Model.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
 
-		internal byte Selection;							// changed only in JSONio.Select() on UI thread
+		internal byte Selection;						// changed only in JSONio.Select() on UI thread
 
 		// handle slider changes
 		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)

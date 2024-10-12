@@ -25,7 +25,7 @@ namespace blekenbleu.jsonio
 		private string path;			// JSON file location
 		private string Gname = "";
 		private bool changed;
-		private Slim slim;				// in GameHandler.cs
+		private Slim slim;
 		private List<int> Steps;
 		private List<Property> SetProps;
 		private readonly CarID CurrentCar = new CarID {};
@@ -37,7 +37,7 @@ namespace blekenbleu.jsonio
 		/// </summary>
 		public List<Values> simValues = new List<Values>();		// must be initialized before Init()
 
-		internal void Psave(List<Values> p)			// deep copy for Settings.properties
+		internal void Psave(List<Values> p)						// deep copy for Settings.properties
 		{
 			Settings.properties = new List<Property> {};
 			for(int i = 0; i < p.Count; i++)
