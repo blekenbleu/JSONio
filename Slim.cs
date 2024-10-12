@@ -1,61 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 
 namespace blekenbleu.jsonio
 {
-	// programatically define DataGrid columns
-	// https://wpf-tutorial.com/datagrid-control/custom-columns/
-	public class Values : INotifyPropertyChanged	// https://stackoverflow.com/questions/26871641/how-to-refresh-a-window-in-c-wpf
+	internal class CarID
 	{
-		private string _Default = "default", _Current = "current", _Previous = "previous";
-
-		public event PropertyChangedEventHandler PropertyChanged;
-		private PropertyChangedEventArgs Cevent = new PropertyChangedEventArgs("Current");
-		private PropertyChangedEventArgs Devent = new PropertyChangedEventArgs("Default");
-		private PropertyChangedEventArgs Pevent = new PropertyChangedEventArgs("Previous");
-
-		public string Name { get; set; }	// should not change
-		public string Current
-		{
-			get { return _Current; }
-			set
-			{
-				if (string.Compare(_Current, value) != 0)
-				{
-					_Current = value;
-					PropertyChanged?.Invoke(this, Cevent);
-				}
-			}
-		}
-
-		public string Default
-		{
-			get { return _Default; }
-			set
-			{
-				if (string.Compare(_Default, value) != 0)
-				{
-					_Default = value;
-					PropertyChanged?.Invoke(this, Devent);
-				}
-			}
-		}
-
-		public string Previous
-		{
-			get { return _Previous; }
-			set
-			{
-				if (string.Compare(_Previous, value) != 0)
-				{
-					_Previous = value;
-					PropertyChanged?.Invoke(this, Pevent);
-				}
-			}
-		}
-	}	// class Values
+		public string ID { get; set; }
+	}
 
 // New slim JSON structure ------------------------------------------
 // These must all be declared public for JsonConvert.SerializeObject()
@@ -73,14 +25,14 @@ namespace blekenbleu.jsonio
 	public class GamesList
 	{
 		public string Plugin;			// Plugin Name ("JSONio")
-		public List<string> pList;	// property names, from JSONio.ini
+		public List<string> pList;		// property names, from JSONio.ini
 		public List<GameList> gList;
 	}
 
 	public class Slim
 	{
 		public GamesList data;
-		private JSONio js;
+		private readonly JSONio js;
         public Slim(JSONio plugin)
         {
             this.js = plugin;
@@ -138,51 +90,6 @@ namespace blekenbleu.jsonio
 				js.OOps($"Slim.Load({path}): {nullcarID} null carIDs");
 
 			return (data.gList.Count > 0 && data.gList[0].cList.Count > 1);
-		}
-
-		private List<string> pCopy (List<Property> p)
-		{
-			List<string> l = new List<string> {};
-			for (int i = 0; i < p.Count; i++)
-				l.Add(string.Copy(p[i].Value));
-			return l;
-		}
-
-		internal GamesList Migrate(GameHandler g)
-		{
-			GamesList gsl = new GamesList { Plugin = "JSONio", pList = new List<string> {}, gList  = new List<GameList>{} };
-			if (0 < g.data.Glist.Count)
-			{
-				int i, k, c, v, pc;
-
-				for (i = 0; i < (pc = g.data.Glist[0].defaults.Count); i++)
-					gsl.pList.Add(string.Copy(g.data.Glist[0].defaults[i].Name));
-				for (k = 0; k < g.data.Glist.Count; k++)
-				{
-					if (0 == g.data.Glist[k].Clist.Count)
-						continue;
-
-					GameList gl = new GameList
-					{
-						cList = new List<CarL> {
-							new CarL { Name = g.data.Glist[k].name,
-										Vlist = pCopy(g.data.Glist[k].defaults) } }
-					};
-					for (c = 0; c < g.data.Glist[k].Clist.Count; c++)
-					{
-						CarL car = new CarL
-						{
-							Name = string.Copy(g.data.Glist[k].Clist[c].carID),
-							Vlist = new List<string> {}
-						};
-						for (v = 0; v < pc; v++)
-							car.Vlist.Add(string.Copy(g.data.Glist[k].Clist[c].properties[v].Value));
-						gl.cList.Add(car);
-					}
-					gsl.gList.Add(gl);
-				}
-			}
-			return gsl;
 		}
 
 		bool Mod(int gi, int ci, CarL c)
@@ -251,18 +158,51 @@ namespace blekenbleu.jsonio
 			return (0 <= gi) ? data.gList[gi].cList.FindIndex(c => c.Name == Cname) : -1;
 		}
 	}		// class Slim
+/*
+		private List<string> pCopy (List<Property> p)
+		{
+			List<string> l = new List<string> {};
+			for (int i = 0; i < p.Count; i++)
+				l.Add(string.Copy(p[i].Value));
+			return l;
+		}
 
-// For original JSONio ---------------------------------------------------------------------
-	internal class CarID
-	{
-		public string ID { get; set; }
-	}
+		internal GamesList Migrate(GameHandler g)
+		{
+			GamesList gsl = new GamesList { Plugin = "JSONio", pList = new List<string> {}, gList  = new List<GameList>{} };
+			if (0 < g.data.Glist.Count)
+			{
+				int i, k, c, v, pc;
 
-	public class Property		// must be public for DataPluginSettings
-	{
-		public string Name { get; set; }
-		public string Value { get; set; }
-	}
+				for (i = 0; i < (pc = g.data.Glist[0].defaults.Count); i++)
+					gsl.pList.Add(string.Copy(g.data.Glist[0].defaults[i].Name));
+				for (k = 0; k < g.data.Glist.Count; k++)
+				{
+					if (0 == g.data.Glist[k].Clist.Count)
+						continue;
+
+					GameList gl = new GameList
+					{
+						cList = new List<CarL> {
+							new CarL { Name = g.data.Glist[k].name,
+										Vlist = pCopy(g.data.Glist[k].defaults) } }
+					};
+					for (c = 0; c < g.data.Glist[k].Clist.Count; c++)
+					{
+						CarL car = new CarL
+						{
+							Name = string.Copy(g.data.Glist[k].Clist[c].carID),
+							Vlist = new List<string> {}
+						};
+						for (v = 0; v < pc; v++)
+							car.Vlist.Add(string.Copy(g.data.Glist[k].Clist[c].properties[v].Value));
+						gl.cList.Add(car);
+					}
+					gsl.gList.Add(gl);
+				}
+			}
+			return gsl;
+		}
 
 	public class Car
 	{
@@ -381,4 +321,5 @@ namespace blekenbleu.jsonio
 			return (0 <= gi) ? data.Glist[gi].Clist.FindIndex(c => c.carID == Cname) : -1;
 		}
 	}	// class GameHandler
+ */
 }
