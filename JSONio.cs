@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Forms;
+using System;
 
 namespace blekenbleu.jsonio
 {
@@ -20,17 +21,19 @@ namespace blekenbleu.jsonio
 		public ShakeIt S = new ShakeIt {};
 		internal int[] Low, High;
 		internal static int pCount;														// global Property settings appended after pCount
+		internal int slider = -1;														// simValues index for configured JSONIO.properties
 		private static string Msg = "";
 		private static readonly string My = "JSONio.";									// breaks Ini if not preceding
 		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		private string[] Fmin, Fmax;
 		private bool changed;
 		private readonly CarID CurrentCar = new CarID {};
-		private string Gname = "", slider = "";
+		private string Gname = "";
 		private string path;															// JSON file location
 		private Slim slim;
 		private List<Property> SetProps;
-		private List<int> Steps;
+		private List<int> Steps;														// 100 times actual values
+		private double[] Slider_factor = new double[] { 0, 0 };
 
 		/// <summary>
 		/// DisplayGrid contents
@@ -147,8 +150,40 @@ namespace blekenbleu.jsonio
 
 		internal void SetSlider()
 		{
-			if (null != slider && 0 <= simValues.FindIndex(k => k.Name == slider))
-				Control.Model.Slider_Property = slider;
+			if (0 > slider)
+				return;
+
+			Control.Model.Slider_Property = simValues[slider].Name;
+			/* slider View.SL.Maximum = 100; scale property to it, based on Steps[slider]
+			 ; Steps	   Guestimated range
+			 ; 1  (0.01)	0 - 2
+			 ; 10 (0.10)	0 - 10	
+			 ; 100 (1)		0 - 100
+			 ; 1000 (10)	0 - 1000
+			 */
+			if (0 != Steps[slider] % 10)
+			{
+				Slider_factor[0] = 0.02;	// slider to value
+				Slider_factor[1] = 50;	// value to slider
+			} else if (0 != Steps[slider] % 100) {
+				Slider_factor[0] = 0.1;	// slider to value
+				Slider_factor[1] = 10;	// value to slider
+			} else {
+				Slider_factor[0] = 1;	// slider to value
+				Slider_factor[1] = 1;	// value to slider
+			}
+		}
+
+		internal string FromSlider(double value)
+		{
+			simValues[slider].Current = (Slider_factor[0] * (int)value).ToString();
+			return simValues[slider].Name + ":  " + simValues[slider].Current;
+		}
+
+		internal double ToSlider()
+		{
+			View.TBL.Text = simValues[slider].Name + ":  " + simValues[slider].Current;
+			return Slider_factor[1] * Convert.ToDouble(simValues[slider].Current);
 		}
 
 		/// <summary>
@@ -170,7 +205,7 @@ namespace blekenbleu.jsonio
 					simValues[View.Selection].Current = $"{(float)(0.01 * iv)}";
 				else simValues[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
 				changed = true;
-				if (S.Gscale == View.Selection)
+				if (slider == View.Selection)
 					View.Slslider_Point();
 			}
 		}
@@ -283,7 +318,7 @@ namespace blekenbleu.jsonio
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
 			// Declare an event and corresponding action
-            this.AddEvent("JSONioOOps");
+			this.AddEvent("JSONioOOps");
 			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
 
 			// restore previously saved car properties
@@ -340,7 +375,9 @@ namespace blekenbleu.jsonio
 				return;
 			}
 
-			slider = pluginManager.GetPropertyValue(Myni + "slider")?.ToString();
+			string sl = pluginManager.GetPropertyValue(Myni + "slider")?.ToString();
+			if (null != sl)
+				slider = simValues.FindIndex(i => i.Name == sl);
 
 			// find Fmin, Fmax settings
 			for (int i = 0; i < Fmin.Length; i++)
