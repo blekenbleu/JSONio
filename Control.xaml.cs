@@ -2,6 +2,12 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
+/* XAML DataContext:  Binding source
+ ;	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
+ ;	https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
+ ;	alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
+ */
+
 namespace blekenbleu.jsonio
 {
 	/// <summary>
@@ -10,46 +16,25 @@ namespace blekenbleu.jsonio
 	public partial class Control : UserControl
 	{
 		public JSONio Plugin { get; }
+		public static StaticModel Model;				// must reference XAML controls from statics
+		internal byte Selection;						// changed only in JSONio.Select() on UI thread
 
-		// need to reference XAML control from a static method
-		public static StaticModel Model;
-
-		// this gets called before simprops is initialized
-		public Control() {
+		public Control() {								// called before simValues are initialized
 			Model = new StaticModel(this);
 			InitializeComponent();
-			//	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
-			//  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
-			this.DataContext = Model;						// StaticControl events change Control.xaml properties
-			// alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
-			Version.Text = "Version 2.22";
+			this.DataContext = Model;					// StaticControl events change Control.xaml properties
+			Version.Text = "Version 2.23";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
-			plugin.SetSlider();
+			plugin.SetSlider();							// whenever SimHub gets around to calling 
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
-			Model.ButtonVisibility = Visibility.Hidden;	// Buttons should be hidden until carID and game are defined
-			Model.StatusText = "Launch game (or Replay) to enable property value changes";
 		}
 
-		internal byte Selection;						// changed only in JSONio.Select() on UI thread
-
-		// handle slider changes
-		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
-		{
-			TBL.Text = "Gscale:  " + (Plugin.simValues[Plugin.S.Gscale].Current = (0.02 * (float)(int)(0.5 + ((Slider)sender).Value)).ToString());
-		}
-
-		internal void Slslider_Point()
-		{
-			SL.Value = 50 * Plugin.S.Current(Plugin.S.Gscale);
-			TBL.Text = "Gscale:  " + Plugin.simValues[Plugin.S.Gscale].Current;
-		}
-
-		// highlights Current property value selected
-		internal void Selected()	// crashes if called from other threads
+		// highlights selected property cell
+		internal void Selected()						// crashes if called from other threads
 		{
 			if ((dg.Items.Count > Selection) && (dg.Columns.Count > 2))
 			{
@@ -60,11 +45,24 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		// highlights selected cell when plugin first displays
-		private void DgSelect(object sender, RoutedEventArgs e) { Selected(); }
+		private void DgSelect(object sender, RoutedEventArgs e)
+		{
+			Selected();
+		}
 
-		// handle button clicks
-		private void Prior_Click(object sender, RoutedEventArgs e)
+		// handle slider changes
+		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
+		{
+			TBL.Text = "Gscale:  " + (Plugin.simValues[Plugin.S.Gscale].Current = (0.02 * (int)(0.5 + ((Slider)sender).Value)).ToString());
+		}
+
+		internal void Slslider_Point()
+		{
+			SL.Value = 50 * Plugin.S.Current(Plugin.S.Gscale);
+			TBL.Text = "Gscale:  " + Plugin.simValues[Plugin.S.Gscale].Current;
+		}
+
+		private void Prior_Click(object sender, RoutedEventArgs e)	// handle button clicks
 		{
 			Plugin.Select(false);
 		}
