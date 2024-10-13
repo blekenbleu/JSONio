@@ -17,18 +17,18 @@ namespace blekenbleu.jsonio
 	{
 		public DataPluginSettings Settings;
 		public string New_Car = "false";
-		internal static int pCount;                                                     // global Property settings appended after pCount
-		internal int slider = -1;                                                       // simValues index for configured JSONIO.properties
+		internal static int pCount;														// global Property settings appended after pCount
+		internal int slider = -1;														// simValues index for configured JSONIO.properties
 		private static string Msg = "";
-		private static readonly string My = "JSONio.";                                  // breaks Ini if not preceding
-		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;    // configuration source
+		private static readonly string My = "JSONio.";									// breaks Ini if not preceding
+		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		private bool changed;
-		private readonly CarID CurrentCar = new CarID { };
+		private readonly CarID CurrentCar = new CarID {};
 		private string Gname = "";
-		private string path;                                                            // JSON file location
+		private string path;															// JSON file location
 		private Slim slim;
 		private List<Property> SetProps;
-		private List<int> Steps;                                                        // 100 times actual values
+		private List<int> Steps;														// 100 times actual values
 		private double[] Slider_factor = new double[] { 0, 0 };
 
 		/// <summary>
@@ -130,8 +130,8 @@ namespace blekenbleu.jsonio
 				return;
 
 			Control.Model.Slider_Property = simValues[slider].Name;
-            /* slider View.SL.Maximum = 100; scale property to it, based on Steps[slider]
-			 ; Steps       Guestimated range
+			/* slider View.SL.Maximum = 100; scale property to it, based on Steps[slider]
+			 ; Steps	   Guestimated range
 			 ; 1  (0.01)	0 - 2
 			 ; 10 (0.10)	0 - 10	
 			 ; 100 (1)		0 - 100
@@ -139,10 +139,13 @@ namespace blekenbleu.jsonio
 			 */
 			if (0 != Steps[slider] % 10)
 			{
-            	Slider_factor[0] = 0.02;	// slider to value
+				Slider_factor[0] = 0.02;	// slider to value
 				Slider_factor[1] = 50;	// value to slider
+			} else if (0 != Steps[slider] % 100) {
+				Slider_factor[0] = 0.1;	// slider to value
+				Slider_factor[1] = 10;	// value to slider
 			} else {
-	            Slider_factor[0] = 1;	// slider to value
+				Slider_factor[0] = 1;	// slider to value
 				Slider_factor[1] = 1;	// value to slider
 			}
 		}
@@ -286,7 +289,7 @@ namespace blekenbleu.jsonio
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
 			// Declare an event and corresponding action
-            this.AddEvent("JSONioOOps");
+			this.AddEvent("JSONioOOps");
 			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
 
 			// restore previously saved car properties
