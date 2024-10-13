@@ -206,3 +206,13 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- **Gscale** affects `Grip` values
 	- Version 2.18: enable **PREV** and **NEXT** from iPhone - *11 Oct*  
 		[`Dispatcher.Invoke(() => Ctrl.Selected())`](https://www.webdevtutor.net/blog/c-sharp-wpf-update-ui-from-another-thread) // update DataGrid from another thread
+- *12 Oct* - sync most code to [master branch](https://github.com/blekenbleu/JSONio/)
+### *13 Oct* - **configurable slider**  
+- instead of hard-coded to `Gscale`
+- configured in [`NCalcScripts/JSONio.ini`](NCalcScripts/JSONio.ini),   
+	where `value` may be any name in `JSONio.properties`, e.g.:
+```
+[ExportProperty]
+name='JSONio.slider'
+value='Gscale' 
+```
