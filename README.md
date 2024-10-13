@@ -179,3 +179,13 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		`this.AddAction("OopsMessageBox", (a, b) => OOpsMB());`
 
 - *12 Oct* - sync most code to [SlipGrip branch](https://github.com/blekenbleu/JSONio/tree/SlipGrip)
+### *13 Oct* - **configurable slider**  
+- instead of hard-coded to `Gscale`
+- configured in [`NCalcScripts/JSONio.ini`](NCalcScripts/JSONio.ini),   
+	where `value` may be any name in `JSONio.properties`, e.g.:
+```
+[ExportProperty]
+name='JSONio.slider'
+value='Gscale' 
+```
+
