@@ -31,8 +31,8 @@ namespace blekenbleu.jsonio
         readonly PropertyChangedEventArgs SVevent = new PropertyChangedEventArgs("SliderVisibility");
         readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
 
-		private Visibility _bvis;
-		public Visibility ButtonVisibility		// must be public for XAML Binding
+		private Visibility _bvis = Visibility.Hidden;	// until carID and game are defined
+		public Visibility ButtonVisibility				// must be public for XAML Binding
 		{
 			get { return _bvis; }
 			set
@@ -92,7 +92,7 @@ namespace blekenbleu.jsonio
             }
         }
 
-		private string _statusText = "Waiting for Car Change";
+		private string _statusText = "To enable:  launch game or Replay";
 		public string StatusText			// must be public for XAML Binding
         {
             get { return _statusText; }
