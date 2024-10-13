@@ -25,20 +25,36 @@ namespace blekenbleu.jsonio
 		public event PropertyChangedEventHandler PropertyChanged;
 
         // events to raise
-        readonly PropertyChangedEventArgs Vevent = new PropertyChangedEventArgs("ButtonVisibility");
-        readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
+        readonly PropertyChangedEventArgs Bevent = new PropertyChangedEventArgs("ButtonVisibility");
+        readonly PropertyChangedEventArgs Nevent = new PropertyChangedEventArgs("Slider_Property");
         readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("Selected_Property");
+        readonly PropertyChangedEventArgs SVevent = new PropertyChangedEventArgs("SliderVisibility");
+        readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
 
-		private Visibility _visibility;
-		public Visibility ButtonVisibility	// must be public for XAML Binding
+		private Visibility _bvis;
+		public Visibility ButtonVisibility		// must be public for XAML Binding
 		{
-			get { return _visibility; }
+			get { return _bvis; }
 			set
 			{
-				if (_visibility != value)
+				if (_bvis != value)
                 {
-					_visibility = value;
-					PropertyChanged?.Invoke(this, Vevent);
+					_bvis = value;
+					PropertyChanged?.Invoke(this, Bevent);
+				}
+			}
+		}
+
+		private Visibility _svis = Visibility.Hidden;
+		public Visibility SliderVisibility		// must be public for XAML Binding
+		{
+			get { return _svis; }
+			set
+			{
+				if (_svis != value)
+                {
+					_svis = value;
+					PropertyChanged?.Invoke(this, SVevent);
 				}
 			}
 		}
@@ -56,6 +72,22 @@ namespace blekenbleu.jsonio
                 	PropertyChanged?.Invoke(this, Sevent);
 					// update xaml DataGrid from another thread
                     Ctrl.Dispatcher.Invoke(() => Ctrl.Selected());
+				}
+            }
+        }
+
+		private string _slider_Property = "";
+		public string Slider_Property			// must be public for XAML Binding
+        {
+            get { return _slider_Property; }
+
+            set
+            {
+                if (value != _slider_Property)
+				{
+                	_slider_Property = value;
+                	PropertyChanged?.Invoke(this, Nevent);
+					SliderVisibility = Visibility.Visible;
 				}
             }
         }

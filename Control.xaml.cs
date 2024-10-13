@@ -22,12 +22,13 @@ namespace blekenbleu.jsonio
 			//  https://www.codeproject.com/articles/126249/mvvm-pattern-in-wpf-a-simple-tutorial-for-absolute
 			this.DataContext = Model;						// StaticControl events change Control.xaml properties
 			// alternatively, DataContext in XAML	https://dev.to/mileswatson/a-beginners-guide-to-mvvm-using-c-wpf-241b
-			Version.Text = "Version 2.21";
+			Version.Text = "Version 2.22";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
+			plugin.SetSlider();
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
 			Model.ButtonVisibility = Visibility.Hidden;	// Buttons should be hidden until carID and game are defined
 			Model.StatusText = "Launch game (or Replay) to enable property value changes";

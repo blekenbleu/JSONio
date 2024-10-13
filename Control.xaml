@@ -34,8 +34,10 @@
 
 		<Slider Maximum="100" Minimum="0" TickPlacement="BottomRight" TickFrequency="3"
 				Name="SL" Value="40" PreviewMouseUp="SLslider_DragCompleted" Width="250" Height="20"
+				Visibility="{Binding SliderVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,115,0,0"/>
-		<TextBox Name="TBL" Text="Gscale" Width="95" Height="22"
+		<TextBox Name="TBL" Text="{Binding Slider_Property}" Width="95" Height="22"
+				Visibility="{Binding SliderVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="330,112,0,0"/>
 
 		<DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
