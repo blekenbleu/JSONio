@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Forms;
+using System;
 
 namespace blekenbleu.jsonio
 {
@@ -16,41 +17,31 @@ namespace blekenbleu.jsonio
 	{
 		public DataPluginSettings Settings;
 		public string New_Car = "false";
-		internal static string Msg = "";
-		internal static readonly string My = "JSONio.";			// breaks Ini if not preceding
-		internal static readonly string Ini = "DataCorePlugin.ExternalScript." + My;	// configuration source
-		internal static int pCount;								// global Property settings appended after pCount
-		private string path;			// JSON file location
-		private string Gname = "";
+		internal static int pCount;                                                     // global Property settings appended after pCount
+		internal int slider = -1;                                                       // simValues index for configured JSONIO.properties
+		private static string Msg = "";
+		private static readonly string My = "JSONio.";                                  // breaks Ini if not preceding
+		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;    // configuration source
 		private bool changed;
+		private readonly CarID CurrentCar = new CarID { };
+		private string Gname = "";
+		private string path;                                                            // JSON file location
 		private Slim slim;
-		private List<int> Steps;
 		private List<Property> SetProps;
-		private readonly CarID CurrentCar = new CarID {};
+		private List<int> Steps;                                                        // 100 times actual values
+		private double[] Slider_factor = new double[] { 0, 0 };
 
 		/// <summary>
 		/// DisplayGrid contents
 		/// </summary>
-		public List<Values> simValues = new List<Values>();		// must be initialized before Init()
+		public List<Values> simValues = new List<Values>();								// must be initialized before Init()
 
-		internal void Psave(List<Values> p)						// deep copy for Settings.properties
+		internal void Psave(List<Values> p)												// deep copy for Settings.properties
 		{
 			Settings.properties = new List<Property> {};
 			for(int i = 0; i < p.Count; i++)
 				if (null != p[i].Name &&  null != p[i].Current)
 					Settings.properties.Add(new Property() { Name = string.Copy(p[i].Name), Value = string.Copy(p[i].Current) });
-		}
-
-		void Scopy(int cndx, GameList game)	// copy matching values from GameList
-		{
-			if (0 > cndx)
-				for (int i = 0; i < pCount; i++)
-					simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
-			else for (int i = 0; i < pCount; i++)
-			{
-				simValues[i].Current = game.cList[cndx].Vlist[i];
-				simValues[i].Default = game.cList[0].Vlist[i];
-			}
 		}
 
 		/// <summary>
@@ -133,6 +124,41 @@ namespace blekenbleu.jsonio
 			return View = new Control(this);		// invoked *after* Init()
 		}
 
+		internal void SetSlider()
+		{
+			if (0 > slider)
+				return;
+
+			Control.Model.Slider_Property = simValues[slider].Name;
+            /* slider View.SL.Maximum = 100; scale property to it, based on Steps[slider]
+			 ; Steps       Guestimated range
+			 ; 1  (0.01)	0 - 2
+			 ; 10 (0.10)	0 - 10	
+			 ; 100 (1)		0 - 100
+			 ; 1000 (10)	0 - 1000
+			 */
+			if (0 != Steps[slider] % 10)
+			{
+            	Slider_factor[0] = 0.02;	// slider to value
+				Slider_factor[1] = 50;	// value to slider
+			} else {
+	            Slider_factor[0] = 1;	// slider to value
+				Slider_factor[1] = 1;	// value to slider
+			}
+		}
+
+		internal string FromSlider(double value)
+		{
+			simValues[slider].Current = (Slider_factor[0] * (int)value).ToString();
+			return simValues[slider].Name + ":  " + simValues[slider].Current;
+		}
+
+		internal double ToSlider()
+		{
+			View.TBL.Text = simValues[slider].Name + ":  " + simValues[slider].Current;
+			return Slider_factor[1] * Convert.ToDouble(simValues[slider].Current);
+		}
+
 		/// <summary>
 		/// Helper functions used in Init() AddAction()s and Control.xaml.cs button Clicks
 		/// </summary>
@@ -152,6 +178,8 @@ namespace blekenbleu.jsonio
 					simValues[View.Selection].Current = $"{(float)(0.01 * iv)}";
 				else simValues[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
 				changed = true;
+				if (slider == View.Selection)
+					View.Slslider_Point();
 			}
 		}
 
@@ -160,7 +188,7 @@ namespace blekenbleu.jsonio
 			if (null == Control.Model)
 				return;
 			Control.Model.Selected_Property = simValues[View.Selection].Name;
-			Control.Model.StatusText = Gname + " " + CurrentCar.ID + " " + Control.Model.Selected_Property;
+			Control.Model.StatusText = Gname + " " + CurrentCar.ID + ":\t" + Control.Model.Selected_Property;
 		}
 
 		/// <summary>
@@ -270,9 +298,9 @@ namespace blekenbleu.jsonio
 			Steps = new List<int>() { };
 
 			// Load property and setting names, default values and steps from JSONio.ini
-			string pts, ds = pluginManager.GetPropertyValue(pts = Ini + "properties")?.ToString();
-			string vts, vs = pluginManager.GetPropertyValue(vts = Ini + "values")?.ToString();
-			string sts, ss = pluginManager.GetPropertyValue(sts = Ini + "steps")?.ToString();
+			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
+			string vts, vs = pluginManager.GetPropertyValue(vts = Myni + "values")?.ToString();
+			string sts, ss = pluginManager.GetPropertyValue(sts = Myni + "steps")?.ToString();
 			if ((!(null == ds && OOps($"Init(): '{pts}' not found")))
 			 && (!(null == vs && OOps($"Init(): '{vts}' not found")))
 			 && (!(null == ss && OOps($"Init(): '{sts}' not found")))
@@ -289,9 +317,9 @@ namespace blekenbleu.jsonio
 			}
 
 			// JSONio.ini also optionally defines settings (NOT per-car)
-			string ptts, dss = pluginManager.GetPropertyValue(ptts = Ini + "settings")?.ToString();
-			string vtts, vss = pluginManager.GetPropertyValue(vtts = Ini + "setvals")?.ToString();
-			string stts, sss = pluginManager.GetPropertyValue(stts = Ini + "setsteps")?.ToString();
+			string ptts, dss = pluginManager.GetPropertyValue(ptts = Myni + "settings")?.ToString();
+			string vtts, vss = pluginManager.GetPropertyValue(vtts = Myni + "setvals")?.ToString();
+			string stts, sss = pluginManager.GetPropertyValue(stts = Myni + "setsteps")?.ToString();
 			if ((!(null == dss && OOps($"Init(): '{ptts}' not found")))
 			 && (!(null == vss && OOps($"Init(): '{vtts}' not found")))
 			 && (!(null == sss && OOps($"Init(): '{stts}' not found")))
@@ -307,14 +335,20 @@ namespace blekenbleu.jsonio
 
 			if (0 == simValues.Count)
 			{
-				OOps(Control.Model.StatusText = "Missing or invalid " + Ini + "properties from NCalcScripts/JSONio.ini");
+				string oops = "Missing or invalid " + Myni + "properties from NCalcScripts/JSONio.ini";
+
+				OOps(oops);
+				if (null != Control.Model)
+					Control.Model.StatusText = oops;
 				return;
 			}
 
-
-			path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString();
+			string sl = pluginManager.GetPropertyValue(Myni + "slider")?.ToString();
+			if (null != sl)
+				slider = simValues.FindIndex(i => i.Name == sl);
+			path = pluginManager.GetPropertyValue(Msg = Myni + "file")?.ToString();
 			// Load existing JSON, using slim format
-			if (slim.Load(path = pluginManager.GetPropertyValue(Msg = Ini + "file")?.ToString(), simValues))
+			if (slim.Load(path = pluginManager.GetPropertyValue(Msg = Myni + "file")?.ToString(), simValues))
 				Msg = "Init():  " + Msg + " loaded";
 			else
 				changed = OOps($"Init(): {Msg} not found");
@@ -340,7 +374,7 @@ namespace blekenbleu.jsonio
  ;			name='CarChange'
  ;			trigger=changed(200, [DataCorePlugin.GameData.CarId])
  ;--------------------------------------------------------------- */	
-			this.AddAction("ChangeProperties",(a, b) =>
+			this.AddAction("ChangeProperties", (a, b) =>
 			{
 				if (0 == simValues.Count)
 					return;
@@ -348,10 +382,11 @@ namespace blekenbleu.jsonio
 				int ml = 0;
 				string cname = pluginManager.GetPropertyValue("CarID")?.ToString();
 				string gnew = pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString();
+
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
 				{
 					Msg = "Current Car: " + cname;
-					if (0 < Gname.Length								// do not save first (null) CurrentCar.ID in game
+					if (0 < Gname.Length									// do not save first (null) CurrentCar.ID in game
 					 && slim.Save_Car(CurrentCar, simValues, Gname))
 					{
 						changed = true;
@@ -360,16 +395,27 @@ namespace blekenbleu.jsonio
 					}
 					ml = Msg.Length;
 
-					for (int i = 0; i < pCount; i++)					// copy Current to previous
+					for (int i = 0; i < pCount; i++)						// copy Current to previous
 						simValues[i].Previous = simValues[i].Current;
 
 					// indices for new car
 					int gndx, cndx = slim.Car_Change(out gndx, gnew, cname);
-					New_Car = (-1 == cndx) ? "true" : "false";
-						
+
+					New_Car = (-1 == cndx) ? "true" : "false";						
 					CurrentCar.ID = cname;
-					if (0 <= gndx)										// else reuse current properties
-						Scopy(cndx, slim.data.gList[gndx]);
+					if (0 <= gndx)
+					{														// copy matching values from GameList
+						GameList game = slim.data.gList[gndx];
+						if (0 > cndx)
+							for (int i = 0; i < pCount; i++)
+								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
+						else for (int i = 0; i < pCount; i++)
+						{
+							simValues[i].Current = game.cList[cndx].Vlist[i];
+							simValues[i].Default = game.cList[0].Vlist[i];
+						}
+					}														// else reuse current properties
+
 					SelectedStatus();
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}
