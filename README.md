@@ -2,14 +2,14 @@
  from [SimHubPluginSdk](https://github.com/blekenbleu/SimHubPluginSdk/blob/main/README.md)  
 ## What
 ![](Documentation/B4launch.png) &nbsp; ![](Documentation/launch.png)  
-A common list of custom SimHub properties with values potentially specific to each sim and car.  
+A common list of custom SimHub properties with *some* values potentially specific to each sim and car.  
 In this example, properties are managed for ShakeIt Wheel Slip haptics:  
 ![](Documentation/properties.png)
 - a C# list of games
 	- each `Game` object a `name`, game-specific `defaults Property List<>` and `CList` of `Car` objects
 		- each `Car` object a `carID` and its `List<>` of `Property` objects
 			- each `Property` object a `Name` and `Value` 
-- Properties to be managed are configured in `JSONio.ini`.
+- Properties to be managed are configured in [`JSONio.ini`](NCalcScripts/JSONio.ini).
 ## How
 - instead of just copying that SimHubPluginSdk repository
 	- created a new Visual Studio JSONio WPF project, then quit
@@ -39,7 +39,7 @@ In this example, properties are managed for ShakeIt Wheel Slip haptics:
 - in `JSONio.cs Init()`
 	- create `games` object
 		- populate from configured `.json` file, if existing
-	- populate `simprops Values` object from saved `Settings`, `games` and `JASONio.ini`
+	- populate `simValues` object from saved `Settings`, `games` and `JASONio.ini`
 	- in `this.AddAction("ChangeProperties",(a, b)`
 		- create new `Game` object in `games` when none match current `Game name`
 		- set `game` for matching `games.data.name`
@@ -47,7 +47,7 @@ In this example, properties are managed for ShakeIt Wheel Slip haptics:
 
 My understanding of C# is that `games` could be a jagged array,  
 but jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) better supports
-e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/).
+e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/), based on `JSONio.ini`.
 
 ### To Do &nbsp; *24 Apr 2024*  
 - **done** stop mouse click messing with selected property in UI
@@ -56,14 +56,14 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 	- some tricks:
 		- conversion to/from Car class has uses only first pCount `List<Values>`,  
 		which GameHandler class uses to save cars into `Games data` for `.json` file.
-		- JSONio knows about properties beyond pCount in `List<Values> simprops`...
+		- JSONio knows about properties beyond pCount in `List<Values> simValues`...
 			- these are NOT saved in `.json` files
 			- these ARE available as SimHub properties e.g. for ShakeIt
 			- these ARE available for value changes in user interface  
-	- refactored to use *only* `List<Values> simprops` for user interface;
+	- refactored to use *only* `List<Values> simValues` for user interface;
 		- using `JSONio.ini`, convert from/to `DataPluginSettings Settings` in `Init()`/`End()`
-		- restore/save simprop.Current values from/to `GameHandler games.Car` from/to `JSONio.json`
-- new *slim* .json format storing only one instance of property names, instead of redundantly per-car
+		- restore/save simValue.Current values from/to `GameHandler games.Car` from/to `JSONio.json`
+- **done** *slim* .json format storing only one instance of property names, instead of redundantly per-car
 - [OxyPlot integration](https://github.com/blekenbleu/OxyPlotPlugin)
 
 ## New to me
@@ -116,9 +116,16 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 			- fiddle with margins for Grid and DataGrid to make space for Label
 			- [add DataGrid column Headers](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-add-row-details-to-a-datagrid-control?view=netframeworkdesktop-4.8)
 		- drag in buttons for previous, next, +, -, etc  
-	- *3 April 2024*:  
+- C# [Dispatcher.Invoke()](https://learn.microsoft.com/en-us/dotnet/api/system.windows.threading.dispatcher.invoke?view=windowsdesktop-8.0#system-windows-threading-dispatcher-invoke(system-action))
+	- WPF DataGrid user interface updates want a [method](https://github.com/blekenbleu/JSONio/blob/a1fc9f75966f2fffc43bfcaa66c4cfff117e1d40/Control.xaml.cs#L38).
+	- Invoking method on WPF DataGrid resources is disallowed from other threads.
+	- [`Dispatcher.Invoke()`](https://dotnetpattern.com/wpf-dispatcher) is
+	[*less code*](https://github.com/blekenbleu/JSONio/blob/a1fc9f75966f2fffc43bfcaa66c4cfff117e1d40/StaticModel.cs#L58)
+	than subscribing to `PropertyChanged` events
+### Updates
+- *3 April 2024*:  
 		- [bind Values class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
-		```
+```
 			<DataGrid.Columns>
 				<DataGridTextColumn Header="Property" Binding="{Binding Name}" />
 				<DataGridTextColumn Header="Default" Binding="{Binding Default}" />
@@ -134,29 +141,29 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 			public string Previous { get; set; }
 		}
 		...
-		public List<Values> simprops;
+		public List<Values> simValues;
 
 		public SettingsControl()
 		{
 			InitializeComponent();
 
-			simprops = new List<Values>();
-			dg.ItemsSource = simprops;
+			simValues = new List<Values>();
+			dg.ItemsSource = simValues;
 		}
-		```
-		- bind WPF button clicks directly to Plugin Action methods
-	- *4 Apr*:
-		- test buttons
+```
+	- bind WPF button clicks directly to Plugin Action methods
+- *4 Apr*:
+		- test buttons  
 		- populate `List<Values>` from existing `current`, `previous`, etc
-	- *5 Apr*:
-		- fully functional by buttons
-			- Select hightlight forced for button changes, will not work for dashboard
-		- `simprops` updated from original Lists, pending refactor
+- *5 Apr*:
+		- fully functional by buttons  
+			- Select hightlight forced for button changes, will not work for dashboard  
+		- `simValues` updated from original Lists, pending refactor  
 			- property updates by dashboard *should work*...
-	- *7 Apr*:
-		- fully functional by buttons *and* dashboard
-			- thanks to arguably sketch code rearranging...
-			- still to do:&nbsp; fully integrate `simprops` in `JSONio.cs`
+- *7 Apr*:
+		- fully functional by buttons *and* dashboard  
+			- thanks to arguably sketch code rearranging...  
+			- still to do:&nbsp; fully integrate `simValues` in `JSONio.cs`
 - [**C# WPF XY plot**](https://github.com/blekenbleu/OxyPlotPlugin):&nbsp; SimHub already uses OxyPlot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)
 		- [website](https://oxyplot.github.io/) &nbsp; [documentation](https://oxyplot.readthedocs.io/en/latest/)
@@ -164,7 +171,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- [CodeProject](https://www.codeproject.com/Articles/1164395/Wpf-application-with-real-time-data-in-OxyPlot-cha)
 		- [stackoverflow example](https://stackoverflow.com/questions/44697701/create-an-oxyplot-in-wpf)
 
-- **MessageBox** &nbsp; *12 May 2024*
+- *12 May 2024* - **MessageBox**
 	- SimHub Event triggers do not work from plugin `Init()`
 	- `MessageBox()` during `Init()` (e.g. for `JASONio.ini` configuration errors)  
 		provokes extensive SimHub log error message.

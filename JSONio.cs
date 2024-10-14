@@ -145,7 +145,9 @@ namespace blekenbleu.jsonio
 		private Control View;	// instance of Control.xaml.cs Control()
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
-			return View = new Control(this);		// invoked *after* Init()
+			View = new Control(this);		// invoked *after* Init()
+			View.Slslider_Point();
+			return View;
 		}
 
 		internal void SetSlider()
@@ -464,7 +466,8 @@ namespace blekenbleu.jsonio
 							simValues[i].Default = game.cList[0].Vlist[i];
 						}
 					}														// else reuse current properties
-
+					
+					View.Dispatcher.Invoke(() => View.Slslider_Point());
 					SelectedStatus();
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}

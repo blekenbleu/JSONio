@@ -23,7 +23,7 @@ namespace blekenbleu.jsonio
 			Model = new StaticModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 2.24";
+			Version.Text = "Version 2.25";
 		}
 
 		public Control(JSONio plugin) : this()
