@@ -188,4 +188,3 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 name='JSONio.slider'
 value='Gscale' 
 ```
-
