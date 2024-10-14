@@ -184,6 +184,8 @@ namespace blekenbleu.jsonio
 
 		internal double ToSlider()
 		{
+			if(0 > slider)
+				return 0;
 			View.TBL.Text = simValues[slider].Name + ":  " + simValues[slider].Current;
 			return Slider_factor[1] * Convert.ToDouble(simValues[slider].Current);
 		}
@@ -466,7 +468,7 @@ namespace blekenbleu.jsonio
 							simValues[i].Default = game.cList[0].Vlist[i];
 						}
 					}														// else reuse current properties
-					
+
 					View.Dispatcher.Invoke(() => View.Slslider_Point());
 					SelectedStatus();
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
