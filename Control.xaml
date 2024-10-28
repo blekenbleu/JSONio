@@ -7,7 +7,7 @@
 			 mc:Ignorable="d"
 		Width="480">
 	<Grid Margin="0,0,0,0">
-		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Width="164" Height="25"
+		<Label x:Name="SHlabel" Content="JSONio Grip/Slip Properties" Width="164" Height="25"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,10,0,0"/>
 		<TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="310,18,0,0"/>
