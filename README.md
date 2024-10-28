@@ -1,5 +1,6 @@
 # SimHub JSONio plugin  
  from [SimHubPluginSdk](https://github.com/blekenbleu/SimHubPluginSdk/blob/main/README.md)  
+- **switch to [SlipGrip branch](https://github.com/blekenbleu/JSONio/tree/SlipGrip) for Custom ShakeIt effects implemented in C#**
 ## What
 ![](Documentation/B4launch.png) &nbsp; ![](Documentation/launch.png)  
 A common list of custom SimHub properties with *some* values potentially specific to each sim and car.  
