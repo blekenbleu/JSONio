@@ -19,7 +19,8 @@ namespace blekenbleu.jsonio
 		private JSONio J;
 		private PluginManager pluginManager;
 		internal Random random;
-		internal double Surge, Sway, Heave, RAccG;
+		internal double Surge, Sway, Heave;
+		public double RAccG;
 		internal double[] SG;
 		private string[] corner;
 
@@ -72,10 +73,10 @@ namespace blekenbleu.jsonio
 			J.AttachDelegate("ProxyS"+corner[2], () => ProxyS(2));
 			J.AttachDelegate("ProxyS"+corner[3], () => ProxyS(3));
 
-			J.AttachDelegate("Grip"+corner[0], () => Current(Gscale) * 5 * Grip(0));
-			J.AttachDelegate("Grip"+corner[1], () => Current(Gscale) * 5 * Grip(1));
-			J.AttachDelegate("Grip"+corner[2], () => Current(Gscale) * 5 * Grip(2));
-			J.AttachDelegate("Grip"+corner[3], () => Current(Gscale) * 5 * Grip(3));
+			J.AttachDelegate("Grip"+corner[0], () => Grip(0));
+			J.AttachDelegate("Grip"+corner[1], () => Grip(1));
+			J.AttachDelegate("Grip"+corner[2], () => Grip(2));
+			J.AttachDelegate("Grip"+corner[3], () => Grip(3));
 
 			J.AttachDelegate("SlipGrip"+corner[0], () => SG[0]);
 			J.AttachDelegate("SlipGrip"+corner[1], () => SG[1]);
@@ -87,10 +88,18 @@ namespace blekenbleu.jsonio
 			J.AttachDelegate("FF"+corner[2], () => FF(2));
 			J.AttachDelegate("FF"+corner[3], () => FF(3));
 
+			J.AttachDelegate("PhysicsGrip"+corner[0], () => Current(Gscale) * Raw("Physics.WheelLoad01") / RAccG);
+			J.AttachDelegate("PhysicsGrip"+corner[1], () => Current(Gscale) * Raw("Physics.WheelLoad02") / RAccG);
+			J.AttachDelegate("PhysicsGrip"+corner[2], () => Current(Gscale) * Raw("Physics.WheelLoad03") / RAccG);
+			J.AttachDelegate("PhysicsGrip"+corner[3], () => Current(Gscale) * Raw("Physics.WheelLoad04") / RAccG);
+
 			J.AttachDelegate("LoadedSlipGrip"+corner[0], () => LoadedSlipGrip(SG[0], -1,  1));
 			J.AttachDelegate("LoadedSlipGrip"+corner[1], () => LoadedSlipGrip(SG[1],  1,  1));
 			J.AttachDelegate("LoadedSlipGrip"+corner[2], () => LoadedSlipGrip(SG[2], -1, -1));
 			J.AttachDelegate("LoadedSlipGrip"+corner[3], () => LoadedSlipGrip(SG[3],  1, -1));
+
+			J.AttachDelegate("Physics.Accel", () => RSS1());
+			J.AttachDelegate("SimHub.Accel", () => RSS(Surge, Sway));
 		}
 
 		private double RSS(double x, double y)
@@ -121,7 +130,7 @@ namespace blekenbleu.jsonio
 			double sway = Sway * g[i, 0];
 			double surge = Surge * g[i, 1];
 			double load = 25 + Heave + sway + surge * 0.67;
-			return 1 + 0.99 * 25 * RSS(surge, sway) / (25 > load ? 25 : load);
+			return Current(Gscale) * 5 * (1 + 0.99 * 25 * RSS(Surge, Sway) / (25 > load ? 25 : load));
 		}
 
 		private double ProxyS(int c)
@@ -131,13 +140,12 @@ namespace blekenbleu.jsonio
 
 		public double SHslipGrip(int corner)
 		{
-			return 100 * Math.Min(1, Current(EffectStrength) * 0.1 * ProxyS(corner) / Grip(corner));
+			return 100 * Math.Min(1, Current(EffectStrength) * ProxyS(corner) / Grip(corner));
 		}
 
-		public double ACslipGrip(int proxyS)
+		public double ACslipGrip(int corner)
 		{
-			string Whload = (1 + proxyS).ToString();
-			double sg = 0.000005 * Current(EffectStrength) * ProxyS(proxyS) * Raw("Physics.WheelLoad0"+Whload) / RAccG;
+			double sg = 0.000005 * Current(EffectStrength) * ProxyS(corner) * Raw($"Physics.WheelLoad0{1 + corner}") / RAccG;
 			return 100 * Math.Pow(Math.Min(1, sg), 0.5);
 		}
 

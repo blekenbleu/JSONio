@@ -101,10 +101,14 @@ namespace blekenbleu.jsonio
 			S.Surge = S.Prop("AccelerationSurge");
 			S.Sway = S.Prop("AccelerationSway");
 			S.Heave = S.Prop("AccelerationHeave");
-			S.RAccG = S.RSS1();
+			// AssettoCorsaCompetizione has DataCorePlugin.GameRawData.Physics.WheelLoad properties, but they are zero
+			// estimate load from DataCorePlugin.GameRawData.Physics.SuspensionTravel
+			// fully unloaded suspension travel seems to be 0; fully loaded varies by car...
+			// AssettoCorsa load compression peaks are higher than suspension travel, thanks to dampers...
 			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
 			{
-				S.SG[0] = S.ACslipGrip(0);
+                S.RAccG = S.RSS1();
+                S.SG[0] = S.ACslipGrip(0);
 				S.SG[1] = S.ACslipGrip(1);
 				S.SG[2] = S.ACslipGrip(2);
 				S.SG[3] = S.ACslipGrip(3);
@@ -138,7 +142,7 @@ namespace blekenbleu.jsonio
 		}
 
 		/// <summary>
-		/// Returns the settings control, return null if no settings control is required
+		/// Returns the settings control (AKA View for Model-View-ViewModel pattern)
 		/// </summary>
 		/// <param name="pluginManager"></param>
 		/// <returns> instance of UserControl </returns>
