@@ -81,8 +81,10 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 ```
 	- removed obsolete `Documentation\release.sh`  
 - fix SimHub crashes for `OOps()` popups
-	- moving `OOpsMB()` to `Control.xaml.cs` did not help  
+	- invoke `MessageBox()` by `TriggerEvent()` .. but not in Init()...   
+	- Error Msg early in `Init()` do not survive until `MessageBox()`
 - fix bugs for `JSONio.file` property *not* 'PluginsData/JSONio.json'
+	- initially generated `JSONio.file` is wrong... better later..??!  
 - save global properties and all property names to `Settings`
 - add distinct `JSONio.ini` configuration for per-game properties:
 	- global

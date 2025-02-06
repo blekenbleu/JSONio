@@ -24,13 +24,12 @@ namespace blekenbleu.jsonio
 			Model = new ViewModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 1.26";
+			Version.Text = "Version 1.27";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
-			plugin.SetSlider();							// whenever SimHub gets around to calling
 			if (0 < JSONio.Msg.Length)
 			{
 				Model.StatusText = JSONio.Msg;

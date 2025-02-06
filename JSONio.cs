@@ -54,6 +54,7 @@ namespace blekenbleu.jsonio
 
 		internal void OOpsMB()
 		{
+			Info("OOpsMB(): " + Msg);
 			System.Windows.Forms.MessageBox.Show(Msg, "JSONio");
 			Msg = "";
 		}
@@ -64,7 +65,7 @@ namespace blekenbleu.jsonio
 
 			if (0 < str.Length)
 			{
-				rc = Info(Msg = str);
+				rc = Info("OOps:  " + (Msg = str));
 				if (null != View && null != View.Model)
 					View.Model.StatusText = str;
 				this.TriggerEvent("JSONioOOps");
@@ -96,6 +97,11 @@ namespace blekenbleu.jsonio
 		/// <param name="data">Current game data, including present and previous data frames.</param>
 		public void DataUpdate(PluginManager pluginManager, ref GameData data)
 		{
+				if (0 < Msg.Length)
+				{
+					OOps(Msg);
+					Msg = "";
+				}
 		}
 
 		/// <summary>
@@ -128,6 +134,7 @@ namespace blekenbleu.jsonio
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
 			View = new Control(this);		// invoked *after* Init()
+			SetSlider();
 			View.Slslider_Point();
 			return View;
 		}
@@ -274,6 +281,11 @@ namespace blekenbleu.jsonio
 			}
 		}
 
+		private bool OOpa(string msg)
+		{
+			Msg += msg + "\n";
+			return true;
+		}
 		/// <summary>
 		/// Called once after plugins startup
 		/// Plugins are rebuilt at game change
@@ -301,7 +313,6 @@ namespace blekenbleu.jsonio
 			// Declare an event and corresponding action
 			this.AddEvent("JSONioOOps");
 			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
-			OOps("testing");
 
 			// restore previously saved car properties		<- do this AFTER sorting JSONio.ini??
 			SetProps = new List<Property> {};				// deep copy
@@ -311,13 +322,14 @@ namespace blekenbleu.jsonio
 
 			Steps = new List<int>() { };
 
+			Msg = "";	// accumulate to report after Init()
 			// Load property and setting names, default values and steps from JSONio.ini
 			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Myni + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Myni + "steps")?.ToString();
-			if ((!(null == ds && OOps($"Init(): '{pts}' not found")))
-			 && (!(null == vs && OOps($"Init(): '{vts}' not found")))
-			 && (!(null == ss && OOps($"Init(): '{sts}' not found")))
+			if ((!(null == ds && OOpa($"Init(): '{pts}' not found")))
+			 && (!(null == vs && OOpa($"Init(): '{vts}' not found")))
+			 && (!(null == ss && OOpa($"Init(): '{sts}' not found")))
 				)
 			{
 				// JSONio.ini defines per-car Properties
@@ -326,7 +338,7 @@ namespace blekenbleu.jsonio
 				List<string> values = new List<string>(vs.Split(','));
 				List<string> steps = new List<string>(ss.Split(','));
 				if (pCount != values.Count || pCount != steps.Count)
-					OOps($"Init(): {pCount} per-car properties;  {values.Count} values;  {steps.Count} steps");
+					OOpa($"Init(): {pCount} per-car properties;  {values.Count} values;  {steps.Count} steps");
 				Populate(Iprops, values, steps);
 			}
 
@@ -336,34 +348,32 @@ namespace blekenbleu.jsonio
 			string ptts, dss = pluginManager.GetPropertyValue(ptts = Myni + "settings")?.ToString();
 			string vtts, vss = pluginManager.GetPropertyValue(vtts = Myni + "setvals")?.ToString();
 			string stts, sss = pluginManager.GetPropertyValue(stts = Myni + "setsteps")?.ToString();
-			if ((!(null == dss && OOps($"Init(): '{ptts}' not found")))
-			 && (!(null == vss && OOps($"Init(): '{vtts}' not found")))
-			 && (!(null == sss && OOps($"Init(): '{stts}' not found")))
+			if ((!(null == dss && OOpa($"Init(): '{ptts}' not found")))
+			 && (!(null == vss && OOpa($"Init(): '{vtts}' not found")))
+			 && (!(null == sss && OOpa($"Init(): '{stts}' not found")))
 				)
 			{
 				List<string> Sprops = new List<string>(dss.Split(','));
 				List<string> values = new List<string>(vss.Split(','));
 				List<string> steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Sprops.Count != steps.Count)
-					OOps($"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
+					OOpa($"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
 				Populate(Sprops, values, steps);
 			}
 
 			if (0 == simValues.Count)
 			{
-				OOps("Missing or invalid " + Myni + "properties from NCalcScripts/JSONio.ini");
+				OOpa("Missing or invalid " + Myni + "properties from NCalcScripts/JSONio.ini");
 				return;
 			}
 
 			string sl = pluginManager.GetPropertyValue(Myni + "slider")?.ToString();
 			if (null != sl)
 				slider = simValues.FindIndex(i => i.Name == sl);
-			path = pluginManager.GetPropertyValue(Msg = Myni + "file")?.ToString();
+			path = pluginManager.GetPropertyValue(sl = Myni + "file")?.ToString();
 			// Load existing JSON, using slim format
-			if (slim.Load(path = pluginManager.GetPropertyValue(Msg = Myni + "file")?.ToString(), simValues))
-				Msg = "";
-			else
-				changed = OOps($"Init(): {Msg} not found");
+			if (!slim.Load(path, simValues))
+				changed = OOpa($"Init(): {sl} not found");
 
 			// Declare available properties
 			// these get evaluated "on demand" (when shown or used in formulae)
@@ -443,10 +453,9 @@ namespace blekenbleu.jsonio
 					Msg += ", empty CurrentGame Name, ";
 				else Gname = gnew;
 
-				if (ml < Msg.Length) {
-					Info(Msg);
-					this.TriggerEvent("JSONioOOps");
-				}
+				if (ml < Msg.Length)
+					OOps(Msg);
+				else Msg = "";
 			});
 
 			this.AddAction("IncrementSelectedProperty", (a, b) => Ment(1));

@@ -21,6 +21,5 @@ namespace blekenbleu.jsonio
 
 		public List<string> carpropnames = new List<string>();
 		public List<string> gamepropnames = new List<string>();
-
 	}
 }
