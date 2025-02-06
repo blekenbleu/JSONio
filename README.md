@@ -83,7 +83,7 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 - fix SimHub crashes for `OOps()` popups
 	- moving `OOpsMB()` to `Control.xaml.cs` did not help  
 - fix bugs for `JSONio.file` property *not* 'PluginsData/JSONio.json'
-- save global properties to `Settings`
+- save global properties and all property names to `Settings`
 - add distinct `JSONio.ini` configuration for per-game properties:
 	- global
 	- per game

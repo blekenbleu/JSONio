@@ -13,10 +13,10 @@ namespace blekenbleu.jsonio
     /// <summary>
     /// define a class with Model-view-viewmodel pattern for dynamic UI
     /// </summary>
-    public class StaticModel : INotifyPropertyChanged
+    public class ViewModel : INotifyPropertyChanged
 	{
         readonly Control Ctrl;				// Dispatcher.Invoke(Ctrl.Selected())
-		public StaticModel(Control C)
+		public ViewModel(Control C)
 		{
 			Ctrl = C;
 		}

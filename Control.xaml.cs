@@ -17,26 +17,26 @@ namespace blekenbleu.jsonio
 	public partial class Control : UserControl
 	{
 		public JSONio Plugin { get; }
-		public static StaticModel Model;				// must reference XAML controls from statics
+		public ViewModel Model;							// reference XAML controls
 		internal byte Selection;						// changed only in JSONio.Select() on UI thread
 
 		public Control() {								// called before simValues are initialized
-			Model = new StaticModel(this);
+			Model = new ViewModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 1.25";
+			Version.Text = "Version 1.26";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
-			plugin.SetSlider();							// whenever SimHub gets around to calling 
+			plugin.SetSlider();							// whenever SimHub gets around to calling
+			if (0 < JSONio.Msg.Length)
+			{
+				Model.StatusText = JSONio.Msg;
+				JSONio.Msg = "";
+			}
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
-		}
-
-		internal void OOpsMB()
-		{
-			System.Windows.MessageBox.Show(JSONio.Msg, "JSONio");
 		}
 
 		// highlights selected property cell

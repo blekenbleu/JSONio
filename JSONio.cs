@@ -51,12 +51,13 @@ namespace blekenbleu.jsonio
 			SimHub.Logging.Current.Info(JSONio.My + str);   // bool Info()
 			return true;
 		}
-/*
+
 		internal void OOpsMB()
 		{
-			System.Windows.Forms.MessageBox.Show(Msg, "JSONio", MessageBoxButtons.OK);
+			System.Windows.Forms.MessageBox.Show(Msg, "JSONio");
+			Msg = "";
 		}
- */
+
 		internal bool OOps(string str)
 		{
 			bool rc;
@@ -64,11 +65,9 @@ namespace blekenbleu.jsonio
 			if (0 < str.Length)
 			{
 				rc = Info(Msg = str);
-				if (null != View)
-				{
-					View.Dispatcher.Invoke(() => View.OOpsMB());	// invoke from another thread
-					Msg = "";
-				}
+				if (null != View && null != View.Model)
+					View.Model.StatusText = str;
+				this.TriggerEvent("JSONioOOps");
 			} else rc = true;
 			return rc;
 		}
@@ -130,11 +129,6 @@ namespace blekenbleu.jsonio
 		{
 			View = new Control(this);		// invoked *after* Init()
 			View.Slslider_Point();
-			if (0 < Msg.Length)
-			{
-				View.Dispatcher.Invoke(() => View.OOpsMB());	// invoke from another thread
-				Msg = "";
-			}
 			return View;
 		}
 
@@ -143,7 +137,7 @@ namespace blekenbleu.jsonio
 			if (0 > slider)
 				return;
 
-			Control.Model.Slider_Property = simValues[slider].Name;
+			View.Model.Slider_Property = simValues[slider].Name;
 			/* slider View.SL.Maximum = 100; scale property to it, based on Steps[slider]
 			 ; Steps	   Guestimated range
 			 ; 1  (0.01)	0 - 2
@@ -204,10 +198,10 @@ namespace blekenbleu.jsonio
 
 		private void SelectedStatus()
 		{
-			if (null == Control.Model)
+			if (null == View)
 				return;
-			Control.Model.Selected_Property = simValues[View.Selection].Name;
-			Control.Model.StatusText = Gname + " " + CurrentCar.ID + ":\t" + Control.Model.Selected_Property;
+			View.Model.Selected_Property = simValues[View.Selection].Name;
+			View.Model.StatusText = Gname + " " + CurrentCar.ID + ":\t" + View.Model.Selected_Property;
 		}
 
 		/// <summary>
@@ -306,7 +300,8 @@ namespace blekenbleu.jsonio
 
 			// Declare an event and corresponding action
 			this.AddEvent("JSONioOOps");
-			this.AddAction("OopsMessageBox", (a, b) => View.OOpsMB());
+			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
+			OOps("testing");
 
 			// restore previously saved car properties		<- do this AFTER sorting JSONio.ini??
 			SetProps = new List<Property> {};				// deep copy
@@ -356,11 +351,7 @@ namespace blekenbleu.jsonio
 
 			if (0 == simValues.Count)
 			{
-				string oops = "Missing or invalid " + Myni + "properties from NCalcScripts/JSONio.ini";
-
-				OOps(oops);
-				if (null != Control.Model)
-					Control.Model.StatusText = oops;
+				OOps("Missing or invalid " + Myni + "properties from NCalcScripts/JSONio.ini");
 				return;
 			}
 
@@ -370,7 +361,7 @@ namespace blekenbleu.jsonio
 			path = pluginManager.GetPropertyValue(Msg = Myni + "file")?.ToString();
 			// Load existing JSON, using slim format
 			if (slim.Load(path = pluginManager.GetPropertyValue(Msg = Myni + "file")?.ToString(), simValues))
-				Msg = "Init():  " + Msg + " loaded";
+				Msg = "";
 			else
 				changed = OOps($"Init(): {Msg} not found");
 
@@ -379,11 +370,11 @@ namespace blekenbleu.jsonio
 			foreach(Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
 
-			if ((0 == Gname.Length || 0 == CurrentCar.ID.Length) && null != Control.Model)
-					Control.Model.Selected_Property = "unKnown";
+			if ((0 == Gname.Length || 0 == CurrentCar.ID.Length) && null != View)
+					View.Model.Selected_Property = "unKnown";
 			else SelectedStatus();
 
-			this.AttachDelegate("Selected", () => Control.Model.Selected_Property);
+			this.AttachDelegate("Selected", () => View.Model.Selected_Property);
 			this.AttachDelegate("New Car", () => New_Car);
 			this.AttachDelegate("Car", () => CurrentCar.ID);
 			this.AttachDelegate("Game", () => Gname);
@@ -439,7 +430,7 @@ namespace blekenbleu.jsonio
 
 					View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke from another thread
 					SelectedStatus();
-					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
+					View.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}
 				else if (null == cname)		// CarID verification - should make a popup
 					Msg = "null CarID";
