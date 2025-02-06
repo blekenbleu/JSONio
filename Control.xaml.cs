@@ -24,7 +24,7 @@ namespace blekenbleu.jsonio
 			Model = new StaticModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 1.24";
+			Version.Text = "Version 1.25";
 		}
 
 		public Control(JSONio plugin) : this()
@@ -32,6 +32,11 @@ namespace blekenbleu.jsonio
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
 			plugin.SetSlider();							// whenever SimHub gets around to calling 
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
+		}
+
+		internal void OOpsMB()
+		{
+			System.Windows.MessageBox.Show(JSONio.Msg, "JSONio");
 		}
 
 		// highlights selected property cell

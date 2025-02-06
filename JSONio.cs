@@ -5,7 +5,6 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Windows.Media;
 using System.Windows;
-using System.Windows.Forms;
 using System;
 
 namespace blekenbleu.jsonio
@@ -19,7 +18,7 @@ namespace blekenbleu.jsonio
 		public string New_Car = "false";
 		internal static int pCount;														// global Property settings appended after pCount
 		internal int slider = -1;														// simValues index for configured JSONIO.properties
-		private static string Msg = "";
+		internal static string Msg = "";
 		private static readonly string My = "JSONio.";									// breaks Ini if not preceding
 		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		private bool changed;
@@ -29,7 +28,7 @@ namespace blekenbleu.jsonio
 		private Slim slim;
 		private List<Property> SetProps;
 		private List<int> Steps;														// 100 times actual values
-		private double[] Slider_factor = new double[] { 0, 0 };
+		private readonly double[] Slider_factor = new double[] { 0, 0 };
 
 		/// <summary>
 		/// DisplayGrid contents
@@ -52,18 +51,26 @@ namespace blekenbleu.jsonio
 			SimHub.Logging.Current.Info(JSONio.My + str);   // bool Info()
 			return true;
 		}
-
+/*
 		internal void OOpsMB()
 		{
 			System.Windows.Forms.MessageBox.Show(Msg, "JSONio", MessageBoxButtons.OK);
 		}
-
+ */
 		internal bool OOps(string str)
 		{
+			bool rc;
+
 			if (0 < str.Length)
-				Msg = str;
-			OOpsMB();
-			return (0 == str.Length) || Info(Msg);
+			{
+				rc = Info(Msg = str);
+				if (null != View)
+				{
+					View.Dispatcher.Invoke(() => View.OOpsMB());	// invoke from another thread
+					Msg = "";
+				}
+			} else rc = true;
+			return rc;
 		}
 
 		/// <summary>
@@ -123,6 +130,11 @@ namespace blekenbleu.jsonio
 		{
 			View = new Control(this);		// invoked *after* Init()
 			View.Slslider_Point();
+			if (0 < Msg.Length)
+			{
+				View.Dispatcher.Invoke(() => View.OOpsMB());	// invoke from another thread
+				Msg = "";
+			}
 			return View;
 		}
 
@@ -294,9 +306,9 @@ namespace blekenbleu.jsonio
 
 			// Declare an event and corresponding action
 			this.AddEvent("JSONioOOps");
-			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
+			this.AddAction("OopsMessageBox", (a, b) => View.OOpsMB());
 
-			// restore previously saved car properties
+			// restore previously saved car properties		<- do this AFTER sorting JSONio.ini??
 			SetProps = new List<Property> {};				// deep copy
 			foreach(Property p in Settings.properties)
 				if (null != p.Name && null != p.Value)
@@ -322,6 +334,8 @@ namespace blekenbleu.jsonio
 					OOps($"Init(): {pCount} per-car properties;  {values.Count} values;  {steps.Count} steps");
 				Populate(Iprops, values, steps);
 			}
+
+			// JSONio.ini also optionally defines per-game Properties
 
 			// JSONio.ini also optionally defines settings (NOT per-car)
 			string ptts, dss = pluginManager.GetPropertyValue(ptts = Myni + "settings")?.ToString();
@@ -423,7 +437,7 @@ namespace blekenbleu.jsonio
 						}
 					}														// else reuse current properties
 
-					View.Dispatcher.Invoke(() => View.Slslider_Point());
+					View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke from another thread
 					SelectedStatus();
 					Control.Model.ButtonVisibility = Visibility.Visible;	// ready for business
 				}

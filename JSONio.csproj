@@ -121,4 +121,12 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="copy NCalcScripts\*.ini ..\..\NCalcScripts\" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+	  cd "$(ProjectDir)"
+	  if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip NCalcScripts\JSONio.ini)
+	  cd "bin\Release"
+	  if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip JSONio.dll)
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

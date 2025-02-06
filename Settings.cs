@@ -18,5 +18,9 @@ namespace blekenbleu.jsonio
 			// each current Value stored as string of integer 10x actual value
 			new Property() {}
 		};
+
+		public List<string> carpropnames = new List<string>();
+		public List<string> gamepropnames = new List<string>();
+
 	}
 }

@@ -67,11 +67,28 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 - **done** *slim* .json format storing only one instance of property names, instead of redundantly per-car
 
 ### To Do &nbsp; *5 Feb 2025 V1.24*
-- generate release .zip file for Release 1.25 and newer builds
+- **done:** generate release .zip file for Release 1.25 and newer builds
+	- in `JSONio.csproj`:
+```
+  <PropertyGroup>
+    <PostBuildEvent>
+      cd "$(ProjectDir)"
+      if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip NCalcScripts\JSONio.ini)
+      cd "bin\Release"
+      if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip JSONio.dll)
+    </PostBuildEvent>
+  </PropertyGroup>
+```
+	- removed obsolete `Documentation\release.sh`  
 - fix SimHub crashes for `OOps()` popups
+	- moving `OOpsMB()` to `Control.xaml.cs` did not help  
 - fix bugs for `JSONio.file` property *not* 'PluginsData/JSONio.json'
 - save global properties to `Settings`
-- [OxyPlot integration](https://github.com/blekenbleu/OxyPlotPlugin)
+- add distinct `JSONio.ini` configuration for per-game properties:
+	- global
+	- per game
+	- per car
+- [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration
 
 ## New to me
 - C# `List<>` patterns, particularly with non-trivial objects.
