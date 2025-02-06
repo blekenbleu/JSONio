@@ -65,6 +65,12 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 		- using `JSONio.ini`, convert from/to `DataPluginSettings Settings` in `Init()`/`End()`
 		- restore/save simValue.Current values from/to `GameHandler games.Car` from/to `JSONio.json`
 - **done** *slim* .json format storing only one instance of property names, instead of redundantly per-car
+
+### To Do &nbsp; *5 Feb 2025 V1.24*
+- generate release .zip file for Release 1.25 and newer builds
+- fix SimHub crashes for `OOps()` popups
+- fix bugs for `JSONio.file` property *not* 'PluginsData/JSONio.json'
+- save global properties to `Settings`
 - [OxyPlot integration](https://github.com/blekenbleu/OxyPlotPlugin)
 
 ## New to me
