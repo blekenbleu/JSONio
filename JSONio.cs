@@ -1,11 +1,9 @@
 ﻿using GameReaderCommon;
 using SimHub.Plugins;
 using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
 using System.Windows.Media;
-using System.Windows;
 using System;
+using System.Windows;
 
 namespace blekenbleu.jsonio
 {
@@ -25,7 +23,7 @@ namespace blekenbleu.jsonio
 		private readonly CarID CurrentCar = new CarID {};
 		private string Gname = "";
 		private string path;															// JSON file location
-		private Slim slim;
+		private Slim slim;																// new JSON format
 		private List<Property> SetProps;
 		private List<int> Steps;														// 100 times actual values
 		private readonly double[] Slider_factor = new double[] { 0, 0 };
@@ -55,22 +53,21 @@ namespace blekenbleu.jsonio
 		internal void OOpsMB()
 		{
 			Info("OOpsMB(): " + Msg);
-			System.Windows.Forms.MessageBox.Show(Msg, "JSONio");
+		//	System.Windows.Forms.MessageBox.Show(Msg, "JSONio");
+			View.Dispatcher.Invoke(() => View.OOpsMB());
 			Msg = "";
 		}
 
 		internal bool OOps(string str)
 		{
-			bool rc;
-
-			if (0 < str.Length)
+			if (null != str  || 0 < Msg.Length)
 			{
-				rc = Info("OOps:  " + (Msg = str));
-				if (null != View && null != View.Model)
-					View.Model.StatusText = str;
-				this.TriggerEvent("JSONioOOps");
-			} else rc = true;
-			return rc;
+				if (null != str)
+                    Msg = str;
+			//	this.TriggerEvent("JSONioOOps");
+				OOpsMB();							// either way can Log [WatchDog] Abnormal Inactivity dump
+			}
+			return true;
 		}
 
 		/// <summary>
@@ -95,14 +92,7 @@ namespace blekenbleu.jsonio
 		/// </summary>
 		/// <param name="pluginManager"></param>
 		/// <param name="data">Current game data, including present and previous data frames.</param>
-		public void DataUpdate(PluginManager pluginManager, ref GameData data)
-		{
-				if (0 < Msg.Length)
-				{
-					OOps(Msg);
-					Msg = "";
-				}
-		}
+		public void DataUpdate(PluginManager pluginManager, ref GameData data) {}
 
 		/// <summary>
 		/// Called at plugin manager stop, close/dispose anything needed here !
@@ -118,10 +108,10 @@ namespace blekenbleu.jsonio
 			}
 			if (changed = slim.Save_Car(CurrentCar, simValues, Gname) || changed)
 			{
-				string sjs = JsonConvert.SerializeObject(slim.data, Formatting.Indented);
+				string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data, Newtonsoft.Json.Formatting.Indented);
 				if (0 == sjs.Length || "{}" == sjs)
 					OOps("End():  Json Serializer failure");
-				else File.WriteAllText(path, sjs);
+				else System.IO.File.WriteAllText(path, sjs);
 			}
 		}
 
@@ -136,6 +126,8 @@ namespace blekenbleu.jsonio
 			View = new Control(this);		// invoked *after* Init()
 			SetSlider();
 			View.Slslider_Point();
+			if (0 < Msg.Length)
+				OOps(null);
 			return View;
 		}
 
@@ -176,7 +168,7 @@ namespace blekenbleu.jsonio
 			if(0 > slider)
 				return 0;
 			View.TBL.Text = simValues[slider].Name + ":  " + simValues[slider].Current;
-			return Slider_factor[1] * Convert.ToDouble(simValues[slider].Current);
+			return Slider_factor[1] * System.Convert.ToDouble(simValues[slider].Current);
 		}
 
 		/// <summary>
@@ -281,8 +273,8 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		private bool OOpa(string msg)
-		{
+		internal bool OOpa(string msg)   // defer OOps() until GetWPFSettingsControl()
+        {
 			Msg += msg + "\n";
 			return true;
 		}
@@ -307,7 +299,7 @@ namespace blekenbleu.jsonio
 				}
 			};
 
-			// Load Properties from settings
+			// restore Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
 
 			// Declare an event and corresponding action
@@ -322,8 +314,7 @@ namespace blekenbleu.jsonio
 
 			Steps = new List<int>() { };
 
-			Msg = "";	// accumulate to report after Init()
-			// Load property and setting names, default values and steps from JSONio.ini
+			// property and setting names, default values and steps from JSONio.ini
 			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Myni + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Myni + "steps")?.ToString();
@@ -440,7 +431,7 @@ namespace blekenbleu.jsonio
 
 					View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke from another thread
 					SelectedStatus();
-					View.Model.ButtonVisibility = Visibility.Visible;	// ready for business
+					View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready for business
 				}
 				else if (null == cname)		// CarID verification - should make a popup
 					Msg = "null CarID";
@@ -454,9 +445,9 @@ namespace blekenbleu.jsonio
 				else Gname = gnew;
 
 				if (ml < Msg.Length)
-					OOps(Msg);
+					OOps(null);
 				else Msg = "";
-			});
+			});					// ChangeProperties (CarID change)
 
 			this.AddAction("IncrementSelectedProperty", (a, b) => Ment(1));
 			this.AddAction("DecrementSelectedProperty", (a, b) => Ment(-1));

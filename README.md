@@ -148,6 +148,11 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 	- [`Dispatcher.Invoke()`](https://dotnetpattern.com/wpf-dispatcher) is
 	[*less code*](https://github.com/blekenbleu/JSONio/blob/a1fc9f75966f2fffc43bfcaa66c4cfff117e1d40/StaticModel.cs#L58)
 	than subscribing to `PropertyChanged` events
+- invoke `MessageBox.Show()`
+	- *should be able to* run on plugin's `View` (UI) thread..?  
+	- but plugin UI thread starts (`GetWPFSettingsControl()`) *after* `Init()`  
+		- queue Msg until UI thread launch, then `View.Dispatcher.Invoke(() => View.OOpsMB());`  
+		- **[WatchDog] Abnormal Inactivity detected** gets provoked if message box displays > 5 seconds...  
 ### Updates
 - *3 April 2024*:  
 		- [bind Values class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)

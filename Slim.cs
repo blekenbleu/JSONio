@@ -72,7 +72,7 @@ namespace blekenbleu.jsonio
 
 			if (i != pCount) // repopulate car properties according to NCalcScripts/JSONio.ini
 			{
-				js.OOps($"Slim.Load({path}):  pList mismatched NCalcScripts/JSONio.ini");
+				js.OOpa($"Slim.Load({path}):  pList mismatched NCalcScripts/JSONio.ini");
 				for (i = 0; i < data.gList.Count; i++)
 				{
 					for (int c = 0; c < data.gList[i].cList.Count; c++)
@@ -88,7 +88,7 @@ namespace blekenbleu.jsonio
 					data.pList.Add(string.Copy(simprops[i].Name));
 			}
 			if (0 < nullcarID)
-				js.OOps($"Slim.Load({path}): {nullcarID} null carIDs");
+				js.OOpa($"Slim.Load({path}): {nullcarID} null carIDs");
 
 			return (data.gList.Count > 0 && data.gList[0].cList.Count > 1);
 		}

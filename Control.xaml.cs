@@ -1,7 +1,5 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 /* XAML DataContext:  Binding source
  ;	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
@@ -24,19 +22,20 @@ namespace blekenbleu.jsonio
 			Model = new ViewModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 1.27";
+			Version.Text = "Version 1.28";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
 			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
-			if (0 < JSONio.Msg.Length)
-			{
-				Model.StatusText = JSONio.Msg;
-				JSONio.Msg = "";
-			}
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
 		}
+
+		internal void OOpsMB()
+        {
+            Model.StatusText = JSONio.Msg;
+            System.Windows.Forms.MessageBox.Show(JSONio.Msg, "JSONio");
+        }
 
 		// highlights selected property cell
 		internal void Selected()						// crashes if called from other threads
@@ -56,7 +55,7 @@ namespace blekenbleu.jsonio
 		}
 
 		// handle slider changes
-		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
+		private void SLslider_DragCompleted(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
 			TBL.Text = Plugin.FromSlider(0.5 + SL.Value);
 		}
