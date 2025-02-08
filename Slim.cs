@@ -59,7 +59,7 @@ namespace blekenbleu.jsonio
 
 			data = JsonConvert.DeserializeObject<GamesList>(File.ReadAllText(path));
 			if (null == data || null == data.Plugin || null == data.pList || null == data.gList)
-				return !js.OOps($"Slim.Load({path}):  bad data");
+				return !js.OOpa($"Slim.Load({path}):  bad data");
 
 			int nullcarID = 0;
 			int pCount = JSONio.pCount;

@@ -127,7 +127,13 @@ namespace blekenbleu.jsonio
 			SetSlider();
 			View.Slslider_Point();
 			if (0 < Msg.Length)
-				OOps(null);
+			{
+				Info("OOpsMB(): " + Msg);
+			//	System.Windows.Forms.MessageBox.Show(Msg, "JSONio");
+				View.Dispatcher.Invoke(() => View.OOpsMB());
+				Msg = "";
+			//	OOps(null);
+			}
 			return View;
 		}
 

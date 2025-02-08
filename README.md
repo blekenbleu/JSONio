@@ -4,14 +4,17 @@
 ## What
 ![](Documentation/B4launch.png) &nbsp; ![](Documentation/launch.png)  
 A common list of custom SimHub properties with *some* values potentially specific to each sim and car.  
+
 In this example, properties are managed for ShakeIt Wheel Slip haptics:  
 ![](Documentation/properties.png)
-- a C# list of games
+- a global `Property` list
+	- each `Property` object a `Name` and `Value`
+- a `Game` list
 	- each `Game` object a `name`, game-specific `defaults Property List<>` and `CList` of `Car` objects
 		- each `Car` object a `carID` and its `List<>` of `Property` objects
 			- each `Property` object a `Name` and `Value` 
 - Properties to be managed are configured in [`JSONio.ini`](NCalcScripts/JSONio.ini).
-## How
+## How this plugin was developed
 - instead of just copying that SimHubPluginSdk repository
 	- created a new Visual Studio JSONio WPF project, then quit
 	- deleted everything in that project except `JSONio.sln` and `JSONio.csproj`
@@ -27,7 +30,7 @@ In this example, properties are managed for ShakeIt Wheel Slip haptics:
 		in `public void Init(PluginManager pluginManager)`,  
 		- then `this.TriggerEvent("CarChange");`  
 			in `public void DataUpdate(PluginManager pluginManager, ref GameData data)`
-	- *but instead* let SimHub do it, by `JSONio.ini`:
+	- *but instead*, by [GitHub NCalc](https://github.com/ncalc/ncalc) 'CarChange' event in `JSONio.ini`:
 		```
 		[ExportEvent]
 		name='CarChange'
@@ -35,10 +38,11 @@ In this example, properties are managed for ShakeIt Wheel Slip haptics:
 		```
 
 ![](Documentation/mapping.png)  
-		- *my experience*:&nbsp; SimHub ignored this **Source** when `JSONio.ini` was first loaded...  
+	- *my experience*:&nbsp; SimHub ignored this **Source** when `JSONio.ini` was first loaded...  
 
 - in `JSONio.cs Init()`
-	- create `games` object
+	- create and update *global* property settings
+	- create and maintain *games* object and JSON file
 		- populate from configured `.json` file, if existing
 	- populate `simValues` object from saved `Settings`, `games` and `JASONio.ini`
 	- in `this.AddAction("ChangeProperties",(a, b)`
@@ -46,9 +50,9 @@ In this example, properties are managed for ShakeIt Wheel Slip haptics:
 		- set `game` for matching `games.data.name`
 	- additional `this.AddAction()`s for modifying `Car` and `defaults` values
 
-My understanding of C# is that `games` could be a jagged array,  
-but jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) better supports
-e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/), based on `JSONio.ini`.
+Jagged [List<>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) supports
+e.g. [dynamically adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists/) (based on `JSONio.ini`)  
+better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/arrays).
 
 ### To Do &nbsp; *24 Apr 2024*  
 - **done** stop mouse click messing with selected property in UI
@@ -68,24 +72,13 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 
 ### To Do &nbsp; *5 Feb 2025 V1.24*
 - **done:** generate release .zip file for Release 1.25 and newer builds
-	- in `JSONio.csproj`:
-```
-  <PropertyGroup>
-    <PostBuildEvent>
-      cd "$(ProjectDir)"
-      if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip NCalcScripts\JSONio.ini)
-      cd "bin\Release"
-      if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip JSONio.dll)
-    </PostBuildEvent>
-  </PropertyGroup>
-```
-	- removed obsolete `Documentation\release.sh`  
-- fix SimHub crashes for `OOps()` popups
+- SimHub crashes for `OOps()` popups
 	- invoke `MessageBox()` by `TriggerEvent()` .. but not in Init()...   
 	- Error Msg early in `Init()` do not survive until `MessageBox()`
 - fix bugs for `JSONio.file` property *not* 'PluginsData/JSONio.json'
 	- initially generated `JSONio.file` is wrong... better later..??!  
 - save global properties and all property names to `Settings`
+- document [error messages](Documentation/error)
 - add distinct `JSONio.ini` configuration for per-game properties:
 	- global
 	- per game
@@ -219,3 +212,17 @@ e.g. [adding and deleting elements](https://csharp-station.com/c-arrays-vs-lists
 name='JSONio.slider'
 value='Gscale' 
 ```
+
+### *6 Feb 2025* build release `.zip`
+	- in `JSONio.csproj`:
+```
+  <PropertyGroup>
+    <PostBuildEvent>
+      cd "$(ProjectDir)"
+      if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip NCalcScripts\JSONio.ini)
+      cd "bin\Release"
+      if $(ConfigurationName) == Release (7z u R:\TEMP\JSONio.zip JSONio.dll)
+    </PostBuildEvent>
+  </PropertyGroup>
+```
+	- removed obsolete `Documentation\release.sh`  
