@@ -78,7 +78,7 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 - fix bugs for `JSONio.file` property *not* 'PluginsData/JSONio.json'
 	- initially generated `JSONio.file` is wrong... better later..??!  
 - save global properties and all property names to `Settings`
-- document [error messages](Documentation/error)
+- document [error messages](master/Documentation/error.md)
 - add distinct `JSONio.ini` configuration for per-game properties:
 	- global
 	- per game
