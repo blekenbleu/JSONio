@@ -14,6 +14,7 @@ In this example, properties are managed for ShakeIt Wheel Slip haptics:
 		- each `Car` object a `carID` and its `List<>` of `Property` objects
 			- each `Property` object a `Name` and `Value` 
 - Properties to be managed are configured in [`JSONio.ini`](NCalcScripts/JSONio.ini).
+### [Error Messages](https://github.com/blekenbleu/JSONio/blob/master/Documentation/error.md)
 ## How this plugin was developed
 - instead of just copying that SimHubPluginSdk repository
 	- created a new Visual Studio JSONio WPF project, then quit
@@ -72,13 +73,15 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 
 ### To Do &nbsp; *5 Feb 2025 V1.24*
 - **done:** generate release .zip file for Release 1.25 and newer builds
+- **done** document [error messages](https://github.com/blekenbleu/JSONio/blob/master/Documentation/error.md)
 - SimHub crashes for `OOps()` popups
-	- invoke `MessageBox()` by `TriggerEvent()` .. but not in Init()...   
-	- Error Msg early in `Init()` do not survive until `MessageBox()`
-- fix bugs for `JSONio.file` property *not* 'PluginsData/JSONio.json'
-	- initially generated `JSONio.file` is wrong... better later..??!  
-- save global properties and all property names to `Settings`
-- document [error messages](https://github.com/blekenbleu/JSONio/blob/master/Documentation/error.md)
+	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
+	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).
+- `Init()` bugs&nbsp; *substantial refactoring* 
+	- **done** when `JSONio.file` property *not* 'PluginsData/JSONio.json',  
+		initially generated `JSONio.file` is wrong... better later..??!  
+		- set zero.Count `slim.data.pList` from `simValues.Name]` in `End()`  
+	- save global properties and all property names to `Settings`
 - add distinct `JSONio.ini` configuration for per-game properties:
 	- global
 	- per game
@@ -146,7 +149,8 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 	- but plugin UI thread starts (`GetWPFSettingsControl()`) *after* `Init()`  
 		- queue Msg until UI thread launch, then `View.Dispatcher.Invoke(() => View.OOpsMB());`  
 		- **[WatchDog] Abnormal Inactivity detected** gets provoked if message box displays > 5 seconds...  
-### Updates
+
+## Updates
 - *3 April 2024*:  
 		- [bind Values class to DataGrid columns](https://wpf-tutorial.com/datagrid-control/custom-columns/)
 ```
@@ -185,8 +189,8 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 		- `simValues` updated from original Lists, pending refactor  
 			- property updates by dashboard *should work*...
 - *7 Apr*:
-		- fully functional by buttons *and* dashboard  
-			- thanks to arguably sketch code rearranging...  
+		- *per-car* fully functional by buttons *and* dashboard  
+			- thanks to arguably sketchy code rearranging...  
 			- still to do:&nbsp; fully integrate `simValues` in `JSONio.cs`
 - [**C# WPF XY plot**](https://github.com/blekenbleu/OxyPlotPlugin):&nbsp; SimHub already uses OxyPlot
 	- using [OxyPlot](https://github.com/oxyplot/oxyplot)
@@ -206,15 +210,16 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 ### *13 Oct* - **configurable slider**  
 - instead of hard-coded to `Gscale`
 - configured in [`NCalcScripts/JSONio.ini`](NCalcScripts/JSONio.ini),   
-	where `value` may be any name in `JSONio.properties`, e.g.:
+	where `value` may be any name in `JSONio.properties`, e.g.:  
 ```
 [ExportProperty]
 name='JSONio.slider'
 value='Gscale' 
 ```
 
-### *6 Feb 2025* build release `.zip`
-	- in `JSONio.csproj`:
+#### *6 Feb 2025* build release `.zip`
+- removed obsolete `Documentation\release.sh`  
+- in `JSONio.csproj`:
 ```
   <PropertyGroup>
     <PostBuildEvent>
@@ -225,4 +230,11 @@ value='Gscale'
     </PostBuildEvent>
   </PropertyGroup>
 ```
-	- removed obsolete `Documentation\release.sh`  
+
+#### Init() refactor
+- restore `Settings`
+  - reconcile with JSONio.ini global properties
+- load Slim .json
+  - reconcile JSONio.ini car- and game -specific
+- bool `changed` set true if any .json mismatches
+

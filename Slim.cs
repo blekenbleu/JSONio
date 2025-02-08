@@ -5,28 +5,23 @@ using System.IO;
 
 namespace blekenbleu.jsonio
 {
-	internal class CarID
-	{
-		public string ID { get; set; }
-	}
-
 // New slim JSON structure ------------------------------------------
 // These must all be declared public for JsonConvert.SerializeObject()
 	public class CarL
 	{
-		public string Name { get; set; }
-		public List<string> Vlist { get; set; }	// property values
+		public string Name { get; set; }		// CarID (game name for Carl[0])
+		public List<string> Vlist { get; set; }	// property values	(game defaults for Carl[0])
 	}
 
 	public class GameList
 	{
-		public List<CarL> cList;		// first CarL is game Name + default property values
+		public List<CarL> cList;		// cList[0] is game Name + default per-car, then per-game property values
 	}
 
 	public class GamesList
 	{
 		public string Plugin;			// Plugin Name ("JSONio")
-		public List<string> pList;		// property names, from JSONio.ini
+		public List<string> pList;		// per-car, then per-game property names, from JSONio.ini
 		public List<GameList> gList;
 	}
 
@@ -121,11 +116,11 @@ namespace blekenbleu.jsonio
 		}
 
 		// called when changing cars or games
-		internal bool Save_Car(CarID car, List<Values> props, string gname)
+		internal bool Save_Car(string car, List<Values> props, string gname)
 		{
 			bool changed;
 
-			if (null == car || null == car.ID || 0 == JSONio.pCount || JSONio.pCount > props.Count)
+			if (null == car || 0 == JSONio.pCount || JSONio.pCount > props.Count)
 				return false;									// nothing to save
 
 			// search for game
@@ -142,8 +137,8 @@ namespace blekenbleu.jsonio
 			// defaults may have been changed
 			else changed = Mod(gndex, 0, new CarL { Name = gname, Vlist = DCopy(props) });
 
-			CarL newc = new CarL { Name = string.Copy(car.ID), Vlist = CCopy(props)};
-			int cndex = data.gList[gndex].cList.FindIndex(c => c.Name == car.ID);
+			CarL newc = new CarL { Name = string.Copy(car), Vlist = CCopy(props)};
+			int cndex = data.gList[gndex].cList.FindIndex(c => c.Name == car);
 			if (-1 == cndex)
 			{
 				changed = true;

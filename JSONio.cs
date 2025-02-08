@@ -20,7 +20,7 @@ namespace blekenbleu.jsonio
 		private static readonly string My = "JSONio.";									// breaks Ini if not preceding
 		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;	// configuration source
 		private bool changed;
-		private readonly CarID CurrentCar = new CarID {};
+		private string CurrentCar;
 		private string Gname = "";
 		private string path;															// JSON file location
 		private Slim slim;																// new JSON format
@@ -108,7 +108,11 @@ namespace blekenbleu.jsonio
 			}
 			if (changed = slim.Save_Car(CurrentCar, simValues, Gname) || changed)
 			{
-				string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data, Newtonsoft.Json.Formatting.Indented);
+				if (0 == slim.data.pList.Count) // no previous JSON file
+                    for (int i = 0; i < simValues.Count; i++)
+						slim.data.pList.Add(simValues[i].Name);
+
+                string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data, Newtonsoft.Json.Formatting.Indented);
 				if (0 == sjs.Length || "{}" == sjs)
 					OOps("End():  Json Serializer failure");
 				else System.IO.File.WriteAllText(path, sjs);
@@ -129,10 +133,8 @@ namespace blekenbleu.jsonio
 			if (0 < Msg.Length)
 			{
 				Info("OOpsMB(): " + Msg);
-			//	System.Windows.Forms.MessageBox.Show(Msg, "JSONio");
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
-			//	OOps(null);
 			}
 			return View;
 		}
@@ -184,7 +186,7 @@ namespace blekenbleu.jsonio
 		/// <param name="prefix"></param> should be "in" or "de"
 		public void Ment(int sign)
 		{
-			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
+			if (0 == Gname.Length || 0 == CurrentCar.Length)
 				return;
 			int step = Steps[View.Selection];
 			int iv = (int)(0.004 + 100 * float.Parse(simValues[View.Selection].Current));
@@ -206,7 +208,7 @@ namespace blekenbleu.jsonio
 			if (null == View)
 				return;
 			View.Model.Selected_Property = simValues[View.Selection].Name;
-			View.Model.StatusText = Gname + " " + CurrentCar.ID + ":\t" + View.Model.Selected_Property;
+			View.Model.StatusText = Gname + " " + CurrentCar + ":\t" + View.Model.Selected_Property;
 		}
 
 		/// <summary>
@@ -215,7 +217,7 @@ namespace blekenbleu.jsonio
 		/// <param name="next"></param> false for prior
 		public void Select(bool next)
 		{
-			if (0 == Gname.Length || 0 == CurrentCar.ID.Length)
+			if (0 == Gname.Length || 0 == CurrentCar.Length)
 				return;
 
 			if (next)
@@ -240,6 +242,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
+		// set "CurrentAsDefaults" action
 		internal void New_defaults()	// List<GameList> Glist)
 		{
 			if (0 == Gname.Length)
@@ -250,8 +253,9 @@ namespace blekenbleu.jsonio
 
 			if (0 <= Index)
 			{
+				changed = true;
 				for (p = 0; p < pCount; p++)
-					Glist[Index].cList[0].Vlist[p] =
+					Glist[Index].cList[0].Vlist[p] =			// first "car" has per-car game default values, then per-game
 					simValues[p].Default = simValues[p].Current;
 				for (; p < simValues.Count; p++)
 					simValues[p].Default = simValues[p].Current;
@@ -300,17 +304,13 @@ namespace blekenbleu.jsonio
 				data = new GamesList()
 				{
 					Plugin = "JSONio",
-					gList = new List<GameList>() {},
-					pList = new List<string> {}
+					gList = new List<GameList>() {},	// GameList @ slim.cs line 16
+					pList = new List<string> {}			// per-car property names, then per-game names
 				}
 			};
 
 			// restore Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
-
-			// Declare an event and corresponding action
-			this.AddEvent("JSONioOOps");
-			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
 
 			// restore previously saved car properties		<- do this AFTER sorting JSONio.ini??
 			SetProps = new List<Property> {};				// deep copy
@@ -329,14 +329,14 @@ namespace blekenbleu.jsonio
 			 && (!(null == ss && OOpa($"Init(): '{sts}' not found")))
 				)
 			{
-				// JSONio.ini defines per-car Properties
-				Iprops = new List<string>(ds.Split(','));
-				pCount = Iprops.Count;						// these are per-car
+                // JSONio.ini defines per-car Properties
+                List<string> CarProps = new List<string>(ds.Split(','));
+				pCount = CarProps.Count;						// these are per-car
 				List<string> values = new List<string>(vs.Split(','));
 				List<string> steps = new List<string>(ss.Split(','));
 				if (pCount != values.Count || pCount != steps.Count)
 					OOpa($"Init(): {pCount} per-car properties;  {values.Count} values;  {steps.Count} steps");
-				Populate(Iprops, values, steps);
+				Populate(CarProps, values, steps);
 			}
 
 			// JSONio.ini also optionally defines per-game Properties
@@ -377,13 +377,13 @@ namespace blekenbleu.jsonio
 			foreach(Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
 
-			if ((0 == Gname.Length || 0 == CurrentCar.ID.Length) && null != View)
+			if ((0 == Gname.Length || 0 == CurrentCar.Length) && null != View)
 					View.Model.Selected_Property = "unKnown";
 			else SelectedStatus();
 
 			this.AttachDelegate("Selected", () => View.Model.Selected_Property);
 			this.AttachDelegate("New Car", () => New_Car);
-			this.AttachDelegate("Car", () => CurrentCar.ID);
+			this.AttachDelegate("Car", () => CurrentCar);
 			this.AttachDelegate("Game", () => Gname);
 			this.AttachDelegate("Msg", () => Msg);
 
@@ -405,12 +405,12 @@ namespace blekenbleu.jsonio
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
 				{
 					Msg = "Current Car: " + cname;
-					if (0 < Gname.Length									// do not save first (null) CurrentCar.ID in game
+					if (0 < Gname.Length									// do not save first (null) CurrentCar in game
 					 && slim.Save_Car(CurrentCar, simValues, Gname))
 					{
 						changed = true;
 						slim.Save_Car(CurrentCar, simValues, Gname);
-						Msg += $";  {CurrentCar.ID} saved";
+						Msg += $";  {CurrentCar} saved";
 					}
 					ml = Msg.Length;
 
@@ -421,7 +421,7 @@ namespace blekenbleu.jsonio
 					int gndx, cndx = slim.Car_Change(out gndx, gnew, cname);
 
 					New_Car = (-1 == cndx) ? "true" : "false";						
-					CurrentCar.ID = cname;
+					CurrentCar = cname;
 					if (0 <= gndx)
 					{														// copy matching values from GameList
 						GameList game = slim.data.gList[gndx];
@@ -461,6 +461,10 @@ namespace blekenbleu.jsonio
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => New_defaults());
+
+			// Declare an event and corresponding action
+			this.AddEvent("JSONioOOps");
+			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
 		}	// Init()
 	}		// class JSONio
 }

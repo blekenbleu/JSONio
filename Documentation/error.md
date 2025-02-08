@@ -25,6 +25,6 @@
 - **Slim.Load(`path`):  pList mismatched NCalcScripts/JSONio.ini**
 	- Current JSON file `path` content does not match `NcalcScripts/JSONio.ini` content.
 		- JSONio `Init()` will rewrite `path` to match
-- **Slim.Load(`path`): `nullcarID` null carIDs**
-	- a Car list property carIDs is missing  
-		- that car will be deleted deleted from `path`.
+- **Slim.Load(`path`): `count` null carIDs**
+	- one or more missing Car list property carIDs  
+		- those car objects will be deleted deleted from `path` JSON.
