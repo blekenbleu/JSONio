@@ -34,14 +34,16 @@ namespace blekenbleu.jsonio
             this.js = plugin;
         }
 
-        private List<string> Refactor(List<Values> simprops, List<string> properties)
+        private List<string> Refactor(List<Values> simprops, List<string> properties, int car)
 		{
 			List<string> New = new List<string> {};
+			// car[0] is per-game car default and per-game property values
+			int count = (0 == car) ? JSONio.pCount : JSONio.gCount;
 
 			for (int i = 0; i < JSONio.pCount; i++)
 			{
 				int Index =  data.pList.FindIndex(j => j == simprops[i].Name);
-				New.Add(string.Copy((-1 == Index) ? simprops[i].Default : properties[Index]));
+				New.Add(string.Copy((-1 == Index) ? simprops[i].Default : properties[Index];
 			}
 			return New;
 		}
@@ -58,29 +60,32 @@ namespace blekenbleu.jsonio
 
 			int nullcarID = 0;
 			int pCount = JSONio.pCount;
+			int gCount = JSONio.gCount;
 			int i = -1;
 
-			if (pCount == data.pList.Count)
+			if (gCount == data.pList.Count)		// data.pList has both per-car and per-game
 				for (i = 0; i < pCount; i++)
 					if (data.pList[i] != simprops[i].Name)
 						break;
 
-			if (i != pCount) // repopulate car properties according to NCalcScripts/JSONio.ini
+			if (i != pCount || gCount != data.pList.Count) // repopulate car properties according to NCalcScripts/JSONio.ini
 			{
 				js.OOpa($"Slim.Load({path}):  pList mismatched NCalcScripts/JSONio.ini");
-				for (i = 0; i < data.gList.Count; i++)
-				{
-					for (int c = 0; c < data.gList[i].cList.Count; c++)
-						if (null == data.gList[i].cList[c].Name)
-						{
-							nullcarID++;
-							data.gList[i].cList.RemoveAt(c--);
-						}
-						else data.gList[i].cList[c].Vlist = Refactor(simprops, data.gList[i].cList[c].Vlist);
-				}
-				data.pList = new List<string> {};
-				for (i = 0; i < pCount; i++)
-					data.pList.Add(string.Copy(simprops[i].Name));
+				if (i != pCount)
+					for (i = 0; i < data.gList.Count; i++)					// all games
+					{
+						for (int c = 0; c < data.gList[i].cList.Count; c++)	// all cars in game
+							if (null == data.gList[i].cList[c].Name)
+							{
+								nullcarID++;
+								data.gList[i].cList.RemoveAt(c--);
+							}
+							else data.gList[i].cList[c].Vlist = Refactor(simprops, data.gList[i].cList[c].Vlist, c);
+					}
+				if (gCount != data.pList.Count)
+					data.pList = new List<string> {};
+					for (i = 0; i < gCount; i++)
+						data.pList.Add(string.Copy(simprops[i].Name));
 			}
 			if (0 < nullcarID)
 				js.OOpa($"Slim.Load({path}): {nullcarID} null carIDs");

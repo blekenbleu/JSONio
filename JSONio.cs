@@ -14,7 +14,7 @@ namespace blekenbleu.jsonio
 	{
 		public DataPluginSettings Settings;
 		public string New_Car = "false";
-		internal static int pCount;														// global Property settings appended after pCount
+		internal static int pCount, gCount;												// append per-game settings after pCount, global after gCount
 		internal int slider = -1;														// simValues index for configured JSONIO.properties
 		internal static string Msg = "";
 		private static readonly string My = "JSONio.";									// breaks Ini if not preceding
@@ -105,6 +105,11 @@ namespace blekenbleu.jsonio
 			if (0 < Gname.Length) {
 				Psave(simValues);
 				this.SaveCommonSettings("GeneralSettings", Settings);
+			}
+			if (null == slim.data.pList || (0 < slim.data.pList.Count && slim.data.pList.Count != simValues.Count))
+			{
+				slim.data.pList = new List<string> {};
+				changed = true;
 			}
 			if (changed = slim.Save_Car(CurrentCar, simValues, Gname) || changed)
 			{
@@ -341,10 +346,10 @@ namespace blekenbleu.jsonio
 
 			// JSONio.ini also optionally defines per-game Properties
 
-			// JSONio.ini also optionally defines settings (NOT per-car)
-			string ptts, dss = pluginManager.GetPropertyValue(ptts = Myni + "settings")?.ToString();
-			string vtts, vss = pluginManager.GetPropertyValue(vtts = Myni + "setvals")?.ToString();
-			string stts, sss = pluginManager.GetPropertyValue(stts = Myni + "setsteps")?.ToString();
+			// JSONio.ini also optionally defines per-game settings
+			string ptts, dss = pluginManager.GetPropertyValue(ptts = Myni + "gameprops")?.ToString();
+			string vtts, vss = pluginManager.GetPropertyValue(vtts = Myni + "gamevals")?.ToString();
+			string stts, sss = pluginManager.GetPropertyValue(stts = Myni + "gamesteps")?.ToString();
 			if ((!(null == dss && OOpa($"Init(): '{ptts}' not found")))
 			 && (!(null == vss && OOpa($"Init(): '{vtts}' not found")))
 			 && (!(null == sss && OOpa($"Init(): '{stts}' not found")))
@@ -354,7 +359,11 @@ namespace blekenbleu.jsonio
 				List<string> values = new List<string>(vss.Split(','));
 				List<string> steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Sprops.Count != steps.Count)
-					OOpa($"Init(): {Sprops.Count} settings;  {values.Count} values;  {steps.Count} steps");
+					OOpa($"Init(): {Sprops.Count} gameprops;  {values.Count} gamevals;  {steps.Count} gamesteps");
+				gCount = (Sprops.Count < values.Count) ? Sprops.Count : values.Count;
+				if (gCount > steps.Count)
+					gCount = steps.Count + pCount;
+				else gCount += pCount;
 				Populate(Sprops, values, steps);
 			}
 
@@ -414,7 +423,7 @@ namespace blekenbleu.jsonio
 					}
 					ml = Msg.Length;
 
-					for (int i = 0; i < pCount; i++)						// copy Current to previous
+					for (int i = 0; i < simValues.Count; i++)						// copy Current to previous
 						simValues[i].Previous = simValues[i].Current;
 
 					// indices for new car
@@ -423,12 +432,14 @@ namespace blekenbleu.jsonio
 					New_Car = (-1 == cndx) ? "true" : "false";						
 					CurrentCar = cname;
 					if (0 <= gndx)
-					{														// copy matching values from GameList
+					{													// copy matching values from GameList
+						int i;
+
 						GameList game = slim.data.gList[gndx];
 						if (0 > cndx)
-							for (int i = 0; i < pCount; i++)
+							for (i = 0; i < gCount; i++)
 								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
-						else for (int i = 0; i < pCount; i++)
+						else for (i = 0; i < pCount; i++)
 						{
 							simValues[i].Current = game.cList[cndx].Vlist[i];
 							simValues[i].Default = game.cList[0].Vlist[i];
