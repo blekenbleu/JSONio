@@ -14,7 +14,7 @@ In this example, properties are managed for ShakeIt Wheel Slip haptics:
 		- each `Car` object a `carID` and its `List<>` of `Property` objects
 			- each `Property` object a `Name` and `Value` 
 - Properties to be managed are configured in [`JSONio.ini`](NCalcScripts/JSONio.ini).
-### [Error Messages](https://github.com/blekenbleu/JSONio/blob/master/Documentation/error.md)
+### [Error Messages](https://github.com/blekenbleu/JSONio/blob/master/Documentation/error.md) &emsp; [`Init(), End(),` JSON descriptions](https://github.com/blekenbleu/JSONio/blob/master/Documentation/init.md)
 ## How this plugin was developed
 - instead of just copying that SimHubPluginSdk repository
 	- created a new Visual Studio JSONio WPF project, then quit

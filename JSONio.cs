@@ -292,11 +292,22 @@ namespace blekenbleu.jsonio
 		}
 
 		// set "CurrentAsDefaults" action
-		internal void New_defaults()	// List<GameList> Glist)
+		internal void SetDefault()	// List<GameList> Glist)
 		{
 			if (0 == Gname.Length)
+			{
+				OOps("SetDefault: no Gname");
 				return;
-
+			}
+			int p, Index = slim.data.gList.FindIndex(i => i.cList[0].Name == Gname);
+			if (0 > Index)
+			{
+				OOps($"SetDefault: {Gname} not in slim.data.gList");
+				return;
+			}
+			p = View.Selection;
+			slim.data.gList[Index].cList[0].Vlist[p] = simValues[p].Default = simValues[p].Current;
+/*
 			List<GameList> Glist = slim.data.gList;
 			int p, Index = Glist.FindIndex(i => i.cList[0].Name == Gname);
 
@@ -309,6 +320,7 @@ namespace blekenbleu.jsonio
 				for (; p < simValues.Count; p++)
 					simValues[p].Default = simValues[p].Current;
 			}
+ */
 		}
 
 		// add properties and settings to simValues; initialize Steps
@@ -513,7 +525,7 @@ namespace blekenbleu.jsonio
 			this.AddAction("NextProperty",				(a, b) => Select(true)	);
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
-			this.AddAction("CurrentAsDefaults",			(a, b) => New_defaults());
+			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
 
 			// Declare an event and corresponding action
 			this.AddEvent("JSONioOOps");

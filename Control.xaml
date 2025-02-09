@@ -10,8 +10,8 @@
 		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Width="164" Height="25"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,10,0,0"/>
 		<TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
-			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="310,18,0,0"/>
-		<TextBlock x:Name="Status" Text="{Binding StatusText}" Height="71" Width="350"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="310,14,0,0"/>
+		<TextBlock x:Name="Status" Text="{Binding StatusText}" Height="74" Width="350"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,40,0,0"
 				TextWrapping="Wrap"/>
 
@@ -27,7 +27,7 @@
 		<Button x:Name="b3" Content=" - " Height="40" Click="Dec_Click"
 				Visibility="{Binding ButtonVisibility}"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,120,0,0"/>
-		<Button x:Name="b4" Content="Current&lt;-&gt;&#xA;Previous" Height="40"
+        <Button x:Name="b4" Content="Swap All&#xA;w/Previous" Height="40"
 				Click="Swap_Click" Visibility="{Binding ButtonVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="240,120,0,0"/>
 		<Button x:Name="b5" Content="Current&#xA;-&gt;Default" Height="40"
