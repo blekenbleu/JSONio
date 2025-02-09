@@ -17,9 +17,9 @@ namespace blekenbleu.jsonio
 		internal static int pCount, gCount;												// append per-game settings after pCount, global after gCount
 		internal int slider = -1;														// simValues index for configured JSONIO.properties
 		internal static string Msg = "";
+		internal bool changed;															// slim may change
 		private static readonly string My = "JSONio.";									// breaks Ini if not preceding
 		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;	// configuration source
-		private bool changed;
 		private string CurrentCar;
 		private string Gname = "";
 		private string path;															// JSON file location
@@ -63,7 +63,7 @@ namespace blekenbleu.jsonio
 			if (null != str  || 0 < Msg.Length)
 			{
 				if (null != str)
-                    Msg = str;
+					Msg = str;
 			//	this.TriggerEvent("JSONioOOps");
 				OOpsMB();							// either way can Log [WatchDog] Abnormal Inactivity dump
 			}
@@ -94,6 +94,47 @@ namespace blekenbleu.jsonio
 		/// <param name="data">Current game data, including present and previous data frames.</param>
 		public void DataUpdate(PluginManager pluginManager, ref GameData data) {}
 
+		// called in Save_Car()
+		List<string> CurrentCopy()
+		{
+			List<string> New = new List<string> { };
+			for (int i = 0; i < pCount; i++) { New.Add(string.Copy(simValues[i].Current)); }
+			return New;
+		}
+
+		List<string> DefaultCopy()
+		{
+			List<string> New = new List<string> { };
+			for (int i = 0; i < simValues.Count; i++) { New.Add(string.Copy(simValues[i].Default)); }
+			return New;
+		}
+
+		// called in End() and 'CarChange' ("ChangeProperties")
+		internal void Save_Car()	// update or create car; update or create game
+		{
+			if (null == CurrentCar || 0 == pCount || pCount > simValues.Count)	// weird state based on pCount??
+				return;											// nothing to save
+
+			var vList = DefaultCopy();							// search for game
+			int gndex = slim.data.gList.FindIndex(g => g.cList[0].Name == Gname);
+			if (0 > gndex)	 									// first car for this game?
+			{
+				changed = true;
+				gndex = slim.data.gList.Count;
+				slim.data.gList.Add(new GameList { cList = new List<CarL> { new CarL { Name = string.Copy(Gname), Vlist = vList } } });
+			}
+			else slim.Mod(gndex, 0, vList);						// game defaults may have changed
+
+			vList = CurrentCopy();
+			int cndex = slim.data.gList[gndex].cList.FindIndex(c => c.Name == CurrentCar);
+			if (0 > cndex)
+			{
+				changed = true;
+				slim.data.gList[gndex].cList.Add(new CarL { Name = string.Copy(CurrentCar), Vlist = vList });
+			}
+			else slim.Mod(gndex, cndex, vList);
+		}
+
 		/// <summary>
 		/// Called at plugin manager stop, close/dispose anything needed here !
 		/// Plugins are rebuilt at game changes
@@ -106,18 +147,21 @@ namespace blekenbleu.jsonio
 				Psave(simValues);
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
+
+			// slim.data.pList.Count != simValues.Count will fail when simValues includes globals
 			if (null == slim.data.pList || (0 < slim.data.pList.Count && slim.data.pList.Count != simValues.Count))
 			{
 				slim.data.pList = new List<string> {};
 				changed = true;
 			}
-			if (changed = slim.Save_Car(CurrentCar, simValues, Gname) || changed)
+			Save_Car();
+			if (changed)
 			{
 				if (0 == slim.data.pList.Count) // no previous JSON file
-                    for (int i = 0; i < simValues.Count; i++)
+					for (int i = 0; i < simValues.Count; i++)
 						slim.data.pList.Add(simValues[i].Name);
 
-                string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data, Newtonsoft.Json.Formatting.Indented);
+				string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data, Newtonsoft.Json.Formatting.Indented);
 				if (0 == sjs.Length || "{}" == sjs)
 					OOps("End():  Json Serializer failure");
 				else System.IO.File.WriteAllText(path, sjs);
@@ -267,7 +311,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		// add properties and settings to simprops
+		// add properties and settings to simValues; initialize Steps
 		private void Populate(List<string>props, List<string> vals, List<string> stps)
 		{
 			for (int c = 0; c < props.Count; c++)
@@ -289,7 +333,7 @@ namespace blekenbleu.jsonio
 		}
 
 		internal bool OOpa(string msg)   // defer OOps() until GetWPFSettingsControl()
-        {
+		{
 			Msg += msg + "\n";
 			return true;
 		}
@@ -300,8 +344,6 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-			List<string> Iprops = new List<string> { "" };
-
 			changed = false;	// write JSON file during End() only if true
 
 			slim = new Slim(this)
@@ -334,8 +376,8 @@ namespace blekenbleu.jsonio
 			 && (!(null == ss && OOpa($"Init(): '{sts}' not found")))
 				)
 			{
-                // JSONio.ini defines per-car Properties
-                List<string> CarProps = new List<string>(ds.Split(','));
+				// JSONio.ini defines per-car Properties
+				List<string> CarProps = new List<string>(ds.Split(','));
 				pCount = CarProps.Count;						// these are per-car
 				List<string> values = new List<string>(vs.Split(','));
 				List<string> steps = new List<string>(ss.Split(','));
@@ -378,8 +420,8 @@ namespace blekenbleu.jsonio
 				slider = simValues.FindIndex(i => i.Name == sl);
 			path = pluginManager.GetPropertyValue(sl = Myni + "file")?.ToString();
 			// Load existing JSON, using slim format
-			if (!slim.Load(path, simValues))
-				changed = OOpa($"Init(): {sl} not found");
+			if (!slim.Load(path))
+				changed = OOpa($"Init(): {path} JSON not found");
 
 			// Declare available properties
 			// these get evaluated "on demand" (when shown or used in formulae)
@@ -414,25 +456,25 @@ namespace blekenbleu.jsonio
 				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
 				{
 					Msg = "Current Car: " + cname;
-					if (0 < Gname.Length									// do not save first (null) CurrentCar in game
-					 && slim.Save_Car(CurrentCar, simValues, Gname))
+					if (0 < Gname.Length)									 // do not save first (null) CurrentCar in game
 					{
-						changed = true;
-						slim.Save_Car(CurrentCar, simValues, Gname);
-						Msg += $";  {CurrentCar} saved";
+						Save_Car();
+						if (changed)
+							Msg += $";  {CurrentCar} saved";
 					}
 					ml = Msg.Length;
 
-					for (int i = 0; i < simValues.Count; i++)						// copy Current to previous
+					for (int i = 0; i < simValues.Count; i++)				// copy Current to previous
 						simValues[i].Previous = simValues[i].Current;
 
 					// indices for new car
-					int gndx, cndx = slim.Car_Change(out gndx, gnew, cname);
+					int gndx = (0 < gnew.Length) ? slim.data.gList.FindIndex(g => g.cList[0].Name == gnew) : -1;
+					int cndx = (0 <= gndx) ? slim.data.gList[gndx].cList.FindIndex(c => c.Name == cname) : -1;
 
 					New_Car = (-1 == cndx) ? "true" : "false";						
 					CurrentCar = cname;
 					if (0 <= gndx)
-					{													// copy matching values from GameList
+					{														// copy matching values from GameList
 						int i;
 
 						GameList game = slim.data.gList[gndx];
