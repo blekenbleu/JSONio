@@ -43,7 +43,7 @@ namespace blekenbleu.jsonio
 			for (int i = 0; i < JSONio.pCount; i++)
 			{
 				int Index =  data.pList.FindIndex(j => j == simprops[i].Name);
-				New.Add(string.Copy((-1 == Index) ? simprops[i].Default : properties[Index];
+				New.Add(string.Copy((-1 == Index) ? simprops[i].Default : properties[Index]));
 			}
 			return New;
 		}
