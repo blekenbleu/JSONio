@@ -192,7 +192,8 @@ namespace blekenbleu.jsonio
 
 			if (0 < gnew.Length)
 				for (int g = 0; g < slim.data.gList.Count; g++)
-					if (0 == slim.data.gList[g].cList.Count)
+					if (0 == slim.data.gList[g].cList.Count
+					 || null == slim.data.gList[g].cList[0].Name)
 						slim.data.gList.RemoveAt(g--);
  					else if (gnew == slim.data.gList[g].cList[0].Name)
 					{
