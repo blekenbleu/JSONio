@@ -306,6 +306,7 @@ namespace blekenbleu.jsonio
 				return;
 			}
 			p = View.Selection;
+			changed |= simValues[p].Current != slim.data.gList[Index].cList[0].Vlist[p];
 			slim.data.gList[Index].cList[0].Vlist[p] = simValues[p].Default = simValues[p].Current;
 /*
 			List<GameList> Glist = slim.data.gList;

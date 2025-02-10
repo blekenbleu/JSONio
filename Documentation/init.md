@@ -3,7 +3,7 @@
 	- there were instances where `slim.data.pList` had not been initialized,
 		which suggests that it *might never been validated*
 - `Init()`
-	- initializes slim.data
-	- restores Settings
+	- initializes slim.data &emsp; (C# class for JSON)
+	- restores Settings (`simValues`)
 	- calls `Populate` to initialize `simValues` and `Steps` from `.ini` with `.json`
 	- calls `slim.Load()` to `Reconcile()` `simValues` with `.json` 
