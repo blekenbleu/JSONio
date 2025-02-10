@@ -43,7 +43,8 @@
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="330,162,0,0"/>
 
 		<DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"
-				SelectionUnit="Cell" SelectionMode="Single" Loaded="DgSelect" CanUserAddRows="False"
+				SelectionUnit="Cell" SelectionMode="Single" Loaded="DgSelect"
+				CanUserAddRows="False" CanUserSortColumns="False"
 				VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,190,0,20">
 			<DataGrid.CellStyle>
 				<Style TargetType="{x:Type DataGridCell}">
