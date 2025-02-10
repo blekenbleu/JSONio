@@ -12,24 +12,25 @@ namespace blekenbleu.jsonio
 	{
 		public DataPluginSettings Settings;
 		public string New_Car = "false";
-		internal static int pCount, gCount;												// append per-game settings after pCount, global after gCount
-		internal int slider = -1;														// simValues index for configured JSONIO.properties
+		internal static int pCount, gCount;		// append per-game settings after pCount, global after gCount
+		internal int slider = -1;				// simValues index for configured JSONIO.properties
 		internal static string Msg = "";
-		internal bool changed;															// slim may change
-		private static readonly string My = "JSONio.";									// breaks Ini if not preceding
-		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;	// configuration source
+		internal bool changed;									// slim may change
+		private static readonly string My = "JSONio.";			// breaks Ini if not preceding
+		private static readonly string Myni						// configuration source
+											= "DataCorePlugin.ExternalScript." + My;
 		private string CurrentCar;
 		private string Gname = "";
-		private string path;															// JSON file location
-		private Slim slim;																// new JSON format
-		private List<Property> SetProps;
-		private List<int> Steps;														// 100 times actual values
+		private string path;									// JSON file location
+		private Slim slim;										// new JSON format
+		private List<Property> SettingsProps;
+		private List<int> Steps;								// 100 times actual values
 		private readonly double[] Slider_factor = new double[] { 0, 0 };
 
 		/// <summary>
 		/// DisplayGrid contents
 		/// </summary>
-		public List<Values> simValues = new List<Values>();								// must be initialized before Init()
+		public List<Values> simValues = new List<Values>();		// must be initialized before Init()
 
 		/// <summary>
 		/// Plugin-specific wrapper for SimHub.Logging.Current.Info();
@@ -154,16 +155,16 @@ namespace blekenbleu.jsonio
 			{
 				// populate DisplayGrid ItemsSource
 				// JSONio.ini contents may not match saved car properties
-				int Index = SetProps.FindIndex(i => i.Name == props[c]);
-				string s = (c < vals.Count) ? vals[c] : "0";
-				string p = (-1 != Index) ? SetProps[Index].Value : s;
-				if (c >= vals.Count && -1 != Index)
-					s = p;
+				// default value from .ini
+				int Index = SettingsProps.FindIndex(i => i.Name == props[c]);
+				string ini = (c < vals.Count) ? vals[c] : (0 <= Index) ? SettingsProps[Index].Value : "0";
+				// use SettingsProps value, if it exists, else from .ini
+				string setting = (0 <= Index) ? SettingsProps[Index].Value : ini;
 
 				simValues.Add(new Values {	Name = props[c],
-											Default = s,
-											Current = p,
-											Previous = p });
+											Default = ini,			// replaced by JSON values
+											Current = setting,
+											Previous = setting });
 				Steps.Add((c < stps.Count)  ? (int)(100 * float.Parse(stps[c]))
 											: 10);
 			}
@@ -199,11 +200,11 @@ namespace blekenbleu.jsonio
 			Settings = this.ReadCommonSettings<DataPluginSettings>(
 												"GeneralSettings", () => new DataPluginSettings());
 
-			// restore previously saved car properties	<- do this AFTER sorting JSONio.ini??
-			SetProps = new List<Property> {};			// deep copy
+			// restore previously saved car properties	<- These will be previous values
+			SettingsProps = new List<Property> {};			// deep copy
 			foreach(Property p in Settings.properties)
 				if (null != p.Name && null != p.Value)
-					SetProps.Add(new Property() { Name = string.Copy(p.Name),
+					SettingsProps.Add(new Property() { Name = string.Copy(p.Name),
 												  Value = string.Copy(p.Value) });
 
 			Steps = new List<int>() { };
@@ -229,8 +230,6 @@ namespace blekenbleu.jsonio
 			}
 
 			// JSONio.ini also optionally defines per-game Properties
-
-			// JSONio.ini also optionally defines per-game settings
 			string ptts = Myni + "gameprops";
 			string dss = pluginManager.GetPropertyValue(ptts)?.ToString();
 			string vtts = Myni + "gamevals";
@@ -253,6 +252,27 @@ namespace blekenbleu.jsonio
 					gCount = steps.Count + pCount;
 				else gCount += pCount;
 				Populate(Sprops, values, steps);
+			}
+
+			// JSONio.ini also optionally defines global settings
+			string pgts = Myni + "settings";
+			string dgs = pluginManager.GetPropertyValue(pgts)?.ToString();
+			string vgts = Myni + "setvals";
+			string vgs = pluginManager.GetPropertyValue(vgts)?.ToString();
+			string sgts = Myni + "setsteps";
+			string sgs = pluginManager.GetPropertyValue(sgts)?.ToString();
+			if ((!(null == dgs && OOpa($"Init(): '{pgts}' not found")))
+			 && (!(null == vgs && OOpa($"Init(): '{vgts}' not found")))
+			 && (!(null == sgs && OOpa($"Init(): '{sgts}' not found")))
+				)
+			{
+				List<string> Gprops = new List<string>(dgs.Split(','));
+				List<string> values = new List<string>(vgs.Split(','));
+				List<string> steps = new List<string>(sgs.Split(','));
+				if (Gprops.Count != values.Count || Gprops.Count != steps.Count)
+                    OOpa($"Init(): {Gprops.Count} settings;  {values.Count} setvals;"
+                                    + $"  {steps.Count} setsteps");
+				Populate(Gprops, values, steps);
 			}
 
 			if (0 == simValues.Count)

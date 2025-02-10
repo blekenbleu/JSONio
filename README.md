@@ -87,9 +87,9 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 		initially generated `JSONio.file` is wrong... better later..??!  
 	- **done** save global properties and all property names to `Settings`
 - add distinct `JSONio.ini` configuration for per-game properties:
-	- global
-	- per game
-	- per car
+	- global	saved to, restored from SimHub `DataPluginSettings`
+	- per game	saved to, restored from JSON per DataCorePlugin.ExternalScript.JSONio.file
+	- per car	same as per game;  game properties are first "car" in game `cList`
 - [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration
 
 ## New to me
