@@ -14,7 +14,7 @@ namespace blekenbleu.jsonio
 	/// </summary>
 	public partial class Control : UserControl
 	{
-		public JSONio Plugin { get; }
+		public JSONio js { get; }
 		public ViewModel Model;							// reference XAML controls
 		internal byte Selection;						// changed only in JSONio.Select() on UI thread
 
@@ -22,12 +22,12 @@ namespace blekenbleu.jsonio
 			Model = new ViewModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 1.34";
+			Version.Text = "Version 1.35";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
-			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
+			this.js = plugin;						// Control.xaml button events call JSONio methods
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
 		}
 
@@ -57,42 +57,42 @@ namespace blekenbleu.jsonio
 		// handle slider changes
 		private void SLslider_DragCompleted(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
-			TBL.Text = Plugin.FromSlider(0.5 + SL.Value);
+			TBL.Text = js.FromSlider(0.5 + SL.Value);
 		}
 
 		internal void Slslider_Point()
 		{
-			SL.Value = Plugin.ToSlider();	// TBL.Text set inside ToSlider()
+			SL.Value = js.ToSlider();	// TBL.Text set inside ToSlider()
 		}
 
 		private void Prior_Click(object sender, RoutedEventArgs e)	// handle button clicks
 		{
-			Plugin.Select(false);
+			js.Select(false);
 		}
 
 		private void Next_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Select(true);
+			js.Select(true);
 		}
 
 		private void Inc_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Ment(1);
+			js.Ment(1);
 		}
 
 		private void Dec_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Ment(-1);
+			js.Ment(-1);
 		}
 
 		private void Swap_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Swap();
+			js.Swap();
 		}
 
 		private void Def_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.SetDefault();
+			js.SetDefault();
 		}
 	}
 }

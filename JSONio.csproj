@@ -82,6 +82,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="js.cs" />
     <Compile Include="JSONio.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Slim.cs" />

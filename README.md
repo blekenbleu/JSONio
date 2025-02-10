@@ -82,6 +82,9 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 		initially generated `JSONio.file` is wrong... better later..??!  
 		- set zero.Count `slim.data.pList` from `simValues.Name]` in `End()`  
 	- save global properties and all property names to `Settings`
+- `SetDefault()`: {Gname} not in slim.data.gList
+	- trying to change a default on first car
+	- try `CarChange()`
 - add distinct `JSONio.ini` configuration for per-game properties:
 	- global
 	- per game
