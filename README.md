@@ -74,17 +74,18 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 ### To Do &nbsp; *5 Feb 2025 V1.24*
 - **done:** generate release .zip file for Release 1.25 and newer builds
 - **done** document [error messages](https://github.com/blekenbleu/JSONio/blob/master/Documentation/error.md)
-- SimHub crashes for `OOps()` popups
+- **done** `SetDefault()`: {Gname} not in slim.data.gList
+	- trying to change a default on first car
+	- try `CarChange()`
+- **done** disable sorting property columns in UI
+- buttons not enabled when bad JSON is loaded
+- SimHub [WatchDog] Stacks dump for `OOps()` popups
 	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
 	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).
 - `Init()` bugs&nbsp; *substantial refactoring* 
 	- **done** when `JSONio.file` property *not* 'PluginsData/JSONio.json',  
 		initially generated `JSONio.file` is wrong... better later..??!  
-		- set zero.Count `slim.data.pList` from `simValues.Name]` in `End()`  
-	- save global properties and all property names to `Settings`
-- `SetDefault()`: {Gname} not in slim.data.gList
-	- trying to change a default on first car
-	- try `CarChange()`
+	- **done** save global properties and all property names to `Settings`
 - add distinct `JSONio.ini` configuration for per-game properties:
 	- global
 	- per game

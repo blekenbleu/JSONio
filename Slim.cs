@@ -63,9 +63,29 @@ namespace blekenbleu.jsonio
 				return false;
 
 			data = JsonConvert.DeserializeObject<GamesList>(File.ReadAllText(path));
-			if (null == data || null == data.Plugin || null == data.pList || null == data.gList)
-				return !js.OOpa($"Slim.Load({path}):  bad data");
-
+			if (null == data)
+				return js.OOpa($"Slim.Load({path}):  null data");
+			if (null == data.Plugin)
+			{
+				js.OOpa($"Slim.Load({path}):  null data.Plugin");
+				data.Plugin = "JSONio";
+				js.changed = true;
+			}
+			if ("JSONio" != data.Plugin) {
+				js.OOpa($"Slim.Load({path}) data.Plugin: {data.Plugin} != JSONio");
+				data.Plugin = "JSONio";
+				js.changed = true;
+			}
+			if (null == data.pList)
+			{
+				js.changed = false;
+				return js.OOpa($"Slim.Load({path}):  null data.pList");
+			}
+			if (null == data.gList)
+			{
+                js.changed = false;
+                return js.OOpa($"Slim.Load({path}):  null data.gList");
+			}
 			int nullcarID = 0;
 			int pCount = JSONio.pCount;
 			int gCount = JSONio.gCount;
@@ -98,8 +118,11 @@ namespace blekenbleu.jsonio
 			if (0 < nullcarID)
 				js.OOpa($"Slim.Load({path}): {nullcarID} null carIDs");
 
-			return (data.gList.Count > 0 && data.gList[0].cList.Count > 1);
-		}
+			if (data.gList.Count < 1 || data.gList[0].cList.Count < 2)
+				js.OOpa($"Slim.Load({path}): empty data.gList");
+
+			return true;
+		}	// Load()
 
 		// game defaults (0 == ci) or per-car values
 		internal void Mod(int gi, int ci, List<string> vList)

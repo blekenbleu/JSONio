@@ -103,15 +103,17 @@ namespace blekenbleu.jsonio
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
 
-			// slim.data.pList.Count != simValues.Count will fail when simValues includes globals
-			if (null == slim.data.pList || (0 < slim.data.pList.Count && slim.data.pList.Count != simValues.Count))
-			{
-				slim.data.pList = new List<string> {};
-				changed = true;
-			}
 			Save_Car();
 			if (changed)
-			{
+			{   
+				// slim.data.pList.Count != simValues.Count
+				// will fail when simValues includes globals
+				if (null == slim.data.pList
+				 || (0 < slim.data.pList.Count
+					 && slim.data.pList.Count != simValues.Count))
+				{
+					slim.data.pList = new List<string> {};
+				}
 				if (0 == slim.data.pList.Count) // no previous JSON file
 					for (int i = 0; i < simValues.Count; i++)
 						slim.data.pList.Add(simValues[i].Name);
@@ -302,6 +304,7 @@ namespace blekenbleu.jsonio
 				CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
 						  pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
 			});
+			Info($"JSONIO.Init():  simValues.Count = {simValues.Count}");
 		}	// Init()
 	}		// class JSONio
 }

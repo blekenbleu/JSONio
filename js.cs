@@ -167,7 +167,7 @@ namespace blekenbleu.jsonio
 				return;											// nothing to save
 
 			var vList = DefaultCopy();							// search for game
-			int gndex = slim.data.gList.FindIndex(g => g.cList[0].Name == Gname);
+			int gndex = GameIndex(Gname);
 			if (0 > gndex)	 									// first car for this game?
 			{
 				changed = true;
@@ -184,6 +184,23 @@ namespace blekenbleu.jsonio
 				slim.data.gList[gndex].cList.Add(new CarL { Name = string.Copy(CurrentCar), Vlist = vList });
 			}
 			else slim.Mod(gndex, cndex, vList);
+		}
+
+		int GameIndex(string gnew)
+		{
+			int gndx = -1;
+
+			if (0 < gnew.Length)
+				for (int g = 0; g < slim.data.gList.Count; g++)
+					if (0 == slim.data.gList[g].cList.Count)
+						slim.data.gList.RemoveAt(g--);
+ 					else if (gnew == slim.data.gList[g].cList[0].Name)
+					{
+						gndx = g;
+						break;
+					}
+
+			return gndx;
 		}
 
 		void CarChange(string cname, string gnew)
@@ -204,7 +221,7 @@ namespace blekenbleu.jsonio
 						simValues[i].Previous = simValues[i].Current;
 
 					// indices for new car
-					int gndx = (0 < gnew.Length) ? slim.data.gList.FindIndex(g => g.cList[0].Name == gnew) : -1;
+					int gndx = GameIndex(gnew);
 					int cndx = (0 <= gndx) ? slim.data.gList[gndx].cList.FindIndex(c => c.Name == cname) : -1;
 
 					New_Car = (-1 == cndx) ? "true" : "false";						
@@ -223,10 +240,6 @@ namespace blekenbleu.jsonio
 							simValues[i].Default = game.cList[0].Vlist[i];
 						}
 					}														// else reuse current properties
-
-					View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke from another thread
-					SelectedStatus();
-					View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready for business
 				}
 				else if (null == cname)		// CarID verification - should make a popup
 					Msg = "null CarID";
@@ -242,6 +255,9 @@ namespace blekenbleu.jsonio
 				if (ml < Msg.Length)
 					OOps(null);
 				else Msg = "";
+				View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke from another thread
+				SelectedStatus();
+				View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready for business
 		}
 	}
 }
