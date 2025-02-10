@@ -116,7 +116,8 @@ namespace blekenbleu.jsonio
 					for (int i = 0; i < simValues.Count; i++)
 						slim.data.pList.Add(simValues[i].Name);
 
-				string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data, Newtonsoft.Json.Formatting.Indented);
+				string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data,
+							 Newtonsoft.Json.Formatting.Indented);
 				if (0 == sjs.Length || "{}" == sjs)
 					OOps("End():  Json Serializer failure");
 				else System.IO.File.WriteAllText(path, sjs);
@@ -124,10 +125,10 @@ namespace blekenbleu.jsonio
 		}
 
 		/// <summary>
-		/// Returns the settings control, return null if no settings control is required
+		/// Returns settings control or null if not required
 		/// </summary>
 		/// <param name="pluginManager"></param>
-		/// <returns> instance of UserControl </returns>
+		/// <returns>UserControl instance</returns>
 		private Control View;	// instance of Control.xaml.cs Control()
 		public System.Windows.Controls.Control GetWPFSettingsControl(PluginManager pluginManager)
 		{
@@ -140,6 +141,7 @@ namespace blekenbleu.jsonio
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
+			View.Model.Selected_Property = "unKnown";
 			return View;
 		}
 
@@ -156,11 +158,12 @@ namespace blekenbleu.jsonio
 				if (c >= vals.Count && -1 != Index)
 					s = p;
 
-				simValues.Add(new Values { Name = props[c], Default = s, Current = p, Previous = p });
-
-				if (c < stps.Count)
-					Steps.Add((int)(100 * float.Parse(stps[c])));
-				else Steps.Add(10);
+				simValues.Add(new Values {	Name = props[c],
+											Default = s,
+											Current = p,
+											Previous = p });
+				Steps.Add((c < stps.Count)  ? (int)(100 * float.Parse(stps[c]))
+											: 10);
 			}
 		}
 
@@ -185,18 +188,21 @@ namespace blekenbleu.jsonio
 				{
 					Plugin = "JSONio",
 					gList = new List<GameList>() {},	// GameList @ slim.cs line 16
-					pList = new List<string> {}			// per-car property names, then per-game names
+					// property names
+					pList = new List<string> {}			// per-car, then per-game
 				}
 			};
 
 			// restore Properties from settings
-			Settings = this.ReadCommonSettings<DataPluginSettings>("GeneralSettings", () => new DataPluginSettings());
+			Settings = this.ReadCommonSettings<DataPluginSettings>(
+												"GeneralSettings", () => new DataPluginSettings());
 
-			// restore previously saved car properties		<- do this AFTER sorting JSONio.ini??
-			SetProps = new List<Property> {};				// deep copy
+			// restore previously saved car properties	<- do this AFTER sorting JSONio.ini??
+			SetProps = new List<Property> {};			// deep copy
 			foreach(Property p in Settings.properties)
 				if (null != p.Name && null != p.Value)
-					SetProps.Add(new Property() { Name = string.Copy(p.Name), Value = string.Copy(p.Value) });
+					SetProps.Add(new Property() { Name = string.Copy(p.Name),
+												  Value = string.Copy(p.Value) });
 
 			Steps = new List<int>() { };
 
@@ -215,16 +221,20 @@ namespace blekenbleu.jsonio
 				List<string> values = new List<string>(vs.Split(','));
 				List<string> steps = new List<string>(ss.Split(','));
 				if (pCount != values.Count || pCount != steps.Count)
-					OOpa($"Init(): {pCount} per-car properties;  {values.Count} values;  {steps.Count} steps");
+					OOpa($"Init(): {pCount} per-car properties;  "
+						+$"{values.Count} values;  {steps.Count} steps");
 				Populate(CarProps, values, steps);
 			}
 
 			// JSONio.ini also optionally defines per-game Properties
 
 			// JSONio.ini also optionally defines per-game settings
-			string ptts, dss = pluginManager.GetPropertyValue(ptts = Myni + "gameprops")?.ToString();
-			string vtts, vss = pluginManager.GetPropertyValue(vtts = Myni + "gamevals")?.ToString();
-			string stts, sss = pluginManager.GetPropertyValue(stts = Myni + "gamesteps")?.ToString();
+			string ptts = Myni + "gameprops";
+			string dss = pluginManager.GetPropertyValue(ptts)?.ToString();
+			string vtts = Myni + "gamevals";
+			string vss = pluginManager.GetPropertyValue(vtts)?.ToString();
+			string stts = Myni + "gamesteps";
+			string sss = pluginManager.GetPropertyValue(stts)?.ToString();
 			if ((!(null == dss && OOpa($"Init(): '{ptts}' not found")))
 			 && (!(null == vss && OOpa($"Init(): '{vtts}' not found")))
 			 && (!(null == sss && OOpa($"Init(): '{stts}' not found")))
@@ -234,7 +244,8 @@ namespace blekenbleu.jsonio
 				List<string> values = new List<string>(vss.Split(','));
 				List<string> steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Sprops.Count != steps.Count)
-					OOpa($"Init(): {Sprops.Count} gameprops;  {values.Count} gamevals;  {steps.Count} gamesteps");
+					OOpa($"Init(): {Sprops.Count} gameprops;  {values.Count} gamevals;"
+									+ $"  {steps.Count} gamesteps");
 				gCount = (Sprops.Count < values.Count) ? Sprops.Count : values.Count;
 				if (gCount > steps.Count)
 					gCount = steps.Count + pCount;
@@ -244,58 +255,53 @@ namespace blekenbleu.jsonio
 
 			if (0 == simValues.Count)
 			{
-				OOpa("Missing or invalid " + Myni + "properties from NCalcScripts/JSONio.ini");
+				OOpa("Missing or invalid " + Myni
+					 + "properties from NCalcScripts/JSONio.ini");
 				return;
 			}
 
 			string sl = pluginManager.GetPropertyValue(Myni + "slider")?.ToString();
 			if (null != sl)
 				slider = simValues.FindIndex(i => i.Name == sl);
+
 			path = pluginManager.GetPropertyValue(sl = Myni + "file")?.ToString();
 			// Load existing JSON, using slim format
 			if (!slim.Load(path))
 				changed = OOpa($"Init(): {path} JSON not found");
 
 			// Declare available properties
-			// these get evaluated "on demand" (when shown or used in formulae)
+			// these get evaluated "on demand"
 			foreach(Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
-
-			if ((0 == Gname.Length || 0 == CurrentCar.Length) && null != View)
-					View.Model.Selected_Property = "unKnown";
-			else SelectedStatus();
-
 			this.AttachDelegate("Selected", () => View.Model.Selected_Property);
 			this.AttachDelegate("New Car", () => New_Car);
 			this.AttachDelegate("Car", () => CurrentCar);
 			this.AttachDelegate("Game", () => Gname);
 			this.AttachDelegate("Msg", () => Msg);
 
-/*---------	this.AddAction("ChangeProperties",...)
- ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
- ;			[ExportEvent]
- ;			name='CarChange'
- ;			trigger=changed(200, [DataCorePlugin.GameData.CarId])
- ;--------------------------------------------------------------- */	
-			this.AddAction("ChangeProperties", (a, b) =>
-			{
-				if (0 == simValues.Count)
-					return;
-
-				CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
-						  pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
-			});					// ChangeProperties (CarID change)
-
+			// Declare an event and corresponding action
+			this.AddEvent("JSONioOOps");
+			this.AddAction("OopsMessageBox",			(a, b) => OOpsMB());
 			this.AddAction("IncrementSelectedProperty", (a, b) => Ment(1));
 			this.AddAction("DecrementSelectedProperty", (a, b) => Ment(-1));
 			this.AddAction("NextProperty",				(a, b) => Select(true)	);
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
+			this.AddAction("ChangeProperties",			(a, b) => {
+/*-------------------------------------------------------------- 
+ ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
+ ;			[ExportEvent]
+ ;			name='CarChange'
+ ;			trigger=changed(200, [DataCorePlugin.GameData.CarId])
+ ;--------------------------------------------------------------- */	
+				if (0 == simValues.Count)
+					return;
 
-			// Declare an event and corresponding action
-			this.AddEvent("JSONioOOps");
-			this.AddAction("OopsMessageBox", (a, b) => OOpsMB());
+				// CarID change
+				CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
+						  pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
+			});
 		}	// Init()
 	}		// class JSONio
 }
