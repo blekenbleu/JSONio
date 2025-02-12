@@ -72,6 +72,20 @@ namespace blekenbleu.jsonio
 			return New;
 		}
 
+		int GameIndex(string gnew)
+		{
+			if (1 > gnew.Length)
+				return gndx;										// should be unlikely
+
+			for (int g = 0; g < slim.data.gList.Count; g++)
+				if (0 == slim.data.gList[g].cList.Count
+				 || null == slim.data.gList[g].cList[0].Name)
+					slim.data.gList.RemoveAt(g--);					// Reconcile() failure
+				else if (gnew == slim.data.gList[g].cList[0].Name)
+					gndx = g;
+			return gndx;
+		}
+
 		internal bool Save_Car()
 		{
 			if (null == CurrentCar || 0 == pCount)
@@ -96,20 +110,6 @@ namespace blekenbleu.jsonio
 			changed = false;		// Save_Car() updated per-car slim.data
 			Changed();				// may still be per-game changes
 			return write;
-		}
-
-		int GameIndex(string gnew)
-		{
-			if (1 > gnew.Length)
-				return gndx;										// should be unlikely
-
-			for (int g = 0; g < slim.data.gList.Count; g++)
-				if (0 == slim.data.gList[g].cList.Count
-				 || null == slim.data.gList[g].cList[0].Name)
-					slim.data.gList.RemoveAt(g--);					// Reconcile() failure
-				else if (gnew == slim.data.gList[g].cList[0].Name)
-					gndx = g;
-			return gndx;
 		}
 
 		void CarChange(string cname, string gnew)
