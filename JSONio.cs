@@ -264,18 +264,21 @@ namespace blekenbleu.jsonio
 			if (null != sl)
 				slider = simValues.FindIndex(i => i.Name == sl);
 
-			path = pluginManager.GetPropertyValue(sl = Myni + "file")?.ToString();
 			slim = new Slim(this) {};
 
+			// at this point, simValues has all properties from .ini,
+			// with original .ini default and previous property values
+			// still-configured from most recent game instance
 			// Load existing JSON, using slim format
-			if (slim.Load(path))
+			// JSON values for still-configured properties are supposed more current than .ini
+			if (slim.Load(path = pluginManager.GetPropertyValue(sl = Myni + "file")?.ToString()))
 			{
 				OOpa($"Init() slim.Load({path}): " + Msg);
 				slim.Data();
 			}
 
 			// Declare available properties
-			// these get evaluated "on demand"
+			// SimHub properties by AttachDelegate get evaluated "on demand"
 			foreach(Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
 			this.AttachDelegate("Selected", () => View.Model.Selected_Property);

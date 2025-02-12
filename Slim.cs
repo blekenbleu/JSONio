@@ -54,21 +54,23 @@ namespace blekenbleu.jsonio
 		{
 			List<string> New = new List<string> {};
 			// car[0] is per-game car default and per-game property values
-			int count = (0 == car) ? JSONio.pCount : JSONio.gCount;
+			int count = (0 == car) ? JSONio.gCount : JSONio.pCount;
 
-			for (int i = 0; i < JSONio.pCount; i++)
+			for (int i = 0; i < count; i++)
 			{
 				int Index =  data.pList.FindIndex(j => j == js.simValues[i].Name);
 
-				if (-1 == Index)
+				if (-1 == Index || Index >= vList.Count)
 					New.Add(string.Copy(js.simValues[i].Default));
-				else New.Add(string.Copy(vList[Index]));
+				else New.Add(string.Copy(vList[Index]));	// reuse as many as possible
 			}
 			return New;
 		}
 
 		// load Slim .json and reconcile with CurrentCar-specific simValues from NCalcScripts/JSONio.ini
 		// return true if path fails or unrecoverable JSON
+		// .ini may have added, deleted or moved properties among per-car, per-game and global
+		// .json may be e.g. obsolete format, out-of-date or bad because JSONio code bugs.
 		internal bool Load(string path)
 		{
 			if (!File.Exists(path))
@@ -93,30 +95,40 @@ namespace blekenbleu.jsonio
 				return true;
 			}
 
-			// return false, meaning a data that fully matches simValues
+			// Now, can only return false, meaning data fully reconciled to simValues
 
 			if (null == data.Plugin || "JSONio" != data.Plugin) {
 				js.OOpa($"Slim.Load({path}) data.Plugin: {data.Plugin} != JSONio");
-				data.Plugin = "JSONio";
+				data.Plugin = "JSONio";	// user has at least been warned...
 			}
 
 			int nullcarID = 0;
 			int pCount = JSONio.pCount;
 			int gCount = JSONio.gCount;
-			int i;
+			int i, g, c;
 
-			for (i = 0; i < data.pList.Count; i++)
+			if (gCount != data.pList.Count)
+				i = -1;
+			else for (i = 0; i < data.pList.Count; i++)
 				if (data.pList[i] != js.simValues[i].Name)
 					break;
 
-			if (i != gCount || gCount != data.pList.Count)
+			if (i == gCount)
+				for (g = 0; g < data.gList.Count; g++)
+					if(data.gList[g].cList.Count < 2 || data.gList[g].cList[0].Vlist.Count != gCount)
+					{ i--; break; }
+					else for (c = 0; c < data.gList[g].cList.Count; c++)
+						if (data.gList[g].cList[c].Vlist.Count != ((0 == c) ? gCount : pCount))
+						{ i--; g = data.gList.Count; break; }
+
+			if (i != gCount)
 			// repopulate car properties according to simValues
 			{
 				js.OOpa($"Slim.Load({path}):  pList mismatch");
 				if (i != pCount)
 					for (i = 0; i < data.gList.Count; i++)					// all games
 					{
-						for (int c = 0; c < data.gList[i].cList.Count; c++)	// all cars in game
+						for (c = 0; c < data.gList[i].cList.Count; c++)	// all cars in game
 							if (null == data.gList[i].cList[c].Name)
 							{
 								nullcarID++;
