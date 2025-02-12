@@ -21,13 +21,13 @@ namespace blekenbleu.jsonio
 		public Control() {								// called before simValues are initialized
 			Model = new ViewModel(this);
 			InitializeComponent();
-			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 1.40";
+			this.DataContext = Model;					// StaticControl events change Control.xaml binds
+			Version.Text = "Version 1.41";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
-			this.js = plugin;						// Control.xaml button events call JSONio methods
+			this.js = plugin;							// Control.xaml button events call JSONio methods
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
 		}
 
@@ -47,7 +47,6 @@ namespace blekenbleu.jsonio
 				dg.SelectedCells.Clear();
 				dg.SelectedCells.Add(dg.CurrentCell);
 			}
-			Model.ChangedVisibility = (js.changed) ? Visibility.Visible : Visibility.Hidden;
 		}
 
 		// xaml DataGrid:  Loaded="DgSelect"

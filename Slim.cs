@@ -61,17 +61,14 @@ namespace blekenbleu.jsonio
 				int Index =  data.pList.FindIndex(j => j == js.simValues[i].Name);
 
 				if (-1 == Index)
-				{
-					js.changed = true;
 					New.Add(string.Copy(js.simValues[i].Default));
-				}
 				else New.Add(string.Copy(vList[Index]));
 			}
 			return New;
 		}
 
 		// load Slim .json and reconcile with CurrentCar-specific simValues from NCalcScripts/JSONio.ini
-		// return true if path fails
+		// return true if path fails or unrecoverable JSON
 		internal bool Load(string path)
 		{
 			if (!File.Exists(path))
@@ -96,10 +93,11 @@ namespace blekenbleu.jsonio
 				return true;
 			}
 
+			// return false, meaning a data that fully matches simValues
+
 			if (null == data.Plugin || "JSONio" != data.Plugin) {
 				js.OOpa($"Slim.Load({path}) data.Plugin: {data.Plugin} != JSONio");
 				data.Plugin = "JSONio";
-				js.changed = true;
 			}
 
 			int nullcarID = 0;
@@ -114,7 +112,6 @@ namespace blekenbleu.jsonio
 			if (i != gCount || gCount != data.pList.Count)
 			// repopulate car properties according to simValues
 			{
-				js.changed = true;
 				js.OOpa($"Slim.Load({path}):  pList mismatch");
 				if (i != pCount)
 					for (i = 0; i < data.gList.Count; i++)					// all games
@@ -139,18 +136,5 @@ namespace blekenbleu.jsonio
 
 			return false;
 		}	// Load()
-
-		// game defaults (0 == ci) or per-car values
-		internal void Mod(int gi, int ci, List<string> vList)
-		{
-			int count = vList.Count;
-
-			for (int i = 0; i < count; i++)
-				if (data.gList[gi].cList[ci].Vlist[i] != vList[i])
-				{
-					js.changed = true;
-					break;
-		   		}
-		}
 	}		// class Slim
 }

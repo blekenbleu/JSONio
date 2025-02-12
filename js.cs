@@ -49,10 +49,9 @@ namespace blekenbleu.jsonio
 		internal void Changed()
 		{
 			if (-1 == gndx || -1 == cndx)
-			{
-				write = true;
 				return;
-			}
+
+			// this should be unnecessary if slim.Reconcile() works..
 			if (gCount != slim.data.gList[gndx].cList[0].Vlist.Count
 			 || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count)
 				changed = true;
@@ -188,7 +187,8 @@ namespace blekenbleu.jsonio
 				slim.data.gList[gndx].cList.Add(new CarL
 					{ Name = string.Copy(CurrentCar), Vlist = CurrentCopy() });
 			}
-			Changed();
+			changed = false;		// Save_Car() updated per-car slim.data
+			Changed();				// may still be per-game changes
 			return write;
 		}
 

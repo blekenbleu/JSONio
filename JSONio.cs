@@ -15,7 +15,7 @@ namespace blekenbleu.jsonio
 		internal static int pCount, gCount;		// append per-game settings after pCount, global after gCount
 		internal int slider = -1;				// simValues index for configured JSONIO.properties
 		internal static string Msg = "";
-		internal bool changed = false, write = false;			// slim may change
+		internal bool changed = false, write = false;			// slim should not change
 		private static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		private static readonly string Myni						// configuration source
 											= "DataCorePlugin.ExternalScript." + My;

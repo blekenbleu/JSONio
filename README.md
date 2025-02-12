@@ -81,6 +81,12 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 - **done** UI feedback for property value change
 - **done** buttons not enabled when bad JSON is loaded
 - does not handle too short `slim.data.gList[gndx].cList[0].Vlist.Count`
+	- **KEY CONCEPT**: `slim.data` should be ready for saving as JSON after `Init()`  
+		- whether or not user changes any property values
+		- no practical use for `write` flag;  
+			write new JSON *only* when *users* change certain values:
+			- current per-car values
+			- default global or per-game values
 - SimHub [WatchDog] Stacks dump for `OOps()` popups
 	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
 	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).

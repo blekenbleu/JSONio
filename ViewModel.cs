@@ -15,7 +15,7 @@ namespace blekenbleu.jsonio
     /// </summary>
     public class ViewModel : INotifyPropertyChanged
 	{
-        readonly Control Ctrl;				// Dispatcher.Invoke(Ctrl.Selected())
+        readonly Control Ctrl;				// Ctrl.Dispatcher.Invoke(Ctrl.Selected())
 		public ViewModel(Control C)
 		{
 			Ctrl = C;
