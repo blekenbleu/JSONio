@@ -15,12 +15,13 @@ namespace blekenbleu.jsonio
 		internal static int pCount, gCount;		// append per-game settings after pCount, global after gCount
 		internal int slider = -1;				// simValues index for configured JSONIO.properties
 		internal static string Msg = "";
-		internal bool changed;									// slim may change
+		internal bool changed = false, write = false;			// slim may change
 		private static readonly string My = "JSONio.";			// breaks Ini if not preceding
 		private static readonly string Myni						// configuration source
 											= "DataCorePlugin.ExternalScript." + My;
 		private string CurrentCar;
 		private string Gname = "";
+		private int gndx = -1, cndx = -1;						// current car slim.data.gList indices
 		private string path;									// JSON file location
 		private Slim slim;										// new JSON format
 		private List<Property> SettingsProps;
@@ -92,6 +93,7 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void End(PluginManager pluginManager)
 		{
+			Save_Car();
 			// Save settings
 			if (0 < Gname.Length) {
 				Settings.properties = new List<Property> {};
@@ -104,27 +106,14 @@ namespace blekenbleu.jsonio
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
 
-			Save_Car();
-			if (changed)
-			{   
-				// slim.data.pList.Count != simValues.Count
-				// will fail when simValues includes globals
-				if (null == slim.data.pList
-				 || (0 < slim.data.pList.Count
-					 && slim.data.pList.Count != simValues.Count))
-				{
-					slim.data.pList = new List<string> {};
-				}
-				if (0 == slim.data.pList.Count) // no previous JSON file
-					for (int i = 0; i < simValues.Count; i++)
-						slim.data.pList.Add(simValues[i].Name);
+			if (!changed && !write)
+				return;
 
-				string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data,
-							 Newtonsoft.Json.Formatting.Indented);
-				if (0 == sjs.Length || "{}" == sjs)
-					OOps("End():  Json Serializer failure");
-				else System.IO.File.WriteAllText(path, sjs);
-			}
+			string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data,
+						 Newtonsoft.Json.Formatting.Indented);
+			if (0 == sjs.Length || "{}" == sjs)
+				OOps("End():  Json Serializer failure");
+			else System.IO.File.WriteAllText(path, sjs);
 		}
 
 		/// <summary>
@@ -141,6 +130,7 @@ namespace blekenbleu.jsonio
 			if (0 < Msg.Length)
 			{
 				Info("OOpsMB(): " + Msg);
+				Msg += ViewModel.statusText;
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
@@ -183,24 +173,12 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-			changed = false;	// write JSON file during End() only if true
-
-			slim = new Slim(this)
-			{
-				data = new GamesList()
-				{
-					Plugin = "JSONio",
-					gList = new List<GameList>() {},	// GameList @ slim.cs line 16
-					// property names
-					pList = new List<string> {}			// per-car, then per-game
-				}
-			};
-
+			CurrentCar = null;
 			// restore Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>(
 												"GeneralSettings", () => new DataPluginSettings());
 
-			// restore previously saved car properties	<- These will be previous values
+			// restore previously saved car properties
 			SettingsProps = new List<Property> {};			// deep copy
 			foreach(Property p in Settings.properties)
 				if (null != p.Name && null != p.Value)
@@ -270,8 +248,8 @@ namespace blekenbleu.jsonio
 				List<string> values = new List<string>(vgs.Split(','));
 				List<string> steps = new List<string>(sgs.Split(','));
 				if (Gprops.Count != values.Count || Gprops.Count != steps.Count)
-                    OOpa($"Init(): {Gprops.Count} settings;  {values.Count} setvals;"
-                                    + $"  {steps.Count} setsteps");
+					OOpa($"Init(): {Gprops.Count} settings;  {values.Count} setvals;"
+									+ $"  {steps.Count} setsteps");
 				Populate(Gprops, values, steps);
 			}
 
@@ -287,9 +265,14 @@ namespace blekenbleu.jsonio
 				slider = simValues.FindIndex(i => i.Name == sl);
 
 			path = pluginManager.GetPropertyValue(sl = Myni + "file")?.ToString();
+			slim = new Slim(this) {};
+
 			// Load existing JSON, using slim format
-			if (!slim.Load(path))
-				changed = OOpa($"Init(): {path} JSON not found");
+			if (slim.Load(path))
+			{
+				OOpa($"Init() slim.Load({path}): " + Msg);
+				slim.Data();
+			}
 
 			// Declare available properties
 			// these get evaluated "on demand"

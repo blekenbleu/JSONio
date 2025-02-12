@@ -78,7 +78,9 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 	- trying to change a default on first car
 	- try `CarChange()`
 - **done** disable sorting property columns in UI
-- buttons not enabled when bad JSON is loaded
+- **done** UI feedback for property value change
+- **done** buttons not enabled when bad JSON is loaded
+- does not handle too short `slim.data.gList[gndx].cList[0].Vlist.Count`
 - SimHub [WatchDog] Stacks dump for `OOps()` popups
 	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
 	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).
@@ -86,7 +88,7 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 	- **done** when `JSONio.file` property *not* 'PluginsData/JSONio.json',  
 		initially generated `JSONio.file` is wrong... better later..??!  
 	- **done** save global properties and all property names to `Settings`
-- add distinct `JSONio.ini` configuration for per-game properties:
+- **done** add distinct `JSONio.ini` configuration for per-game properties:
 	- global	saved to, restored from SimHub `DataPluginSettings`
 	- per game	saved to, restored from JSON per DataCorePlugin.ExternalScript.JSONio.file
 	- per car	same as per game;  game properties are first "car" in game `cList`

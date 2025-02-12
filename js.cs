@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Windows;
 
 namespace blekenbleu.jsonio
 {
@@ -13,7 +14,7 @@ namespace blekenbleu.jsonio
 			/* slider View.SL.Maximum = 100; scale property to it, based on Steps[slider]
 			 ; Steps	   Guestimated range
 			 ; 1  (0.01)	0 - 2
-			 ; 10 (0.10)	0 - 10	
+			 ; 10 (0.10)	0 - 10
 			 ; 100 (1)		0 - 100
 			 ; 1000 (10)	0 - 1000
 			 */
@@ -44,6 +45,30 @@ namespace blekenbleu.jsonio
 			return Slider_factor[1] * System.Convert.ToDouble(simValues[slider].Current);
 		}
 
+		// check whether current properties differ from JSON
+		internal void Changed()
+		{
+			if (-1 == gndx || -1 == cndx)
+			{
+				write = true;
+				return;
+			}
+			if (gCount != slim.data.gList[gndx].cList[0].Vlist.Count
+			 || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count)
+				changed = true;
+			else for (int p = 0; p < gCount; p++)
+				// default change?
+				if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]
+						// current per-car change?
+			 	 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p]))
+				{
+					changed = true;
+					break;
+				}
+
+			View.Model.ChangedVisibility = changed ? Visibility.Visible : Visibility.Hidden;
+		}
+
 		/// <summary>
 		/// Helper functions used in Init() AddAction()s and Control.xaml.cs button Clicks
 		/// </summary>
@@ -62,7 +87,7 @@ namespace blekenbleu.jsonio
 				if (0 != step % 100)
 					simValues[View.Selection].Current = $"{(float)(0.01 * iv)}";
 				else simValues[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
-				changed = true;
+				Changed();
 				if (slider == View.Selection)
 					View.Slslider_Point();
 			}
@@ -105,6 +130,7 @@ namespace blekenbleu.jsonio
 				simValues[i].Previous = simValues[i].Current;
 				simValues[i].Current = temp;
 			}
+			Changed();
 		}
 
 		// set "CurrentAsDefaults" action
@@ -115,150 +141,129 @@ namespace blekenbleu.jsonio
 				OOps("SetDefault: no Gname");
 				return;
 			}
-			int p, Index = slim.data.gList.FindIndex(i => i.cList[0].Name == Gname);
-			if (0 > Index)
-			{
-				CarChange(CurrentCar, Gname);
-				Index = slim.data.gList.FindIndex(i => i.cList[0].Name == Gname);
-			}
-			if (0 > Index)
-			{
-				OOps($"SetDefault: {Gname} not in slim.data.gList");
-				return;
-			}
-			p = View.Selection;
-			changed |= simValues[p].Current != slim.data.gList[Index].cList[0].Vlist[p];
-			slim.data.gList[Index].cList[0].Vlist[p] = simValues[p].Default = simValues[p].Current;
-/*
-			List<GameList> Glist = slim.data.gList;
-			int p, Index = Glist.FindIndex(i => i.cList[0].Name == Gname);
-
-			if (0 <= Index)
-			{
-				changed = true;
-				for (p = 0; p < pCount; p++)
-					Glist[Index].cList[0].Vlist[p] =			// first "car" has per-car game default values, then per-game
-					simValues[p].Default = simValues[p].Current;
-				for (; p < simValues.Count; p++)
-					simValues[p].Default = simValues[p].Current;
-			}
- */
+			int p = View.Selection;
+			string Current = simValues[p].Current;
+			if (0 > gndx)
+				Save_Car();
+			simValues[p].Default = Current;
+			Changed();
 		}
 
-		// called in Save_Car()
-		List<string> CurrentCopy()
+		List<string> DefaultCopy()		// called in Save_Car()
 		{
+			int i;
 			List<string> New = new List<string> { };
-			for (int i = 0; i < pCount; i++) { New.Add(string.Copy(simValues[i].Current)); }
+			for (i = 0; i < gCount; i++)
+				New.Add(string.Copy(simValues[i].Default));
 			return New;
 		}
 
-		List<string> DefaultCopy()
+		List<string> CurrentCopy()		// called in Save_Car()
 		{
+			int i;
 			List<string> New = new List<string> { };
-			for (int i = 0; i < simValues.Count; i++) { New.Add(string.Copy(simValues[i].Default)); }
+			for (i = 0; i < pCount; i++)
+				New.Add(string.Copy(simValues[i].Current));
 			return New;
 		}
 
-		// called in End() and 'CarChange' ("ChangeProperties")
-		internal void Save_Car()	// update or create car; update or create game
+		internal bool Save_Car()
 		{
-			if (null == CurrentCar || 0 == pCount || pCount > simValues.Count)	// weird state based on pCount??
-				return;											// nothing to save
+			if (null == CurrentCar || 0 == pCount)
+				return false;			// nothing to save
 
-			var vList = DefaultCopy();							// search for game
-			int gndex = GameIndex(Gname);
-			if (0 > gndex)	 									// first car for this game?
+			if (0 > GameIndex(Gname))	// first car for this game?
 			{
-				changed = true;
-				gndex = slim.data.gList.Count;
-				slim.data.gList.Add(new GameList { cList = new List<CarL> { new CarL { Name = string.Copy(Gname), Vlist = vList } } });
+				write = true;
+				gndx = slim.data.gList.Count;
+				slim.data.gList.Add(new GameList
+				{ cList = new List<CarL>
+					{ new CarL { Name = string.Copy(Gname), Vlist = DefaultCopy() } } });
 			}
-			else slim.Mod(gndex, 0, vList);						// game defaults may have changed
 
-			vList = CurrentCopy();
-			int cndex = slim.data.gList[gndex].cList.FindIndex(c => c.Name == CurrentCar);
-			if (0 > cndex)
+			if (0 > (cndx = slim.data.gList[gndx].cList.FindIndex(c => c.Name == CurrentCar)))
 			{
-				changed = true;
-				slim.data.gList[gndex].cList.Add(new CarL { Name = string.Copy(CurrentCar), Vlist = vList });
+				write = true;
+				cndx = 1;
+				slim.data.gList[gndx].cList.Add(new CarL
+					{ Name = string.Copy(CurrentCar), Vlist = CurrentCopy() });
 			}
-			else slim.Mod(gndex, cndex, vList);
+			Changed();
+			return write;
 		}
 
 		int GameIndex(string gnew)
 		{
-			int gndx = -1;
+			if (1 > gnew.Length)
+				return gndx;
 
-			if (0 < gnew.Length)
-				for (int g = 0; g < slim.data.gList.Count; g++)
-					if (0 == slim.data.gList[g].cList.Count
-					 || null == slim.data.gList[g].cList[0].Name)
-						slim.data.gList.RemoveAt(g--);
- 					else if (gnew == slim.data.gList[g].cList[0].Name)
-					{
-						gndx = g;
-						break;
-					}
-
+			for (int g = 0; g < slim.data.gList.Count; g++)
+				if (0 == slim.data.gList[g].cList.Count
+				 || null == slim.data.gList[g].cList[0].Name)
+					slim.data.gList.RemoveAt(g--);
+				else if (gnew == slim.data.gList[g].cList[0].Name)
+					gndx = g;
 			return gndx;
 		}
 
 		void CarChange(string cname, string gnew)
 		{
-				int ml = 0;
-				if (null !=cname && 0 < cname.Length && null != gnew)		// valid new car?
-				{
-					Msg = "Current Car: " + cname;
-					if (0 < Gname.Length)									 // do not save first (null) CurrentCar in game
-					{
-						Save_Car();
-						if (changed)
-							Msg += $";  {CurrentCar} saved";
-					}
-					ml = Msg.Length;
+			int ml = 0;
+			if (null !=cname && 0 < cname.Length && null != gnew && 0 < gnew.Length)	// valid?
+			{
+				Msg = "Current Car: " + cname;
+				if (0 < Gname.Length && Save_Car())	 // do not save first (null) CurrentCar in game
+					Msg += $";  {CurrentCar} saved";
+				ml = Msg.Length;
 
-					for (int i = 0; i < simValues.Count; i++)				// copy Current to previous
-						simValues[i].Previous = simValues[i].Current;
+				for (int i = 0; i < simValues.Count; i++)				// copy Current to previous
+					simValues[i].Previous = simValues[i].Current;
 
-					// indices for new car
-					int gndx = GameIndex(gnew);
-					int cndx = (0 <= gndx) ? slim.data.gList[gndx].cList.FindIndex(c => c.Name == cname) : -1;
+				// indices for new car
+				cndx = (0 <= GameIndex(gnew)) ?
+								slim.data.gList[gndx].cList.FindIndex(c => c.Name == cname) : -1;
 
-					New_Car = (-1 == cndx) ? "true" : "false";						
-					CurrentCar = cname;
-					if (0 <= gndx)
-					{														// copy matching values from GameList
-						int i;
+				New_Car = (-1 == cndx) ? "true" : "false";
+				if (0 <= gndx)
+				{														// matching GameList
+					int i;
 
-						GameList game = slim.data.gList[gndx];
-						if (0 > cndx)
-							for (i = 0; i < gCount; i++)
-								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
-						else for (i = 0; i < pCount; i++)
-						{
+					GameList game = slim.data.gList[gndx];
+					if (-1 < cndx)										// else leave current
+					{													// existing car
+						for (i = 0; i < pCount; i++)
 							simValues[i].Current = game.cList[cndx].Vlist[i];
-							simValues[i].Default = game.cList[0].Vlist[i];
+						if (null == CurrentCar)							// first in this game?
+						{
+							int vcount = game.cList[0].Vlist.Count;
+							int count = pCount > vcount ? vcount : pCount;
+                            for (i = 0; i < count; i++)
+								simValues[i].Default = game.cList[0].Vlist[i];
+							count = gCount > vcount ? vcount : gCount;
+							for(; i < count; i++)
+								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
 						}
-					}														// else reuse current properties
-				}
-				else if (null == cname)		// CarID verification - should make a popup
-					Msg = "null CarID";
-				else if (0 == cname.Length)
-					Msg = "empty CarID";
+					}
+				}													// else reuse current properties
+				CurrentCar = cname;
+			}
+			else if (null == cname)
+				Msg = "null CarID";
+			else if (0 == cname.Length)
+				Msg = "empty CarID";
 
-				if (null == gnew)
-					Msg += ", null CurrentGame Name, ";
-				else if (0 == gnew.Length)
-					Msg += ", empty CurrentGame Name, ";
-				else Gname = gnew;
+			if (null == gnew)
+				Msg += ", null CurrentGame Name, ";
+			else if (0 == gnew.Length)
+				Msg += ", empty CurrentGame Name, ";
+			else Gname = gnew;
 
-				if (ml < Msg.Length)
-					OOps(null);
-				else Msg = "";
-				View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke from another thread
-				SelectedStatus();
-				View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready for business
-		}
-	}
+			if (ml < Msg.Length)
+				OOps(null);
+			else Msg = "";
+			View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke on another thread
+			SelectedStatus();
+			View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready
+		}	// CarChange()
+	}		// public partial class JSONio
 }

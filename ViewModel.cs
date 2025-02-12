@@ -26,6 +26,7 @@ namespace blekenbleu.jsonio
 
         // events to raise
         readonly PropertyChangedEventArgs Bevent = new PropertyChangedEventArgs("ButtonVisibility");
+        readonly PropertyChangedEventArgs Cevent = new PropertyChangedEventArgs("ChangedVisibility");
         readonly PropertyChangedEventArgs Nevent = new PropertyChangedEventArgs("Slider_Property");
         readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("Selected_Property");
         readonly PropertyChangedEventArgs SVevent = new PropertyChangedEventArgs("SliderVisibility");
@@ -41,6 +42,20 @@ namespace blekenbleu.jsonio
                 {
 					_bvis = value;
 					PropertyChanged?.Invoke(this, Bevent);
+				}
+			}
+		}
+
+		private Visibility _cvis = Visibility.Hidden;	// until carID and game are defined
+		public Visibility ChangedVisibility				// must be public for XAML Binding
+		{
+			get { return _cvis; }
+			set
+			{
+				if (_cvis != value)
+                {
+					_cvis = value;
+					PropertyChanged?.Invoke(this, Cevent);
 				}
 			}
 		}
@@ -92,7 +107,8 @@ namespace blekenbleu.jsonio
             }
         }
 
-		private string _statusText = "To enable:  launch game or Replay";
+		static internal readonly string statusText = "To enable:  launch game or Replay";
+		private string _statusText = statusText;
 		public string StatusText			// must be public for XAML Binding
         {
             get { return _statusText; }

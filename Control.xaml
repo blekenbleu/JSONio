@@ -7,10 +7,14 @@
 			 mc:Ignorable="d"
 		Width="480">
 	<Grid Margin="0,0,0,0">
-		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Width="164" Height="25"
-			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,10,0,0"/>
+		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Height="25" Width="155"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="75,10,0,0"/>
+		<TextBlock x:Name="Changed" Text="changed" Height="20" Width="45"
+			Visibility="{Binding changedVisibility}"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,16,0,0"/>
 		<TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
-			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="310,14,0,0"/>
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="315,17,0,0"/>
+
 		<TextBlock x:Name="Status" Text="{Binding StatusText}" Height="74" Width="350"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,40,0,0"
 				TextWrapping="Wrap"/>

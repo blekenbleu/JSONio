@@ -30,13 +30,27 @@ namespace blekenbleu.jsonio
 		public GamesList data;
 		readonly JSONio js;
 
-        public Slim(JSONio plugin)
-        {
-            this.js = plugin;
-        }
+		public Slim(JSONio plugin)
+		{
+			this.js = plugin;
+		}
+
+		// called in End()
+		public void Data()
+		{
+			data = new GamesList()
+			{
+				Plugin = "JSONio",
+				gList = new List<GameList>() { },	// GameList @ slim.cs line 16
+				// property names
+				pList = new List<string> { }		// per-car, then per-game
+			};
+			for (int i = 0; i < js.simValues.Count; i++)
+				data.pList.Add(js.simValues[i].Name);
+		}
 
 		// Reconcile .json values with simValues based on .ini and Settings
-        private List<string> Reconcile(List<string> vList, int car)
+		private List<string> Reconcile(List<string> vList, int car)
 		{
 			List<string> New = new List<string> {};
 			// car[0] is per-game car default and per-game property values
@@ -57,48 +71,51 @@ namespace blekenbleu.jsonio
 		}
 
 		// load Slim .json and reconcile with CurrentCar-specific simValues from NCalcScripts/JSONio.ini
+		// return true if path fails
 		internal bool Load(string path)
 		{
 			if (!File.Exists(path))
-				return false;
-
+			{
+				JSONio.Msg = "{path} JSON not found";
+				return true;
+			}
 			data = JsonConvert.DeserializeObject<GamesList>(File.ReadAllText(path));
 			if (null == data)
-				return js.OOpa($"Slim.Load({path}):  null data");
-			if (null == data.Plugin)
 			{
-				js.OOpa($"Slim.Load({path}):  null data.Plugin");
-				data.Plugin = "JSONio";
-				js.changed = true;
+				JSONio.Msg = "null data";
+				return true;
 			}
-			if ("JSONio" != data.Plugin) {
+			if (null == data.pList)
+			{
+				JSONio.Msg = "null data.pList";
+				return true;
+			}
+			if (null == data.gList)
+			{
+				JSONio.Msg = "null data.gList";
+				return true;
+			}
+
+			if (null == data.Plugin || "JSONio" != data.Plugin) {
 				js.OOpa($"Slim.Load({path}) data.Plugin: {data.Plugin} != JSONio");
 				data.Plugin = "JSONio";
 				js.changed = true;
 			}
-			if (null == data.pList)
-			{
-				js.changed = false;
-				return js.OOpa($"Slim.Load({path}):  null data.pList");
-			}
-			if (null == data.gList)
-			{
-                js.changed = false;
-                return js.OOpa($"Slim.Load({path}):  null data.gList");
-			}
+
 			int nullcarID = 0;
 			int pCount = JSONio.pCount;
 			int gCount = JSONio.gCount;
-			int i = -1;
+			int i;
 
-			if (gCount == data.pList.Count)		// data.pList has both per-car and per-game
-				for (i = 0; i < pCount; i++)
-					if (data.pList[i] != js.simValues[i].Name)
-						break;
+			for (i = 0; i < data.pList.Count; i++)
+				if (data.pList[i] != js.simValues[i].Name)
+					break;
 
-			if (i != pCount || gCount != data.pList.Count) // repopulate car properties according to NCalcScripts/JSONio.ini
+			if (i != gCount || gCount != data.pList.Count)
+			// repopulate car properties according to simValues
 			{
-				js.OOpa($"Slim.Load({path}):  pList mismatched NCalcScripts/JSONio.ini");
+				js.changed = true;
+				js.OOpa($"Slim.Load({path}):  pList mismatch");
 				if (i != pCount)
 					for (i = 0; i < data.gList.Count; i++)					// all games
 					{
@@ -110,10 +127,9 @@ namespace blekenbleu.jsonio
 							}
 							else data.gList[i].cList[c].Vlist = Reconcile(data.gList[i].cList[c].Vlist, c);
 					}
-				if (gCount != data.pList.Count)
-					data.pList = new List<string> {};
-					for (i = 0; i < gCount; i++)
-						data.pList.Add(string.Copy(js.simValues[i].Name));
+				data.pList = new List<string> {};
+				for (i = 0; i < gCount; i++)
+					data.pList.Add(string.Copy(js.simValues[i].Name));
 			}
 			if (0 < nullcarID)
 				js.OOpa($"Slim.Load({path}): {nullcarID} null carIDs");
@@ -121,7 +137,7 @@ namespace blekenbleu.jsonio
 			if (data.gList.Count < 1 || data.gList[0].cList.Count < 2)
 				js.OOpa($"Slim.Load({path}): empty data.gList");
 
-			return true;
+			return false;
 		}	// Load()
 
 		// game defaults (0 == ci) or per-car values
@@ -133,7 +149,7 @@ namespace blekenbleu.jsonio
 				if (data.gList[gi].cList[ci].Vlist[i] != vList[i])
 				{
 					js.changed = true;
-					data.gList[gi].cList[ci].Vlist[i] = string.Copy(vList[i]);
+					break;
 		   		}
 		}
 	}		// class Slim
