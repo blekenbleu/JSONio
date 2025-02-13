@@ -96,12 +96,22 @@ namespace blekenbleu.jsonio
 			Save_Car();
 			// Save settings
 			if (0 < Gname.Length) {
+				int i;
 				Settings.properties = new List<Property> {};
-				for(int i = 0; i < simValues.Count; i++)
+				Settings.game = Gname;
+				Settings.carid = CurrentCar;
+				for(i = 0; i < simValues.Count; i++)
 					if (null != simValues[i].Name &&  null != simValues[i].Current)
 						Settings.properties.Add(new Property()
 						{ Name  = string.Copy(simValues[i].Name),
 						  Value = string.Copy(simValues[i].Current)
+						});
+				Settings.GlobalDefaults = new List<Property> {};
+				for(i = gCount; i < simValues.Count; i++)
+					if (null != simValues[i].Name &&  null != simValues[i].Default)
+						Settings.GlobalDefaults.Add(new Property()
+						{ Name  = string.Copy(simValues[i].Name),
+					  	  Value = string.Copy(simValues[i].Default)
 						});
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}

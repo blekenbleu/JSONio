@@ -12,18 +12,17 @@ namespace blekenbleu.jsonio
 				return;
 
 			// this should be unnecessary if slim.Reconcile() works..
-			if (gCount != slim.data.gList[gndx].cList[0].Vlist.Count
-			 || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count)
-				changed = true;
-			else for (int p = 0; p < gCount; p++)
+			if (!(changed = gCount != slim.data.gList[gndx].cList[0].Vlist.Count
+						 || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count))
+				for (int p = 0; p < gCount; p++)
 				// default change?
-				if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]
+					if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]
 						// current per-car change?
-			 	 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p]))
-				{
-					changed = true;
-					break;
-				}
+			 		 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p]))
+					{
+						changed = true;
+						break;
+					}
 
 			View.Model.ChangedVisibility = changed ? Visibility.Visible : Visibility.Hidden;
 		}
@@ -107,7 +106,6 @@ namespace blekenbleu.jsonio
 				slim.data.gList[gndx].cList.Add(new CarL
 					{ Name = string.Copy(CurrentCar), Vlist = CurrentCopy() });
 			}
-			changed = false;		// Save_Car() updated per-car slim.data
 			Changed();				// may still be per-game changes
 			return write;
 		}
@@ -117,40 +115,58 @@ namespace blekenbleu.jsonio
 			int ml = 0;
 			if (null !=cname && 0 < cname.Length && null != gnew && 0 < gnew.Length)	// valid?
 			{
+				GameList game = null;
+				int i, count = 0, vcount = 0;
+
 				Msg = "Current Car: " + cname;
-				if (0 < Gname.Length && Save_Car())	 // do not save first (null) CurrentCar in game
+				if (0 < Gname.Length && Save_Car())				// do not save first instance
 					Msg += $";  {CurrentCar} saved";
 				ml = Msg.Length;
 
-				for (int i = 0; i < simValues.Count; i++)				// copy Current to previous
+				for (i = 0; i < simValues.Count; i++)			// copy Current to previous
 					simValues[i].Previous = simValues[i].Current;
 
 				// indices for new car
-				cndx = (0 <= GameIndex(gnew)) ?
-								slim.data.gList[gndx].cList.FindIndex(c => c.Name == cname) : -1;
+				if (0 <= GameIndex(gnew))						// sets gndx
+				{
+					game = slim.data.gList[gndx];
+					cndx = game.cList.FindIndex(c => c.Name == cname);
+					vcount = game.cList[0].Vlist.Count;
+					count = gCount > vcount ? vcount : gCount;
+				}
+				else cndx = -1;
 
-				New_Car = (-1 == cndx) ? "true" : "false";
-				if (0 <= gndx)
-				{														// matching GameList
-					int i;
-
-					GameList game = slim.data.gList[gndx];
-					if (-1 < cndx)										// else leave current
-					{													// existing car
-						for (i = 0; i < pCount; i++)
-							simValues[i].Current = game.cList[cndx].Vlist[i];
-						if (null == CurrentCar)							// first in this game?
-						{
-							int vcount = game.cList[0].Vlist.Count;
-							int count = pCount > vcount ? vcount : pCount;
-                            for (i = 0; i < count; i++)
+				if (0 > cndx)
+				{
+					New_Car = "true";
+					if (0 <= gndx)									// set at line 132
+					{												// not a new game
+						if (gnew != Settings.game)
+						{											// different game
+							count = pCount > vcount ? vcount : pCount;
+							for (i = 0; i < count; i++)				// per-car defaults
+								simValues[i].Default = game.cList[0].Vlist[i];
+						}
+						for (i = pCount; i < count; i++)			// per-game defaults
+							simValues[i].Default = game.cList[0].Vlist[i];	// perhaps altered since .ini
+					}
+				}
+				else
+				{													// existing car
+						New_Car = "false";
+						if (cname != Settings.carid)				// previous car?
+							for (i = 0; i < pCount; i++)
+								simValues[i].Current = game.cList[cndx].Vlist[i];
+						if (null == CurrentCar)						// first in this game instance?
+						{											// restore game defaults
+							count = pCount > vcount ? vcount : pCount;
+							for (i = 0; i < count; i++)
 								simValues[i].Default = game.cList[0].Vlist[i];
 							count = gCount > vcount ? vcount : gCount;
-							for(; i < count; i++)
+							for(i = pCount; i < count; i++)
 								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
 						}
-					}
-				}													// else reuse current properties
+				}
 				CurrentCar = cname;
 			}
 			else if (null == cname)

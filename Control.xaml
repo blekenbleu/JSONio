@@ -10,7 +10,7 @@
 		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Height="25" Width="155"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="75,10,0,0"/>
 		<TextBlock x:Name="Changed" Text="changed" Height="20" Width="45"
-			Visibility="{Binding changedVisibility}"
+			Visibility="{Binding ChangedVisibility}"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,16,0,0"/>
 		<TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="315,17,0,0"/>
