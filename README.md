@@ -80,24 +80,28 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 - **done** disable sorting property columns in UI
 - **done** UI feedback for property value change
 - **done** buttons not enabled when bad JSON is loaded
-- does not handle too short `slim.data.gList[gndx].cList[0].Vlist.Count`
+- **done** handle too short `slim.data.gList[gndx].cList[0].Vlist.Count`
 	- **KEY CONCEPT**: `slim.data` should be ready for saving as JSON after `Init()`  
 		- whether or not user changes any property values
 		- no practical use for `write` flag;  
 			write new JSON *only* when *users* change certain values:
 			- current per-car values
 			- default global or per-game values
-- SimHub [WatchDog] Stacks dump for `OOps()` popups
-	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
-	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).
-- `Init()` bugs&nbsp; *substantial refactoring* 
-	- **done** when `JSONio.file` property *not* 'PluginsData/JSONio.json',  
-		initially generated `JSONio.file` is wrong... better later..??!  
-	- **done** save global properties and all property names to `Settings`
 - **done** add distinct `JSONio.ini` configuration for per-game properties:
 	- global	saved to, restored from SimHub `DataPluginSettings`
 	- per game	saved to, restored from JSON per DataCorePlugin.ExternalScript.JSONio.file
 	- per car	same as per game;  game properties are first "car" in game `cList`
+- **done** handle property moves (by .ini reconfiguration) among per-car, per-game and global.
+	- use ini default values for moves
+- convert slider TextBox to a button
+	- click reassigns slider to current Selection value
+- `Init()` bugs&nbsp; *substantial refactoring* 
+	- **done** when `JSONio.file` property *not* 'PluginsData/JSONio.json',  
+		initially generated `JSONio.file` is wrong... better later..??!  
+	- **done** save global properties and all property names to `Settings`
+- SimHub [WatchDog] Stacks dump for `OOps()` popups
+	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
+	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).
 - [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration
 
 ## New to me

@@ -19,7 +19,7 @@ namespace blekenbleu.jsonio
 			new Property() {}	// per-car, then per-game, then global
 		};
 
-		public List<Property> GlobalDefaults = new List<Property>() {};
+		public List<Property> gDefaults = new List<Property>() {};
 
 		public string game;		// keep these properties if Gname matches
 		public string carid;	// replace per-car properties from JSON, if available and CarId mismatches

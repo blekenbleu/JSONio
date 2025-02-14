@@ -12,21 +12,23 @@ namespace blekenbleu.jsonio
 	{
 		public DataPluginSettings Settings;
 		public string New_Car = "false";
+
+		internal bool write = false;			// slim should not change
+		internal static string Msg = "";
 		internal static int pCount, gCount;		// append per-game settings after pCount, global after gCount
 		internal int slider = -1;				// simValues index for configured JSONIO.properties
-		internal static string Msg = "";
-		internal bool changed = false, write = false;			// slim should not change
-		private static readonly string My = "JSONio.";			// breaks Ini if not preceding
-		private static readonly string Myni						// configuration source
-											= "DataCorePlugin.ExternalScript." + My;
+
 		private string CurrentCar;
 		private string Gname = "";
 		private int gndx = -1, cndx = -1;						// current car slim.data.gList indices
+		private static readonly string My = "JSONio.";			// breaks Ini if not preceding
+																// configuration source
+		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;
 		private string path;									// JSON file location
-		private Slim slim;										// new JSON format
-		private List<Property> SettingsProps;
-		private List<int> Steps;								// 100 times actual values
 		private readonly double[] Slider_factor = new double[] { 0, 0 };
+		private Slim slim;										// new JSON format
+		private List<Property> SettingsProps;					// non-null Settings entries
+		private List<int> Steps;								// 100 times actual values
 
 		/// <summary>
 		/// DisplayGrid contents
@@ -106,17 +108,17 @@ namespace blekenbleu.jsonio
 						{ Name  = string.Copy(simValues[i].Name),
 						  Value = string.Copy(simValues[i].Current)
 						});
-				Settings.GlobalDefaults = new List<Property> {};
+				Settings.gDefaults = new List<Property> {};
 				for(i = gCount; i < simValues.Count; i++)
 					if (null != simValues[i].Name &&  null != simValues[i].Default)
-						Settings.GlobalDefaults.Add(new Property()
+						Settings.gDefaults.Add(new Property()
 						{ Name  = string.Copy(simValues[i].Name),
 					  	  Value = string.Copy(simValues[i].Default)
 						});
 				this.SaveCommonSettings("GeneralSettings", Settings);
 			}
 
-			if (!changed && !write)
+			if (!Changed() && !write)
 				return;
 
 			string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data,
@@ -149,6 +151,7 @@ namespace blekenbleu.jsonio
 		}
 
 		// add properties and settings to simValues; initialize Steps
+		// if a property move among
 		private void Populate(List<string>props, List<string> vals, List<string> stps)
 		{
 			for (int c = 0; c < props.Count; c++)
@@ -270,18 +273,31 @@ namespace blekenbleu.jsonio
 				return;
 			}
 
-			string sl = pluginManager.GetPropertyValue(Myni + "slider")?.ToString();
-			if (null != sl)
-				slider = simValues.FindIndex(i => i.Name == sl);
+			// Recover default global values from Settings
+			// for properties which remain global since previous game instance.
+			{
+				int gd, scount = SettingsProps.Count;
 
-			slim = new Slim(this) {};
+				for (gd = scount - Settings.gDefaults.Count; gd < scount; gd++)
+				{
+					int Index = simValues.FindIndex(s => s.Name == Settings.gDefaults[gd].Name);
+					if (Index >= gCount)	// still global?
+						simValues[Index].Default = Settings.gDefaults[gd].Value;
+				}
+
+				string sl = pluginManager.GetPropertyValue(Myni + "slider")?.ToString();
+
+				if (null != sl)
+					slider = simValues.FindIndex(i => i.Name == sl);
+			}
 
 			// at this point, simValues has all properties from .ini,
 			// with original .ini default and previous property values
 			// still-configured from most recent game instance
 			// Load existing JSON, using slim format
 			// JSON values for still-configured properties are supposed more current than .ini
-			if (slim.Load(path = pluginManager.GetPropertyValue(sl = Myni + "file")?.ToString()))
+			slim = new Slim(this) {};
+			if (slim.Load(path = pluginManager.GetPropertyValue(Myni + "file")?.ToString()))
 			{
 				OOpa($"Init() slim.Load({path}): " + Msg);
 				slim.Data();
@@ -306,20 +322,11 @@ namespace blekenbleu.jsonio
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
-			this.AddAction("ChangeProperties",			(a, b) => {
-/*-------------------------------------------------------------- 
- ;		invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
- ;			[ExportEvent]
- ;			name='CarChange'
- ;			trigger=changed(200, [DataCorePlugin.GameData.CarId])
- ;--------------------------------------------------------------- */	
-				if (0 == simValues.Count)
-					return;
+			this.AddAction("ChangeProperties",			(a, b) => CarChange(
+				pluginManager.GetPropertyValue("CarID")?.ToString(),
+				pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString()
+			));
 
-				// CarID change
-				CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
-						  pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
-			});
 			Info($"JSONIO.Init():  simValues.Count = {simValues.Count}");
 		}	// Init()
 	}		// class JSONio

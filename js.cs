@@ -6,25 +6,27 @@ namespace blekenbleu.jsonio
 	public partial class JSONio
 	{
 		// check whether current properties differ from JSON
-		internal void Changed()
+		internal bool Changed()
 		{
-			if (-1 == gndx || -1 == cndx)
-				return;
+			bool changed = false;
 
 			// this should be unnecessary if slim.Reconcile() works..
-			if (!(changed = gCount != slim.data.gList[gndx].cList[0].Vlist.Count
-						 || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count))
-				for (int p = 0; p < gCount; p++)
-				// default change?
-					if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]
-						// current per-car change?
-			 		 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p]))
-					{
-						changed = true;
-						break;
-					}
+			if (-1 < gndx && -1 < cndx
+			 && (gCount != slim.data.gList[gndx].cList[0].Vlist.Count
+			  || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count))
+				changed = true;
+			else for (int p = 0; p < gCount; p++)
+			// default change?
+				if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]
+					// current per-car change?
+		 		 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p]))
+				{
+					changed = true;
+					break;
+				}
 
 			View.Model.ChangedVisibility = changed ? Visibility.Visible : Visibility.Hidden;
+			return changed;
 		}
 
 		internal void SetSlider()
@@ -109,84 +111,6 @@ namespace blekenbleu.jsonio
 			Changed();				// may still be per-game changes
 			return write;
 		}
-
-		void CarChange(string cname, string gnew)
-		{
-			int ml = 0;
-			if (null !=cname && 0 < cname.Length && null != gnew && 0 < gnew.Length)	// valid?
-			{
-				GameList game = null;
-				int i, count = 0, vcount = 0;
-
-				Msg = "Current Car: " + cname;
-				if (0 < Gname.Length && Save_Car())				// do not save first instance
-					Msg += $";  {CurrentCar} saved";
-				ml = Msg.Length;
-
-				for (i = 0; i < simValues.Count; i++)			// copy Current to previous
-					simValues[i].Previous = simValues[i].Current;
-
-				// indices for new car
-				if (0 <= GameIndex(gnew))						// sets gndx
-				{
-					game = slim.data.gList[gndx];
-					cndx = game.cList.FindIndex(c => c.Name == cname);
-					vcount = game.cList[0].Vlist.Count;
-					count = gCount > vcount ? vcount : gCount;
-				}
-				else cndx = -1;
-
-				if (0 > cndx)
-				{
-					New_Car = "true";
-					if (0 <= gndx)									// set at line 132
-					{												// not a new game
-						if (gnew != Settings.game)
-						{											// different game
-							count = pCount > vcount ? vcount : pCount;
-							for (i = 0; i < count; i++)				// per-car defaults
-								simValues[i].Default = game.cList[0].Vlist[i];
-						}
-						for (i = pCount; i < count; i++)			// per-game defaults
-							simValues[i].Default = game.cList[0].Vlist[i];	// perhaps altered since .ini
-					}
-				}
-				else
-				{													// existing car
-						New_Car = "false";
-						if (cname != Settings.carid)				// previous car?
-							for (i = 0; i < pCount; i++)
-								simValues[i].Current = game.cList[cndx].Vlist[i];
-						if (null == CurrentCar)						// first in this game instance?
-						{											// restore game defaults
-							count = pCount > vcount ? vcount : pCount;
-							for (i = 0; i < count; i++)
-								simValues[i].Default = game.cList[0].Vlist[i];
-							count = gCount > vcount ? vcount : gCount;
-							for(i = pCount; i < count; i++)
-								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
-						}
-				}
-				CurrentCar = cname;
-			}
-			else if (null == cname)
-				Msg = "null CarID";
-			else if (0 == cname.Length)
-				Msg = "empty CarID";
-
-			if (null == gnew)
-				Msg += ", null CurrentGame Name, ";
-			else if (0 == gnew.Length)
-				Msg += ", empty CurrentGame Name, ";
-			else Gname = gnew;
-
-			if (ml < Msg.Length)
-				OOps(null);
-			else Msg = "";
-			View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke on another thread
-			SelectedStatus();
-			View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready
-		}	// CarChange()
 
 		// Control.xaml methods -------------------------------------------------
 		internal string FromSlider(double value)
@@ -282,5 +206,94 @@ namespace blekenbleu.jsonio
 			simValues[p].Default = Current;
 			Changed();
 		}
+
+/*--------------------------------------------------------------
+ ;      invoked for CarId changes, based on this `NCalcScripts/JSONio.ini` entry:
+ ;          [ExportEvent]
+ ;          name='CarChange'
+ ;          trigger=changed(200, [DataCorePlugin.GameData.CarId])
+ ;--------------------------------------------------------------- */
+		void CarChange(string cname, string gnew)
+		{
+			int ml = 0;
+
+			if (0 == simValues.Count)
+				return;
+
+
+			if (null !=cname && 0 < cname.Length && null != gnew && 0 < gnew.Length)	// valid?
+			{
+				GameList game = null;
+				int i, count = 0, vcount = 0;
+
+				Msg = "Current Car: " + cname;
+				if (0 < Gname.Length && Save_Car())				// do not save first instance
+					Msg += $";  {CurrentCar} saved";
+				ml = Msg.Length;
+
+				for (i = 0; i < simValues.Count; i++)			// copy Current to previous
+					simValues[i].Previous = simValues[i].Current;
+
+				// indices for new car
+				if (0 <= GameIndex(gnew))						// sets gndx
+				{
+					game = slim.data.gList[gndx];
+					cndx = game.cList.FindIndex(c => c.Name == cname);
+					vcount = game.cList[0].Vlist.Count;
+					count = gCount > vcount ? vcount : gCount;
+				}
+				else cndx = -1;
+
+				if (0 > cndx)
+				{
+					New_Car = "true";
+					if (0 <= gndx)									// set at line 132
+					{												// not a new game
+						if (gnew != Settings.game)
+						{											// different game
+							count = pCount > vcount ? vcount : pCount;
+							for (i = 0; i < count; i++)				// per-car defaults
+								simValues[i].Default = game.cList[0].Vlist[i];
+						}
+						for (i = pCount; i < count; i++)			// per-game defaults
+							simValues[i].Default = game.cList[0].Vlist[i];	// perhaps altered since .ini
+					}
+				}
+				else
+				{													// existing car
+						New_Car = "false";
+						if (cname != Settings.carid)				// previous car?
+							for (i = 0; i < pCount; i++)
+								simValues[i].Current = game.cList[cndx].Vlist[i];
+						if (null == CurrentCar)						// first in this game instance?
+						{											// restore game defaults
+							count = pCount > vcount ? vcount : pCount;
+							for (i = 0; i < count; i++)
+								simValues[i].Default = game.cList[0].Vlist[i];
+							count = gCount > vcount ? vcount : gCount;
+							for(i = pCount; i < count; i++)
+								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
+						}
+				}
+				CurrentCar = cname;
+			}
+			else if (null == cname)
+				Msg = "null CarID";
+			else if (0 == cname.Length)
+				Msg = "empty CarID";
+
+			if (null == gnew)
+				Msg += ", null CurrentGame Name, ";
+			else if (0 == gnew.Length)
+				Msg += ", empty CurrentGame Name, ";
+			else Gname = gnew;
+
+			if (ml < Msg.Length)
+				OOps(null);
+			else Msg = "";
+			View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke on another thread
+			SelectedStatus();
+			View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready
+		}	// CarChange()
 	}		// public partial class JSONio
 }
