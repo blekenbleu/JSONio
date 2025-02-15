@@ -110,7 +110,7 @@ namespace blekenbleu.jsonio
 			}
 			Changed();				// may still be per-game changes
 			return write;
-		}
+		}	// Save_Car()
 
 		// Control.xaml methods -------------------------------------------------
 		internal string FromSlider(double value)
@@ -204,7 +204,11 @@ namespace blekenbleu.jsonio
 			string Current = simValues[p].Current;
 			if (0 > gndx)
 				Save_Car();
-			simValues[p].Default = Current;
+			if (Current != simValues[p].Default)
+			{
+				simValues[p].Default = Current;
+				write = true;
+			}
 			Changed();
 		}
 

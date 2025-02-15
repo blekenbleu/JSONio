@@ -77,7 +77,7 @@ namespace blekenbleu.jsonio
 		/// <summary>
 		/// Short plugin title to show in left menu. Return null to use the PluginName attribute.
 		/// </summary>
-		public string LeftMenuTitle => "JSONio plugin";
+		public string LeftMenuTitle => "JSONio " + Control.version;
 
 		/// <summary>
 		/// Called one time per game data update, contains all normalized game data,
@@ -116,6 +116,8 @@ namespace blekenbleu.jsonio
 					  	  Value = string.Copy(simValues[i].Default)
 						});
 				this.SaveCommonSettings("GeneralSettings", Settings);
+				if (write)
+					slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
 			}
 
 			if (!Changed() && !write)

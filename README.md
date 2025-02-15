@@ -101,7 +101,8 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
 	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).
 - **done** Help link
-- **done** Change for slider
+- **done** Change() for slider
+- **done** set `write` true in SetDefault(); run `DefaultCopy()` in `End()` if `write`
 - convert slider TextBox to a button
 	- click reassigns slider to current Selection value
 - [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration

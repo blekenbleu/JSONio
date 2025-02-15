@@ -17,12 +17,13 @@ namespace blekenbleu.jsonio
 		public JSONio JS { get; }
 		public ViewModel Model;							// reference XAML controls
 		internal byte Selection;						// changes only in JSONio.Select() on UI thread
+		internal static string version = "1.46";
 
 		public Control() {								// called before simValues are initialized
 			Model = new ViewModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml binds
-			Version.Text = "Version 1.45";
+			Version.Text = "Version " + version;
 		}
 
 		public Control(JSONio plugin) : this()
