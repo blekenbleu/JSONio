@@ -4,16 +4,21 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:blekenbleu.jsonio"
-			 mc:Ignorable="d"
+		mc:Ignorable="d"
 		Width="480">
 	<Grid Margin="0,0,0,0">
-		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Height="25" Width="155"
-			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="75,10,0,0"/>
-		<TextBlock x:Name="Changed" Text="changed" Height="20" Width="45"
-			Visibility="{Binding ChangedVisibility}"
-			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,16,0,0"/>
+		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Height="25" Width="158"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="70,10,0,0"/>
+		<TextBlock x:Name="Changed" Text="changed" Height="20" Width="48"
+			Visibility="{Binding ChangedVisibility}" Background="Blue"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="226,15,0,0"/>
+        <TextBlock Background="White" TextAlignment="Center" Height="20" Width="30"
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="280,15,0,0">
+			<Hyperlink RequestNavigate="Hyperlink_RequestNavigate"
+			NavigateUri="https://github.com/blekenbleu/JSONio/wiki">Help</Hyperlink>
+		</TextBlock>
 		<TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
-			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="315,17,0,0"/>
+			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="315,15,0,0"/>
 
 		<TextBlock x:Name="Status" Text="{Binding StatusText}" Height="74" Width="350"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,40,0,0"
@@ -31,7 +36,7 @@
 		<Button x:Name="b3" Content=" - " Height="40" Click="Dec_Click"
 				Visibility="{Binding ButtonVisibility}"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,120,0,0"/>
-        <Button x:Name="b4" Content="Swap All&#xA;w/Previous" Height="40"
+		<Button x:Name="b4" Content="Swap All&#xA;w/Previous" Height="40"
 				Click="Swap_Click" Visibility="{Binding ButtonVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="240,120,0,0"/>
 		<Button x:Name="b5" Content="Current&#xA;-&gt;Default" Height="40"
@@ -42,8 +47,8 @@
 				Name="SL" Value="40" PreviewMouseUp="SLslider_DragCompleted" Width="250" Height="20"
 				Visibility="{Binding SliderVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,165,0,0"/>
-		<TextBox Name="TBL" Text="{Binding Slider_Property}" Width="95" Height="22"
-				Visibility="{Binding SliderVisibility}"
+		<TextBox Name="TBL" Text="{Binding Slider_Property}" Width="75" Height="22"
+				Visibility="{Binding SliderVisibility}" Background="Green"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="330,162,0,0"/>
 
 		<DataGrid x:Name="dg" ItemsSource="{Binding}" AutoGenerateColumns="False" IsReadOnly="True"

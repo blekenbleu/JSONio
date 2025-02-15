@@ -14,7 +14,7 @@ namespace blekenbleu.jsonio
 	/// </summary>
 	public partial class Control : UserControl
 	{
-		public JSONio js { get; }
+		public JSONio JS { get; }
 		public ViewModel Model;							// reference XAML controls
 		internal byte Selection;						// changes only in JSONio.Select() on UI thread
 
@@ -22,20 +22,26 @@ namespace blekenbleu.jsonio
 			Model = new ViewModel(this);
 			InitializeComponent();
 			this.DataContext = Model;					// StaticControl events change Control.xaml binds
-			Version.Text = "Version 1.44";
+			Version.Text = "Version 1.45";
 		}
 
 		public Control(JSONio plugin) : this()
 		{
-			this.js = plugin;							// Control.xaml button events call JSONio methods
+			this.JS = plugin;							// Control.xaml button events call JSONio methods
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
 		}
 
+		private void Hyperlink_RequestNavigate(object sender,
+									System.Windows.Navigation.RequestNavigateEventArgs e)
+		{
+			System.Diagnostics.Process.Start(e.Uri.AbsoluteUri);
+		}
+
 		internal void OOpsMB()
-        {
-            Model.StatusText = JSONio.Msg;
-            System.Windows.Forms.MessageBox.Show(JSONio.Msg, "JSONio");
-        }
+		{
+			Model.StatusText = JSONio.Msg;
+			System.Windows.Forms.MessageBox.Show(JSONio.Msg, "JSONio");
+		}
 
 		// highlights selected property cell
 		internal void Selected()						// crashes if called from other threads
@@ -58,42 +64,42 @@ namespace blekenbleu.jsonio
 		// handle slider changes
 		private void SLslider_DragCompleted(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
-			TBL.Text = js.FromSlider(0.5 + SL.Value);
+			TBL.Text = JS.FromSlider(0.5 + SL.Value);
 		}
 
 		internal void Slslider_Point()
 		{
-			SL.Value = js.ToSlider();	// TBL.Text set inside ToSlider()
+			SL.Value = JS.ToSlider();	// TBL.Text set inside ToSlider()
 		}
 
 		private void Prior_Click(object sender, RoutedEventArgs e)	// handle button clicks
 		{
-			js.Select(false);
+			JS.Select(false);
 		}
 
 		private void Next_Click(object sender, RoutedEventArgs e)
 		{
-			js.Select(true);
+			JS.Select(true);
 		}
 
 		private void Inc_Click(object sender, RoutedEventArgs e)
 		{
-			js.Ment(1);
+			JS.Ment(1);
 		}
 
 		private void Dec_Click(object sender, RoutedEventArgs e)
 		{
-			js.Ment(-1);
+			JS.Ment(-1);
 		}
 
 		private void Swap_Click(object sender, RoutedEventArgs e)
 		{
-			js.Swap();
+			JS.Swap();
 		}
 
 		private void Def_Click(object sender, RoutedEventArgs e)
 		{
-			js.SetDefault();
+			JS.SetDefault();
 		}
 	}
 }

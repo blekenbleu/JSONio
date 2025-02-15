@@ -278,7 +278,7 @@ namespace blekenbleu.jsonio
 			{
 				int gd, scount = SettingsProps.Count;
 
-				for (gd = scount - Settings.gDefaults.Count; gd < scount; gd++)
+				for (gd = 0; gd < Settings.gDefaults.Count; gd++)
 				{
 					int Index = simValues.FindIndex(s => s.Name == Settings.gDefaults[gd].Name);
 					if (Index >= gCount)	// still global?

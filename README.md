@@ -93,15 +93,17 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 	- per car	same as per game;  game properties are first "car" in game `cList`
 - **done** handle property moves (by .ini reconfiguration) among per-car, per-game and global.
 	- use ini default values for moves
-- convert slider TextBox to a button
-	- click reassigns slider to current Selection value
-- `Init()` bugs&nbsp; *substantial refactoring* 
+- **done** `Init()` bugs:&nbsp; *substantial refactoring* 
 	- **done** when `JSONio.file` property *not* 'PluginsData/JSONio.json',  
 		initially generated `JSONio.file` is wrong... better later..??!  
 	- **done** save global properties and all property names to `Settings`
 - SimHub [WatchDog] Stacks dump for `OOps()` popups
 	- invoke `MessageBox.Show()` by `TriggerEvent()` .. but not in Init()...   
 	- `MessageBox.Show()` in `Init()` does not display (UI thread not yet launched).
+- **done** Help link
+- **done** Change for slider
+- convert slider TextBox to a button
+	- click reassigns slider to current Selection value
 - [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration
 
 ## New to me

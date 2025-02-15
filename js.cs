@@ -116,6 +116,7 @@ namespace blekenbleu.jsonio
 		internal string FromSlider(double value)
 		{
 			simValues[slider].Current = (Slider_factor[0] * (int)value).ToString();
+			Changed();
 			return simValues[slider].Name + ":  " + simValues[slider].Current;
 		}
 
