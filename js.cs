@@ -9,17 +9,16 @@ namespace blekenbleu.jsonio
 		internal bool Changed()
 		{
 			bool changed = false;
-
+			
+			if (0 > gndx || 0 > cndx || !SaveCar())
+				return changed;
 			// this should be unnecessary if slim.Reconcile() works..
-			if (-1 < gndx && -1 < cndx
-			 && (gCount != slim.data.gList[gndx].cList[0].Vlist.Count
-			  || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count))
+			if (gCount != slim.data.gList[gndx].cList[0].Vlist.Count
+			 || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count)
 				changed = true;
 			else for (int p = 0; p < gCount; p++)
-			// default change?
-				if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]
-					// current per-car change?
-		 		 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p]))
+				if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]				// per-game default change?
+		 		 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p])) // per-car change?
 				{
 					changed = true;
 					break;
@@ -34,7 +33,7 @@ namespace blekenbleu.jsonio
 			if (0 > slider)
 				return;
 
-			View.Model.Slider_Property = simValues[slider].Name;
+			View.Model.SliderProperty = simValues[slider].Name;
 			/* slider View.SL.Maximum = 100; scale property to it, based on Steps[slider]
 			 ; Steps	   Guestimated range
 			 ; 1  (0.01)	0 - 2
@@ -44,18 +43,18 @@ namespace blekenbleu.jsonio
 			 */
 			if (0 != Steps[slider] % 10)
 			{
-				Slider_factor[0] = 0.02;	// slider to value
-				Slider_factor[1] = 50;	// value to slider
+				SliderFactor[0] = 0.02;	// slider to value
+				SliderFactor[1] = 50;	// value to slider
 			} else if (0 != Steps[slider] % 100) {
-				Slider_factor[0] = 0.1;	// slider to value
-				Slider_factor[1] = 10;	// value to slider
+				SliderFactor[0] = 0.1;	// slider to value
+				SliderFactor[1] = 10;	// value to slider
 			} else {
-				Slider_factor[0] = 1;	// slider to value
-				Slider_factor[1] = 1;	// value to slider
+				SliderFactor[0] = 1;	// slider to value
+				SliderFactor[1] = 1;	// value to slider
 			}
 		}
 
-		List<string> DefaultCopy()		// called in Save_Car()
+		List<string> DefaultCopy()		// called in SaveCar()
 		{
 			int i;
 			List<string> New = new List<string> { };
@@ -64,7 +63,7 @@ namespace blekenbleu.jsonio
 			return New;
 		}
 
-		List<string> CurrentCopy()		// called in Save_Car()
+		List<string> CurrentCopy()		// called in SaveCar()
 		{
 			int i;
 			List<string> New = new List<string> { };
@@ -87,7 +86,7 @@ namespace blekenbleu.jsonio
 			return gndx;
 		}
 
-		internal bool Save_Car()
+		internal bool SaveCar()
 		{
 			if (null == CurrentCar || 0 == pCount)
 				return false;			// nothing to save
@@ -98,24 +97,30 @@ namespace blekenbleu.jsonio
 				gndx = slim.data.gList.Count;
 				slim.data.gList.Add(new GameList
 				{ cList = new List<CarL>
-					{ new CarL { Name = string.Copy(Gname), Vlist = DefaultCopy() } } });
+					{ new CarL { Name = string.Copy(Gname),
+								 Vlist = DefaultCopy()
+								}
+					}
+				});
 			}
 
 			if (0 > (cndx = slim.data.gList[gndx].cList.FindIndex(c => c.Name == CurrentCar)))
 			{
 				write = true;
-				cndx = 1;
+				cndx = slim.data.gList[gndx].cList.Count;
 				slim.data.gList[gndx].cList.Add(new CarL
-					{ Name = string.Copy(CurrentCar), Vlist = CurrentCopy() });
+					{ Name = string.Copy(CurrentCar),
+					  Vlist = CurrentCopy()
+					});
 			}
 			Changed();				// may still be per-game changes
 			return write;
-		}	// Save_Car()
+		}	// SaveCar()
 
 		// Control.xaml methods -------------------------------------------------
 		internal string FromSlider(double value)
 		{
-			simValues[slider].Current = (Slider_factor[0] * (int)value).ToString();
+			simValues[slider].Current = (SliderFactor[0] * (int)value).ToString();
 			Changed();
 			return simValues[slider].Name + ":  " + simValues[slider].Current;
 		}
@@ -125,7 +130,7 @@ namespace blekenbleu.jsonio
 			if(0 > slider)
 				return 0;
 			View.TBL.Text = simValues[slider].Name + ":  " + simValues[slider].Current;
-			return Slider_factor[1] * System.Convert.ToDouble(simValues[slider].Current);
+			return SliderFactor[1] * System.Convert.ToDouble(simValues[slider].Current);
 		}
 
 		/// <summary>
@@ -148,7 +153,7 @@ namespace blekenbleu.jsonio
 				else simValues[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
 				Changed();
 				if (slider == View.Selection)
-					View.Slslider_Point();
+					View.SlsliderPoint();
 			}
 		}
 
@@ -156,8 +161,8 @@ namespace blekenbleu.jsonio
 		{
 			if (null == View)
 				return;
-			View.Model.Selected_Property = simValues[View.Selection].Name;
-			View.Model.StatusText = Gname + " " + CurrentCar + ":\t" + View.Model.Selected_Property;
+			View.Model.SelectedProperty = simValues[View.Selection].Name;
+			View.Model.StatusText = Gname + " " + CurrentCar + ":\t" + View.Model.SelectedProperty;
 		}
 
 		/// <summary>
@@ -201,14 +206,7 @@ namespace blekenbleu.jsonio
 				return;
 			}
 			int p = View.Selection;
-			string Current = simValues[p].Current;
-			if (0 > gndx)
-				Save_Car();
-			if (Current != simValues[p].Default)
-			{
-				simValues[p].Default = Current;
-				write = true;
-			}
+			simValues[p].Default = simValues[p].Current;	// End() sorts per-game changes
 			Changed();
 		}
 
@@ -232,7 +230,7 @@ namespace blekenbleu.jsonio
 				int i, count = 0, vcount = 0;
 
 				Msg = "Current Car: " + cname;
-				if (0 < Gname.Length && Save_Car())				// do not save first instance
+				if (0 < Gname.Length && SaveCar())				// do not save first instance
 					Msg += $";  {CurrentCar} saved";
 				ml = Msg.Length;
 
@@ -251,7 +249,7 @@ namespace blekenbleu.jsonio
 
 				if (0 > cndx)
 				{
-					New_Car = "true";
+					NewCar = "true";
 					if (0 <= gndx)									// set at line 132
 					{												// not a new game
 						if (gnew != Settings.game)
@@ -266,7 +264,7 @@ namespace blekenbleu.jsonio
 				}
 				else
 				{													// existing car
-						New_Car = "false";
+						NewCar = "false";
 						if (cname != Settings.carid)				// previous car?
 							for (i = 0; i < pCount; i++)
 								simValues[i].Current = game.cList[cndx].Vlist[i];
@@ -296,7 +294,7 @@ namespace blekenbleu.jsonio
 			if (ml < Msg.Length)
 				OOps(null);
 			else Msg = "";
-			View.Dispatcher.Invoke(() => View.Slslider_Point());	// invoke on another thread
+			View.Dispatcher.Invoke(() => View.SlsliderPoint());	// invoke on another thread
 			SelectedStatus();
 			View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready
 		}	// CarChange()

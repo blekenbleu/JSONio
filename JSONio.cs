@@ -11,7 +11,7 @@ namespace blekenbleu.jsonio
 	public partial class JSONio : IPlugin, IDataPlugin, IWPFSettingsV2
 	{
 		public DataPluginSettings Settings;
-		public string New_Car = "false";
+		public string NewCar = "false";
 
 		internal bool write = false;			// slim should not change
 		internal static string Msg = "";
@@ -25,7 +25,7 @@ namespace blekenbleu.jsonio
 																// configuration source
 		private static readonly string Myni = "DataCorePlugin.ExternalScript." + My;
 		private string path;									// JSON file location
-		private readonly double[] Slider_factor = new double[] { 0, 0 };
+		private readonly double[] SliderFactor = new double[] { 0, 0 };
 		private Slim slim;										// new JSON format
 		private List<Property> SettingsProps;					// non-null Settings entries
 		private List<int> Steps;								// 100 times actual values
@@ -95,7 +95,7 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void End(PluginManager pluginManager)
 		{
-			Save_Car();
+			SaveCar();
 			// Save settings
 			if (0 < Gname.Length) {
 				int i;
@@ -116,6 +116,18 @@ namespace blekenbleu.jsonio
 					  	  Value = string.Copy(simValues[i].Default)
 						});
 				this.SaveCommonSettings("GeneralSettings", Settings);
+
+				// capture per-game Default value changes
+				if (gCount != slim.data.gList[gndx].cList[0].Vlist.Count)
+					write = true;
+				else
+				{
+					for (i = 0; i < gCount; i++)
+						if (simValues[i].Default != slim.data.gList[gndx].cList[0].Vlist[i])
+							break;
+					if (i < gCount)
+						write = true;
+				}
 				if (write)
 					slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
 			}
@@ -140,7 +152,7 @@ namespace blekenbleu.jsonio
 		{
 			View = new Control(this);		// invoked *after* Init()
 			SetSlider();
-			View.Slslider_Point();
+			View.SlsliderPoint();
 			if (0 < Msg.Length)
 			{
 				Info("OOpsMB(): " + Msg);
@@ -148,7 +160,7 @@ namespace blekenbleu.jsonio
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
-			View.Model.Selected_Property = "unKnown";
+			View.Model.SelectedProperty = "unKnown";
 			return View;
 		}
 
@@ -309,8 +321,8 @@ namespace blekenbleu.jsonio
 			// SimHub properties by AttachDelegate get evaluated "on demand"
 			foreach(Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
-			this.AttachDelegate("Selected", () => View.Model.Selected_Property);
-			this.AttachDelegate("New Car", () => New_Car);
+			this.AttachDelegate("Selected", () => View.Model.SelectedProperty);
+			this.AttachDelegate("New Car", () => NewCar);
 			this.AttachDelegate("Car", () => CurrentCar);
 			this.AttachDelegate("Game", () => Gname);
 			this.AttachDelegate("Msg", () => Msg);

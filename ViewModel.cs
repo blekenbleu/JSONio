@@ -27,8 +27,8 @@ namespace blekenbleu.jsonio
         // events to raise
         readonly PropertyChangedEventArgs Bevent = new PropertyChangedEventArgs("ButtonVisibility");
         readonly PropertyChangedEventArgs Cevent = new PropertyChangedEventArgs("ChangedVisibility");
-        readonly PropertyChangedEventArgs Nevent = new PropertyChangedEventArgs("Slider_Property");
-        readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("Selected_Property");
+        readonly PropertyChangedEventArgs Nevent = new PropertyChangedEventArgs("SliderProperty");
+        readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("SelectedProperty");
         readonly PropertyChangedEventArgs SVevent = new PropertyChangedEventArgs("SliderVisibility");
         readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
 
@@ -75,7 +75,7 @@ namespace blekenbleu.jsonio
 		}
 
 		private string _selected_Property = "unKnown";
-		public string Selected_Property			// must be public for XAML Binding
+		public string SelectedProperty			// must be public for XAML Binding
         {
             get { return _selected_Property; }
 
@@ -92,7 +92,7 @@ namespace blekenbleu.jsonio
         }
 
 		private string _slider_Property = "";
-		public string Slider_Property			// must be public for XAML Binding
+		public string SliderProperty			// must be public for XAML Binding
         {
             get { return _slider_Property; }
 
