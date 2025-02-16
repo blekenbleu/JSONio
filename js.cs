@@ -10,7 +10,7 @@ namespace blekenbleu.jsonio
 		{
 			bool changed = false;
 			
-			if (0 > gndx || 0 > cndx || !SaveCar())
+			if ((0 > gndx || 0 > cndx) && SaveCar())
 				return changed;
 			// this should be unnecessary if slim.Reconcile() works..
 			if (gCount != slim.data.gList[gndx].cList[0].Vlist.Count

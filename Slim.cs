@@ -45,7 +45,7 @@ namespace blekenbleu.jsonio
 				// property names
 				pList = new List<string> { }		// per-car, then per-game
 			};
-			for (int i = 0; i < js.simValues.Count; i++)
+			for (int i = 0; i < JSONio.gCount; i++)
 				data.pList.Add(js.simValues[i].Name);
 		}
 
@@ -74,10 +74,7 @@ namespace blekenbleu.jsonio
 		internal bool Load(string path)
 		{
 			if (!File.Exists(path))
-			{
-				JSONio.Msg = "{path} JSON not found";
 				return true;
-			}
 			data = JsonConvert.DeserializeObject<GamesList>(File.ReadAllText(path));
 			if (null == data)
 			{

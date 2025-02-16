@@ -103,9 +103,15 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 - **done** Help link
 - **done** Change() for slider
 - **done** set `write` true in SetDefault(); run `DefaultCopy()` in `End()` if `write`
+
+### To Do &nbsp; *16 Feb 2025 V1.24*
+- **done:** `SaveCar() in `Changed()` only if bad `gndx` or `cndx` 
+- **done:** skip `OOpa()` in `Load() if empty `Msg`
+- **done:** `pList` should be `gCount`, not `simValues.Count`
 - convert slider TextBox to a button
 	- click reassigns slider to current Selection value
 - [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration
+
 
 ## New to me
 - C# `List<>` patterns, particularly with non-trivial objects.

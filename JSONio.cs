@@ -313,7 +313,8 @@ namespace blekenbleu.jsonio
 			slim = new Slim(this) {};
 			if (slim.Load(path = pluginManager.GetPropertyValue(Myni + "file")?.ToString()))
 			{
-				OOpa($"Init() slim.Load({path}): " + Msg);
+				if (0 < Msg.Length)
+					OOpa($"Init() slim.Load({path}): " + Msg);
 				slim.Data();
 			}
 
