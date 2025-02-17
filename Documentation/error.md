@@ -21,10 +21,10 @@
 		- smallest `count` gets used..
 - **Slim.Load(`path`):  bad data**
 	- JSON file `path` content does not match that expected by `JSONio` plugin,
-		- perhaps from obsolete version
+		- JSON file perhaps from obsolete version of JSONio
 - **Slim.Load(`path`):  pList mismatched NCalcScripts/JSONio.ini**
 	- Current JSON file `path` content does not match `NcalcScripts/JSONio.ini` content.
 		- JSONio `Init()` will rewrite `path` to match
 - **Slim.Load(`path`): `count` null carIDs**
 	- one or more missing Car list property carIDs  
-		- those car objects will be deleted deleted from `path` JSON.
+		- those car objects will be deleted from `path` JSON.

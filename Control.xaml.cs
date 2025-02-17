@@ -17,7 +17,7 @@ namespace blekenbleu.jsonio
 		public JSONio JS { get; }
 		public ViewModel Model;							// reference XAML controls
 		internal byte Selection;						// changes only in JSONio.Select() on UI thread
-		internal static string version = "1.48";
+		internal static string version = "1.49";
 
 		public Control() {								// called before simValues are initialized
 			Model = new ViewModel(this);
@@ -63,14 +63,19 @@ namespace blekenbleu.jsonio
 		}
 
 		// handle slider changes
-		private void SLslider_DragCompleted(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		private void Slider_DragCompleted(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
-			TBL.Text = JS.FromSlider(0.5 + SL.Value);
+			Model.SliderProperty = JS.FromSlider(0.5 + SL.Value);
 		}
 
-		internal void SlsliderPoint()
+		internal void SliderPoint()
 		{
-			SL.Value = JS.ToSlider();	// TBL.Text set inside ToSlider()
+			SL.Value = JS.ToSlider();	// SliderProperty set inside ToSlider()
+		}
+
+		private void Slider_Click(object sender, RoutedEventArgs e)	// handle button clicks
+		{
+			JS.SelectSlider();
 		}
 
 		private void Prior_Click(object sender, RoutedEventArgs e)	// handle button clicks

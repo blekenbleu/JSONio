@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Windows;
 
@@ -6,7 +7,7 @@ namespace blekenbleu.jsonio
 	public partial class JSONio
 	{
 		// check whether current properties differ from JSON
-		internal bool Changed()
+		bool Changed()
 		{
 			bool changed = false;
 			
@@ -17,8 +18,8 @@ namespace blekenbleu.jsonio
 			 || pCount != slim.data.gList[gndx].cList[cndx].Vlist.Count)
 				changed = true;
 			else for (int p = 0; p < gCount; p++)
-				if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]				// per-game default change?
-		 		 || (p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p])) // per-car change?
+				if (simValues[p].Default != slim.data.gList[gndx].cList[0].Vlist[p]			// per-game default change?
+		 		 || p < pCount && simValues[p].Current != slim.data.gList[gndx].cList[cndx].Vlist[p]) // per-car change?
 				{
 					changed = true;
 					break;
@@ -41,7 +42,12 @@ namespace blekenbleu.jsonio
 			 ; 100 (1)		0 - 100
 			 ; 1000 (10)	0 - 1000
 			 */
-			if (0 != Steps[slider] % 10)
+			if (100 < Convert.ToInt32(simValues[slider].Default))
+			{
+				SliderFactor[0] = 10;	// slider to value
+				SliderFactor[1] = 0.1;	// value to slider
+			}
+			else if (0 != Steps[slider] % 10)
 			{
 				SliderFactor[0] = 0.02;	// slider to value
 				SliderFactor[1] = 50;	// value to slider
@@ -129,7 +135,7 @@ namespace blekenbleu.jsonio
 		{
 			if(0 > slider)
 				return 0;
-			View.TBL.Text = simValues[slider].Name + ":  " + simValues[slider].Current;
+			View.Model.SliderProperty = simValues[slider].Name + ":  " + simValues[slider].Current;
 			return SliderFactor[1] * System.Convert.ToDouble(simValues[slider].Current);
 		}
 
@@ -153,7 +159,7 @@ namespace blekenbleu.jsonio
 				else simValues[View.Selection].Current = $"{(int)(0.004 + 0.01 * iv)}";
 				Changed();
 				if (slider == View.Selection)
-					View.SlsliderPoint();
+					View.SliderPoint();
 			}
 		}
 
@@ -194,6 +200,7 @@ namespace blekenbleu.jsonio
 				simValues[i].Previous = simValues[i].Current;
 				simValues[i].Current = temp;
 			}
+			View.SliderPoint();
 			Changed();
 		}
 
@@ -208,6 +215,14 @@ namespace blekenbleu.jsonio
 			int p = View.Selection;
 			simValues[p].Default = simValues[p].Current;	// End() sorts per-game changes
 			Changed();
+		}
+
+		// set "SelectedAsSlider" action
+		internal void SelectSlider()	// List<GameList> Glist)
+		{
+			slider = View.Selection;
+			SetSlider();
+			View.SliderPoint();
 		}
 
 /*--------------------------------------------------------------
@@ -294,7 +309,7 @@ namespace blekenbleu.jsonio
 			if (ml < Msg.Length)
 				OOps(null);
 			else Msg = "";
-			View.Dispatcher.Invoke(() => View.SlsliderPoint());	// invoke on another thread
+			View.Dispatcher.Invoke(() => View.SliderPoint());	// invoke on another thread
 			SelectedStatus();
 			View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready
 		}	// CarChange()

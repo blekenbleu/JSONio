@@ -15,7 +15,8 @@ namespace blekenbleu.jsonio
 
 		internal bool write = false;			// slim should not change
 		internal static string Msg = "";
-		internal static int pCount, gCount;		// append per-game settings after pCount, global after gCount
+		internal static int pCount;				// append per-game settings after pCount
+		internal static int gCount;				// append global settings after gCount
 		internal int slider = -1;				// simValues index for configured JSONIO.properties
 
 		private string CurrentCar;
@@ -152,7 +153,7 @@ namespace blekenbleu.jsonio
 		{
 			View = new Control(this);		// invoked *after* Init()
 			SetSlider();
-			View.SlsliderPoint();
+			View.SliderPoint();
 			if (0 < Msg.Length)
 			{
 				Info("OOpsMB(): " + Msg);
@@ -337,6 +338,7 @@ namespace blekenbleu.jsonio
 			this.AddAction("PreviousProperty",			(a, b) => Select(false)	);
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
+			this.AddAction("SelectedAsSlider",			(a, b) => SelectSlider());
 			this.AddAction("ChangeProperties",			(a, b) => CarChange(
 				pluginManager.GetPropertyValue("CarID")?.ToString(),
 				pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString()
