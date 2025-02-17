@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 /* XAML DataContext:  Binding source
  ;	https://learn.microsoft.com/en-us/dotnet/desktop/wpf/data/how-to-specify-the-binding-source?view=netframeworkdesktop-4.8
@@ -15,22 +14,34 @@ namespace blekenbleu.jsonio
 	/// </summary>
 	public partial class Control : UserControl
 	{
-		public JSONio Plugin { get; }
-		public static StaticModel Model;				// must reference XAML controls from statics
-		internal byte Selection;						// changed only in JSONio.Select() on UI thread
+		public JSONio JS { get; }
+		public ViewModel Model;							// reference XAML controls
+		internal byte Selection;						// changes only in JSONio.Select() on UI thread
+		internal static string version = "2.28";
 
 		public Control() {								// called before simValues are initialized
-			Model = new StaticModel(this);
+			Model = new ViewModel(this);
 			InitializeComponent();
-			this.DataContext = Model;					// StaticControl events change Control.xaml properties
-			Version.Text = "Version 2.27";
+			this.DataContext = Model;					// StaticControl events change Control.xaml binds
+			Version.Text = "Version " + version;
 		}
 
 		public Control(JSONio plugin) : this()
 		{
-			this.Plugin = plugin;						// Control.xaml button events call JSONio methods
-			plugin.SetSlider();							// whenever SimHub gets around to calling 
+			this.JS = plugin;							// Control.xaml button events call JSONio methods
 			dg.ItemsSource = plugin.simValues;			// DataGrid values
+		}
+
+		private void Hyperlink_RequestNavigate(object sender,
+									System.Windows.Navigation.RequestNavigateEventArgs e)
+		{
+			System.Diagnostics.Process.Start(e.Uri.AbsoluteUri);
+		}
+
+		internal void OOpsMB()
+		{
+			Model.StatusText = JSONio.Msg;
+			System.Windows.Forms.MessageBox.Show(JSONio.Msg, "JSONio");
 		}
 
 		// highlights selected property cell
@@ -45,50 +56,51 @@ namespace blekenbleu.jsonio
 			}
 		}
 
+		// xaml DataGrid:  Loaded="DgSelect"
 		private void DgSelect(object sender, RoutedEventArgs e)
 		{
 			Selected();
 		}
 
 		// handle slider changes
-		private void SLslider_DragCompleted(object sender, MouseButtonEventArgs e)
+		private void Slider_DragCompleted(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
-			TBL.Text = Plugin.FromSlider(0.5 + SL.Value);
+			Model.SliderProperty = JS.FromSlider(0.5 + SL.Value);
 		}
 
-		internal void Slslider_Point()
+		private void Slider_Click(object sender, RoutedEventArgs e)	// handle button clicks
 		{
-			SL.Value = Plugin.ToSlider();	// TBL.Text set inside ToSlider()
+			JS.SelectSlider();
 		}
 
 		private void Prior_Click(object sender, RoutedEventArgs e)	// handle button clicks
 		{
-			Plugin.Select(false);
+			JS.Select(false);
 		}
 
 		private void Next_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Select(true);
+			JS.Select(true);
 		}
 
 		private void Inc_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Ment(1);
+			JS.Ment(1);
 		}
 
 		private void Dec_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Ment(-1);
+			JS.Ment(-1);
 		}
 
 		private void Swap_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.Swap();
+			JS.Swap();
 		}
 
 		private void Def_Click(object sender, RoutedEventArgs e)
 		{
-			Plugin.New_defaults();
+			JS.SetDefault();
 		}
 	}
 }

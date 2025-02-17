@@ -33,7 +33,7 @@
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="320,70,0,0"/>
 
 		<Slider Maximum="100" Minimum="0" TickPlacement="BottomRight" TickFrequency="3"
-				Name="SL" Value="40" PreviewMouseUp="SLslider_DragCompleted" Width="250" Height="20"
+				Name="SL" Value="40" PreviewMouseUp="Slider_DragCompleted" Width="250" Height="20"
 				Visibility="{Binding SliderVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,115,0,0"/>
 		<TextBox Name="TBL" Text="{Binding Slider_Property}" Width="95" Height="22"

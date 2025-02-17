@@ -82,6 +82,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="js.cs" />
     <Compile Include="JSONio.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Slim.cs" />
@@ -95,8 +96,8 @@
       <DependentUpon>Control.xaml</DependentUpon>
     </Compile>
     <Compile Include="ShakeIt.cs" />
-    <Compile Include="StaticModel.cs" />
     <Compile Include="Values.cs" />
+    <Compile Include="ViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Properties\DesignTimeResources.xaml" Condition="'$(DesignTime)'=='true' OR ('$(SolutionPath)'!='' AND Exists('$(SolutionPath)') AND '$(BuildingInsideVisualStudio)'!='true' AND '$(BuildingInsideExpressionBlend)'!='true')">

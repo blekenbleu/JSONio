@@ -13,10 +13,10 @@ namespace blekenbleu.jsonio
     /// <summary>
     /// define a class with Model-view-viewmodel pattern for dynamic UI
     /// </summary>
-    public class StaticModel : INotifyPropertyChanged
+    public class ViewModel : INotifyPropertyChanged
 	{
-        readonly Control Ctrl;				// Dispatcher.Invoke(Ctrl.Selected())
-		public StaticModel(Control C)
+        readonly Control Ctrl;				// Ctrl.Dispatcher.Invoke(Ctrl.Selected())
+		public ViewModel(Control C)
 		{
 			Ctrl = C;
 		}
@@ -26,9 +26,11 @@ namespace blekenbleu.jsonio
 
         // events to raise
         readonly PropertyChangedEventArgs Bevent = new PropertyChangedEventArgs("ButtonVisibility");
-        readonly PropertyChangedEventArgs Nevent = new PropertyChangedEventArgs("Slider_Property");
-        readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("Selected_Property");
+        readonly PropertyChangedEventArgs Cevent = new PropertyChangedEventArgs("ChangedVisibility");
+        readonly PropertyChangedEventArgs Nevent = new PropertyChangedEventArgs("SliderProperty");
+        readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("SelectedProperty");
         readonly PropertyChangedEventArgs SVevent = new PropertyChangedEventArgs("SliderVisibility");
+        readonly PropertyChangedEventArgs SLevent = new PropertyChangedEventArgs("SliderValue");
         readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
 
 		private Visibility _bvis = Visibility.Hidden;	// until carID and game are defined
@@ -41,6 +43,34 @@ namespace blekenbleu.jsonio
                 {
 					_bvis = value;
 					PropertyChanged?.Invoke(this, Bevent);
+				}
+			}
+		}
+
+		private Visibility _cvis = Visibility.Hidden;	// until carID and game are defined
+		public Visibility ChangedVisibility				// must be public for XAML Binding
+		{
+			get { return _cvis; }
+			set
+			{
+				if (_cvis != value)
+                {
+					_cvis = value;
+					PropertyChanged?.Invoke(this, Cevent);
+				}
+			}
+		}
+
+		private double _sval = 40;
+		public double SliderValue		// must be public for XAML Binding
+		{
+			get { return _sval; }
+			set
+			{
+				if (_sval != value)
+                {
+					_sval = value;
+					PropertyChanged?.Invoke(this, SLevent);
 				}
 			}
 		}
@@ -60,7 +90,7 @@ namespace blekenbleu.jsonio
 		}
 
 		private string _selected_Property = "unKnown";
-		public string Selected_Property			// must be public for XAML Binding
+		public string SelectedProperty			// must be public for XAML Binding
         {
             get { return _selected_Property; }
 
@@ -77,7 +107,7 @@ namespace blekenbleu.jsonio
         }
 
 		private string _slider_Property = "";
-		public string Slider_Property			// must be public for XAML Binding
+		public string SliderProperty			// must be public for XAML Binding
         {
             get { return _slider_Property; }
 
@@ -92,7 +122,8 @@ namespace blekenbleu.jsonio
             }
         }
 
-		private string _statusText = "To enable:  launch game or Replay";
+		static internal readonly string statusText = "To enable:  launch game or Replay";
+		private string _statusText = statusText;
 		public string StatusText			// must be public for XAML Binding
         {
             get { return _statusText; }

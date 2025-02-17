@@ -16,7 +16,12 @@ namespace blekenbleu.jsonio
 		public List<Property> properties = new List<Property>()
 		{
 			// each current Value stored as string of integer 10x actual value
-			new Property() {}
+			new Property() {}	// per-car, then per-game, then global
 		};
+
+		public List<Property> gDefaults = new List<Property>() {};
+
+		public string game;		// keep these properties if Gname matches
+		public string carid;	// replace per-car properties from JSON, if available and CarId mismatches
 	}
 }
