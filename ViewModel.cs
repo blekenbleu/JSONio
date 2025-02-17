@@ -30,6 +30,7 @@ namespace blekenbleu.jsonio
         readonly PropertyChangedEventArgs Nevent = new PropertyChangedEventArgs("SliderProperty");
         readonly PropertyChangedEventArgs Sevent = new PropertyChangedEventArgs("SelectedProperty");
         readonly PropertyChangedEventArgs SVevent = new PropertyChangedEventArgs("SliderVisibility");
+        readonly PropertyChangedEventArgs SLevent = new PropertyChangedEventArgs("SliderValue");
         readonly PropertyChangedEventArgs Tevent = new PropertyChangedEventArgs("StatusText");
 
 		private Visibility _bvis = Visibility.Hidden;	// until carID and game are defined
@@ -56,6 +57,20 @@ namespace blekenbleu.jsonio
                 {
 					_cvis = value;
 					PropertyChanged?.Invoke(this, Cevent);
+				}
+			}
+		}
+
+		private double _sval = 40;
+		public double SliderValue		// must be public for XAML Binding
+		{
+			get { return _sval; }
+			set
+			{
+				if (_sval != value)
+                {
+					_sval = value;
+					PropertyChanged?.Invoke(this, SLevent);
 				}
 			}
 		}

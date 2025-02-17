@@ -75,17 +75,20 @@ namespace blekenbleu.jsonio
 		{
 			if (!File.Exists(path))
 				return true;
+
 			data = JsonConvert.DeserializeObject<GamesList>(File.ReadAllText(path));
 			if (null == data)
 			{
 				JSONio.Msg = "null data";
 				return true;
 			}
+
 			if (null == data.pList)
 			{
 				JSONio.Msg = "null data.pList";
 				return true;
 			}
+
 			if (null == data.gList)
 			{
 				JSONio.Msg = "null data.gList";

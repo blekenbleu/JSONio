@@ -45,24 +45,17 @@ namespace blekenbleu.jsonio
 			return true;
 		}
 
-		internal void OOpsMB()
+		void OOpsMB()
 		{
 			Info("OOpsMB(): " + Msg);
-		//	System.Windows.Forms.MessageBox.Show(Msg, "JSONio");
 			View.Dispatcher.Invoke(() => View.OOpsMB());
 			Msg = "";
 		}
 
-		internal bool OOps(string str)
+		void OOps(string str)
 		{
-			if (null != str  || 0 < Msg.Length)
-			{
-				if (null != str)
-					Msg = str;
-			//	this.TriggerEvent("JSONioOOps");
-				OOpsMB();							// either way can Log [WatchDog] Abnormal Inactivity dump
-			}
-			return true;
+			Msg = str;
+			OOpsMB();				// may [WatchDog] Abnormal Inactivity dump
 		}
 
 		/// <summary>
@@ -153,7 +146,6 @@ namespace blekenbleu.jsonio
 		{
 			View = new Control(this);		// invoked *after* Init()
 			SetSlider();
-			View.SliderPoint();
 			if (0 < Msg.Length)
 			{
 				Info("OOpsMB(): " + Msg);
@@ -161,7 +153,6 @@ namespace blekenbleu.jsonio
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
-			View.Model.SelectedProperty = "unKnown";
 			return View;
 		}
 
@@ -188,7 +179,7 @@ namespace blekenbleu.jsonio
 			}
 		}
 
-		internal bool OOpa(string msg)   // defer OOps() until GetWPFSettingsControl()
+		internal bool OOpa(string msg)   // defer MessageBox.Show() until GetWPFSettingsControl()
 		{
 			Msg += msg + "\n";
 			return true;
@@ -201,7 +192,7 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-			CurrentCar = null;
+			CurrentCar = null;			// otherwise whatever was set before game change
 			// restore Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>(
 												"GeneralSettings", () => new DataPluginSettings());
@@ -213,7 +204,7 @@ namespace blekenbleu.jsonio
 					SettingsProps.Add(new Property() { Name = string.Copy(p.Name),
 												  Value = string.Copy(p.Value) });
 
-			Steps = new List<int>() { };
+			Steps = new List<int>() {};		// for Populate()
 
 			// property and setting names, default values and steps from JSONio.ini
 			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
@@ -330,8 +321,6 @@ namespace blekenbleu.jsonio
 			this.AttachDelegate("Msg", () => Msg);
 
 			// Declare an event and corresponding action
-			this.AddEvent("JSONioOOps");
-			this.AddAction("OopsMessageBox",			(a, b) => OOpsMB());
 			this.AddAction("IncrementSelectedProperty", (a, b) => Ment(1));
 			this.AddAction("DecrementSelectedProperty", (a, b) => Ment(-1));
 			this.AddAction("NextProperty",				(a, b) => Select(true)	);

@@ -44,7 +44,7 @@
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="320,120,0,0"/>
 
 		<Slider Maximum="100" Minimum="0" TickPlacement="BottomRight" TickFrequency="3"
-				Name="SL" Value="40" PreviewMouseUp="Slider_DragCompleted" Width="250" Height="20"
+				Name="SL" Value="{Binding SliderValue}" PreviewMouseUp="Slider_DragCompleted" Width="250" Height="20"
 				Visibility="{Binding SliderVisibility}"
 				VerticalAlignment="Top" HorizontalAlignment="Left" Margin="80,165,0,0"/>
 		<Button x:Name="SB" Content="{Binding SliderProperty}" Width="140" Height="22"
