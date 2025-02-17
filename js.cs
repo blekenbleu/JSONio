@@ -122,7 +122,6 @@ namespace blekenbleu.jsonio
 					  Vlist = CurrentCopy()
 					});
 			}
-			Changed();				// may still be per-game changes
 			return write;
 		}	// SaveCar()
 
@@ -247,7 +246,10 @@ namespace blekenbleu.jsonio
 
 				Msg = "Current Car: " + cname;
 				if (0 < Gname.Length && SaveCar())				// do not save first instance
+				{
+					Changed();
 					Msg += $";  {CurrentCar} saved";
+				}
 				ml = Msg.Length;
 
 				for (i = 0; i < simValues.Count; i++)			// copy Current to previous
