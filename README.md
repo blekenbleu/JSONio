@@ -108,7 +108,7 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 - **done:** `SaveCar() in `Changed()` only if bad `gndx` or `cndx` 
 - **done:** skip `OOpa()` in `Load() if empty `Msg`
 - **done:** `pList` should be `gCount`, not `simValues.Count`
-- convert slider TextBox to a button
+- **done:** convert slider TextBox to a button
 	- click reassigns slider to current Selection value
 - [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration
 
