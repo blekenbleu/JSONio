@@ -7,7 +7,7 @@ namespace blekenbleu.jsonio
 {
 	[PluginDescription("NCalc configured properties to/from JSON")]
 	[PluginAuthor("blekenbleu")]
-	[PluginName("JSONio plugin")]
+	[PluginName("JSONio")]
 	public partial class JSONio : IPlugin, IDataPlugin, IWPFSettingsV2
 	{
 		public DataPluginSettings Settings;
@@ -126,7 +126,7 @@ namespace blekenbleu.jsonio
 					slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
 			}
 
-			if (!Changed() && !write)
+			if (!(Changed() || write))
 				return;
 
 			string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data,
@@ -134,7 +134,7 @@ namespace blekenbleu.jsonio
 			if (0 == sjs.Length || "{}" == sjs)
 				OOps("End():  Json Serializer failure");
 			else System.IO.File.WriteAllText(path, sjs);
-		}
+		}	// End()
 
 		/// <summary>
 		/// Returns settings control or null if not required
@@ -148,8 +148,8 @@ namespace blekenbleu.jsonio
 			SetSlider();
 			if (0 < Msg.Length)
 			{
-				Info("OOpsMB(): " + Msg);
-				Msg += ViewModel.statusText;
+				Info("OOpsMB() " + Msg);
+				Msg = "Init() " + Msg + ViewModel.statusText;
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
@@ -210,9 +210,9 @@ namespace blekenbleu.jsonio
 			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Myni + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Myni + "steps")?.ToString();
-			if ((!(null == ds && OOpa($"Init(): '{pts}' not found")))
-			 && (!(null == vs && OOpa($"Init(): '{vts}' not found")))
-			 && (!(null == ss && OOpa($"Init(): '{sts}' not found")))
+			if ((!(null == ds && OOpa($"'{pts}' not found")))
+			 && (!(null == vs && OOpa($"'{vts}' not found")))
+			 && (!(null == ss && OOpa($"'{sts}' not found")))
 			   )
 			{
 				// JSONio.ini defines per-car Properties
@@ -221,7 +221,7 @@ namespace blekenbleu.jsonio
 				List<string> values = new List<string>(vs.Split(','));
 				List<string> steps = new List<string>(ss.Split(','));
 				if (pCount != values.Count || pCount != steps.Count)
-					OOpa($"Init(): {pCount} per-car properties;  "
+					OOpa($"{pCount} per-car properties;  "
 						+$"{values.Count} values;  {steps.Count} steps");
 				Populate(CarProps, values, steps);
 			}
@@ -233,16 +233,16 @@ namespace blekenbleu.jsonio
 			string vss = pluginManager.GetPropertyValue(vtts)?.ToString();
 			string stts = Myni + "gamesteps";
 			string sss = pluginManager.GetPropertyValue(stts)?.ToString();
-			if ((!(null == dss && OOpa($"Init(): '{ptts}' not found")))
-			 && (!(null == vss && OOpa($"Init(): '{vtts}' not found")))
-			 && (!(null == sss && OOpa($"Init(): '{stts}' not found")))
+			if ((!(null == dss && OOpa($"'{ptts}' not found")))
+			 && (!(null == vss && OOpa($"'{vtts}' not found")))
+			 && (!(null == sss && OOpa($"'{stts}' not found")))
 				)
 			{
 				List<string> Sprops = new List<string>(dss.Split(','));
 				List<string> values = new List<string>(vss.Split(','));
 				List<string> steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Sprops.Count != steps.Count)
-					OOpa($"Init(): {Sprops.Count} gameprops;  {values.Count} gamevals;"
+					OOpa($"{Sprops.Count} gameprops;  {values.Count} gamevals;"
 									+ $"  {steps.Count} gamesteps");
 				gCount = (Sprops.Count < values.Count) ? Sprops.Count : values.Count;
 				if (gCount > steps.Count)
@@ -258,16 +258,16 @@ namespace blekenbleu.jsonio
 			string vgs = pluginManager.GetPropertyValue(vgts)?.ToString();
 			string sgts = Myni + "setsteps";
 			string sgs = pluginManager.GetPropertyValue(sgts)?.ToString();
-			if ((!(null == dgs && OOpa($"Init(): '{pgts}' not found")))
-			 && (!(null == vgs && OOpa($"Init(): '{vgts}' not found")))
-			 && (!(null == sgs && OOpa($"Init(): '{sgts}' not found")))
+			if ((!(null == dgs && (0 == Settings.gDefaults.Count || OOpa($"'{pgts}' not found"))))
+			 && (!(null == vgs && OOpa($"'{vgts}' not found")))
+			 && (!(null == sgs && OOpa($"'{sgts}' not found")))
 				)
 			{
 				List<string> Gprops = new List<string>(dgs.Split(','));
 				List<string> values = new List<string>(vgs.Split(','));
 				List<string> steps = new List<string>(sgs.Split(','));
 				if (Gprops.Count != values.Count || Gprops.Count != steps.Count)
-					OOpa($"Init(): {Gprops.Count} settings;  {values.Count} setvals;"
+					OOpa($"{Gprops.Count} settings;  {values.Count} setvals;"
 									+ $"  {steps.Count} setsteps");
 				Populate(Gprops, values, steps);
 			}
@@ -312,7 +312,7 @@ namespace blekenbleu.jsonio
 
 			// Declare available properties
 			// SimHub properties by AttachDelegate get evaluated "on demand"
-			foreach(Values p in simValues)
+			foreach (Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
 			this.AttachDelegate("Selected", () => View.Model.SelectedProperty);
 			this.AttachDelegate("New Car", () => NewCar);
@@ -329,9 +329,10 @@ namespace blekenbleu.jsonio
 			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
 			this.AddAction("SelectedAsSlider",			(a, b) => SelectSlider());
 			this.AddAction("ChangeProperties",			(a, b) => CarChange(
-				pluginManager.GetPropertyValue("CarID")?.ToString(),
-				pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString()
-			));
+					pluginManager.GetPropertyValue("CarID")?.ToString(),
+					pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString()
+				)
+			);
 
 			Info($"JSONIO.Init():  simValues.Count = {simValues.Count}");
 		}	// Init()

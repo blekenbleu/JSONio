@@ -110,6 +110,8 @@ better than [jagged array](https://learn.microsoft.com/en-us/dotnet/csharp/langu
 - **done:** `pList` should be `gCount`, not `simValues.Count`
 - **done:** convert slider TextBox to a button
 	- click reassigns slider to current Selection value
+- **done:** bug fix: SaveCar() now explicitly saves per-car and per-game changes for existing cars
+- **done:** bug fix: preserve saved settings *only for first instance* of previous game car
 - [OxyScope](https://github.com/blekenbleu/OxyPlotPlugin) integration
 
 

@@ -95,7 +95,7 @@ namespace blekenbleu.jsonio
 			return gndx;
 		}
 
-		internal bool SaveCar()
+		bool SaveCar()	// called in End(), CarChange() and maybe Changed()
 		{
 			if (null == CurrentCar || 0 == pCount)
 				return false;			// nothing to save
@@ -105,32 +105,49 @@ namespace blekenbleu.jsonio
 				write = true;
 				gndx = slim.data.gList.Count;
 				slim.data.gList.Add(new GameList
-				{ cList = new List<CarL>
-					{ new CarL { Name = string.Copy(Gname),
-								 Vlist = DefaultCopy()
-								}
+					{ cList = new List<CarL>
+						{ new CarL { Name = string.Copy(Gname),
+									 Vlist = DefaultCopy()
+								   }
+						}
 					}
-				});
+				);
 			}
 
 			if (0 > (cndx = slim.data.gList[gndx].cList.FindIndex(c => c.Name == CurrentCar)))
-			{
+			{	// add car to game
 				write = true;
 				cndx = slim.data.gList[gndx].cList.Count;
 				slim.data.gList[gndx].cList.Add(new CarL
 					{ Name = string.Copy(CurrentCar),
 					  Vlist = CurrentCopy()
-					});
+					}
+				);
+			} else {								// property value changes?
+				for (int i = 0; i < gCount; i++)
+					if (slim.data.gList[gndx].cList[0].Vlist[i] != simValues[i].Default)
+					{
+						slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
+						write = true;
+						break;
+					}
+				for (int i = 0; i < pCount; i++)
+					if (slim.data.gList[gndx].cList[cndx].Vlist[i] != simValues[i].Current)
+					{
+						slim.data.gList[gndx].cList[cndx].Vlist = CurrentCopy();
+						write = true;
+						break;
+					}
 			}
 			return write;
 		}	// SaveCar()
 
 		// Control.xaml methods -------------------------------------------------
-		internal string FromSlider(double value)
+		internal void FromSlider(double value)
 		{
 			simValues[slider].Current = (SliderFactor[0] * (int)value).ToString();
 			Changed();
-			return simValues[slider].Name + ":  " + simValues[slider].Current;
+			View.Model.SliderProperty =  simValues[slider].Name + ":  " + simValues[slider].Current;
 		}
 
 		internal void ToSlider()
@@ -246,10 +263,7 @@ namespace blekenbleu.jsonio
 
 				Msg = "Current Car: " + cname;
 				if (0 < Gname.Length && SaveCar())				// do not save first instance
-				{
-					Changed();
 					Msg += $";  {CurrentCar} saved";
-				}
 				ml = Msg.Length;
 
 				for (i = 0; i < simValues.Count; i++)			// copy Current to previous
@@ -296,7 +310,8 @@ namespace blekenbleu.jsonio
 								simValues[i].Current = simValues[i].Default = game.cList[0].Vlist[i];
 						}
 				}
-				CurrentCar = cname;
+				Settings.carid = CurrentCar = cname;
+				Changed();
 			}
 			else if (null == cname)
 				Msg = "null CarID";
@@ -312,8 +327,8 @@ namespace blekenbleu.jsonio
 			if (ml < Msg.Length)
 				OOpsMB();
 			else Msg = "";
+			SelectedStatus();					// CarChange()
 			ToSlider();
-			SelectedStatus();									// CarChange()
 			View.Model.ButtonVisibility = System.Windows.Visibility.Visible;	// ready
 		}	// CarChange()
 	}		// public partial class JSONio
