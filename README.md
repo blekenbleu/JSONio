@@ -59,3 +59,12 @@ Custom SimHub **ShakeIt** Wheel grip / slip settings with *some* car-specific pr
 name='JSONio.slider'
 value='Gscale' 
 ```
+
+### *18 Feb 2025* ported master branch changes
+- cumulative Init message display
+- Help link and changed indicator
+- slider property assignment button
+- change and save only Selected Default, but save all Current per-car changes
+- bug fix: SaveCar() now explicitly saves per-car and per-game changes for existing cars
+- bug fix: preserve saved settings *only for first instance* of previous game car
+

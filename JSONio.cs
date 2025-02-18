@@ -13,17 +13,18 @@ namespace blekenbleu.jsonio
 		public DataPluginSettings Settings;
 		public string NewCar = "false";
 
-		public double[] random;
+		public double[] random;					// ShakeIt profile replacement
 		public ShakeIt S = new ShakeIt {};
 
 		internal bool write = false;			// slim should not change
 		internal static string Msg = "";
 		internal static int pCount;				// append per-game settings after pCount
 		internal static int gCount;				// append global settings after gCount
-		internal int slider = -1;               // simValues index for configured JSONIO.properties
+		internal int slider = -1;			   // simValues index for configured JSONIO.properties
 		internal int[] Low, High;
+		string[] Fmin, Fmax;
 
-        private string CurrentCar;
+		private string CurrentCar;
 		private string Gname = "";
 		private int gndx = -1, cndx = -1;						// current car slim.data.gList indices
 		private static readonly string My = "JSONio.";			// breaks Ini if not preceding
@@ -33,13 +34,12 @@ namespace blekenbleu.jsonio
 		private readonly double[] SliderFactor = new double[] { 0, 0 };
 		private Slim slim;										// new JSON format
 		private List<Property> SettingsProps;					// non-null Settings entries
-		private List<int> Steps;                                // 100 times actual values
-        private string[] Fmin, Fmax;
+		private List<int> Steps;								// 100 times actual values
 
-        /// <summary>
-        /// DisplayGrid contents
-        /// </summary>
-        public List<Values> simValues = new List<Values>();		// must be initialized before Init()
+		/// <summary>
+		/// DisplayGrid contents
+		/// </summary>
+		public List<Values> simValues = new List<Values>();		// must be initialized before Init()
 
 		/// <summary>
 		/// Plugin-specific wrapper for SimHub.Logging.Current.Info();
@@ -100,8 +100,8 @@ namespace blekenbleu.jsonio
 			// AssettoCorsa load compression peaks are higher than suspension travel, thanks to dampers...
 			if ("AssettoCorsa" == pluginManager.GameName || "AssettoCorsaCompetizione" == pluginManager.GameName)
 			{
-                S.RAccG = S.RSS1();
-                S.SG[0] = S.ACslipGrip(0);
+				S.RAccG = S.RSS1();
+				S.SG[0] = S.ACslipGrip(0);
 				S.SG[1] = S.ACslipGrip(1);
 				S.SG[2] = S.ACslipGrip(2);
 				S.SG[3] = S.ACslipGrip(3);
@@ -157,7 +157,7 @@ namespace blekenbleu.jsonio
 					slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
 			}
 
-			if (!Changed() && !write)
+			if (!(Changed() || write))
 				return;
 
 			string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data,
@@ -165,7 +165,7 @@ namespace blekenbleu.jsonio
 			if (0 == sjs.Length || "{}" == sjs)
 				OOps("End():  Json Serializer failure");
 			else System.IO.File.WriteAllText(path, sjs);
-		}
+		}	// End()
 
 		/// <summary>
 		/// Returns settings control or null if not required
@@ -179,8 +179,8 @@ namespace blekenbleu.jsonio
 			SetSlider();
 			if (0 < Msg.Length)
 			{
-				Info("OOpsMB(): " + Msg);
-				Msg += ViewModel.statusText;
+				Info("OOpsMB() " + Msg);
+				Msg = "Init() " + Msg + ViewModel.statusText;
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
@@ -223,12 +223,13 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void Init(PluginManager pluginManager)
 		{
-            Low = new int[] { 0, 0, 0, 0 };
-            High = new int[] { 0, 0, 0, 0 };
-            Fmax = new string[] { "Fmax.FrontLeft", "Fmax.FrontRight", "Fmax.RearLeft", "Fmax.RearRight" };
-            Fmin = new string[] { "Fmin.FrontLeft", "Fmin.FrontRight", "Fmin.RearLeft", "Fmin.RearRight" };
-            random = new double[] { 0, 0, 0, 0 };
-            CurrentCar = null;			// otherwise whatever was set before game change
+			Low = new int[] { 0, 0, 0, 0 };				// ShakeIt properties
+			High = new int[] { 0, 0, 0, 0 };
+			random = new double[] { 0, 0, 0, 0 };
+			Fmax = new string[] { "Fmax.FrontLeft", "Fmax.FrontRight", "Fmax.RearLeft", "Fmax.RearRight" };
+			Fmin = new string[] { "Fmin.FrontLeft", "Fmin.FrontRight", "Fmin.RearLeft", "Fmin.RearRight" };
+
+			CurrentCar = null;			// otherwise whatever was set before game change
 			// restore Properties from settings
 			Settings = this.ReadCommonSettings<DataPluginSettings>(
 												"GeneralSettings", () => new DataPluginSettings());
@@ -246,9 +247,9 @@ namespace blekenbleu.jsonio
 			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Myni + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Myni + "steps")?.ToString();
-			if ((!(null == ds && OOpa($"Init(): '{pts}' not found")))
-			 && (!(null == vs && OOpa($"Init(): '{vts}' not found")))
-			 && (!(null == ss && OOpa($"Init(): '{sts}' not found")))
+			if ((!(null == ds && OOpa($"'{pts}' not found")))
+			 && (!(null == vs && OOpa($"'{vts}' not found")))
+			 && (!(null == ss && OOpa($"'{sts}' not found")))
 			   )
 			{
 				// JSONio.ini defines per-car Properties
@@ -257,7 +258,7 @@ namespace blekenbleu.jsonio
 				List<string> values = new List<string>(vs.Split(','));
 				List<string> steps = new List<string>(ss.Split(','));
 				if (pCount != values.Count || pCount != steps.Count)
-					OOpa($"Init(): {pCount} per-car properties;  "
+					OOpa($"{pCount} per-car properties;  "
 						+$"{values.Count} values;  {steps.Count} steps");
 				Populate(CarProps, values, steps);
 			}
@@ -269,16 +270,16 @@ namespace blekenbleu.jsonio
 			string vss = pluginManager.GetPropertyValue(vtts)?.ToString();
 			string stts = Myni + "gamesteps";
 			string sss = pluginManager.GetPropertyValue(stts)?.ToString();
-			if ((!(null == dss && OOpa($"Init(): '{ptts}' not found")))
-			 && (!(null == vss && OOpa($"Init(): '{vtts}' not found")))
-			 && (!(null == sss && OOpa($"Init(): '{stts}' not found")))
+			if ((!(null == dss && OOpa($"'{ptts}' not found")))
+			 && (!(null == vss && OOpa($"'{vtts}' not found")))
+			 && (!(null == sss && OOpa($"'{stts}' not found")))
 				)
 			{
 				List<string> Sprops = new List<string>(dss.Split(','));
 				List<string> values = new List<string>(vss.Split(','));
 				List<string> steps = new List<string>(sss.Split(','));
 				if (Sprops.Count != values.Count || Sprops.Count != steps.Count)
-					OOpa($"Init(): {Sprops.Count} gameprops;  {values.Count} gamevals;"
+					OOpa($"{Sprops.Count} gameprops;  {values.Count} gamevals;"
 									+ $"  {steps.Count} gamesteps");
 				gCount = (Sprops.Count < values.Count) ? Sprops.Count : values.Count;
 				if (gCount > steps.Count)
@@ -294,16 +295,16 @@ namespace blekenbleu.jsonio
 			string vgs = pluginManager.GetPropertyValue(vgts)?.ToString();
 			string sgts = Myni + "setsteps";
 			string sgs = pluginManager.GetPropertyValue(sgts)?.ToString();
-			if ((!(null == dgs && OOpa($"Init(): '{pgts}' not found")))
-			 && (!(null == vgs && OOpa($"Init(): '{vgts}' not found")))
-			 && (!(null == sgs && OOpa($"Init(): '{sgts}' not found")))
+			if ((!(null == dgs && (0 == Settings.gDefaults.Count || OOpa($"'{pgts}' not found"))))
+			 && (!(null == vgs && OOpa($"'{vgts}' not found")))
+			 && (!(null == sgs && OOpa($"'{sgts}' not found")))
 				)
 			{
 				List<string> Gprops = new List<string>(dgs.Split(','));
 				List<string> values = new List<string>(vgs.Split(','));
 				List<string> steps = new List<string>(sgs.Split(','));
 				if (Gprops.Count != values.Count || Gprops.Count != steps.Count)
-					OOpa($"Init(): {Gprops.Count} settings;  {values.Count} setvals;"
+					OOpa($"{Gprops.Count} settings;  {values.Count} setvals;"
 									+ $"  {steps.Count} setsteps");
 				Populate(Gprops, values, steps);
 			}
@@ -333,23 +334,23 @@ namespace blekenbleu.jsonio
 					slider = simValues.FindIndex(i => i.Name == sl);
 			}
 
-            // find Fmin, Fmax settings
-            for (int i = 0; i < Fmin.Length; i++)
-            {
-                int j = simValues.FindIndex(k => k.Name == Fmin[i]);
-                if (0 <= j)
-                    Low[i] = j;
-                j = simValues.FindIndex(k => k.Name == Fmax[i]);
-                if (0 <= j)
-                    High[i] = j;
-            }
+			// find Fmin, Fmax settings
+			for (int i = 0; i < Fmin.Length; i++)
+			{
+				int j = simValues.FindIndex(k => k.Name == Fmin[i]);
+				if (0 <= j)
+					Low[i] = j;
+				j = simValues.FindIndex(k => k.Name == Fmax[i]);
+				if (0 <= j)
+					High[i] = j;
+			}
 
-            // at this point, simValues has all properties from .ini,
-            // with original .ini default and previous property values
-            // still-configured from most recent game instance
-            // Load existing JSON, using slim format
-            // JSON values for still-configured properties are supposed more current than .ini
-            slim = new Slim(this) {};
+			// at this point, simValues has all properties from .ini,
+			// with original .ini default and previous property values
+			// still-configured from most recent game instance
+			// Load existing JSON, using slim format
+			// JSON values for still-configured properties are supposed more current than .ini
+			slim = new Slim(this) {};
 			if (slim.Load(path = pluginManager.GetPropertyValue(Myni + "file")?.ToString()))
 			{
 				if (0 < Msg.Length)
@@ -357,11 +358,11 @@ namespace blekenbleu.jsonio
 				slim.Data();
 			}
 
-            S.Init(this, pluginManager);
+			S.Init(this, pluginManager);						// ShakeIt effect class
 
-            // Declare available properties
-            // SimHub properties by AttachDelegate get evaluated "on demand"
-            foreach (Values p in simValues)
+			// Declare available properties
+			// SimHub properties by AttachDelegate get evaluated "on demand"
+			foreach (Values p in simValues)
 				this.AttachDelegate(p.Name, () => p.Current);
 			this.AttachDelegate("Selected", () => View.Model.SelectedProperty);
 			this.AttachDelegate("New Car", () => NewCar);
@@ -384,9 +385,10 @@ namespace blekenbleu.jsonio
 			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
 			this.AddAction("SelectedAsSlider",			(a, b) => SelectSlider());
 			this.AddAction("ChangeProperties",			(a, b) => CarChange(
-				pluginManager.GetPropertyValue("CarID")?.ToString(),
-				pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString()
-			));
+					pluginManager.GetPropertyValue("CarID")?.ToString(),
+					pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString()
+				)
+			);
 
 			Info($"JSONIO.Init():  simValues.Count = {simValues.Count}");
 		}	// Init()
