@@ -20,7 +20,9 @@ namespace blekenbleu.jsonio
 		internal static string Msg = "";
 		internal static int pCount;				// append per-game settings after pCount
 		internal static int gCount;				// append global settings after gCount
-		internal int slider = -1;			   // simValues index for configured JSONIO.properties
+		internal int slider = -1;				// simValues index for configured JSONIO.properties
+		internal bool set = false;
+
 		internal int[] Low, High;
 		string[] Fmin, Fmax;
 
@@ -120,10 +122,12 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		public void End(PluginManager pluginManager)
 		{
-			SaveCar();
+			SaveSlim();			// set write for changes
 			// Save settings
-			if (0 < Gname.Length) {
+			if (0 < Gname.Length && write) {
 				int i;
+
+				set = true;	// End(): save Current values
 				Settings.properties = new List<Property> {};
 				Settings.game = Gname;
 				Settings.carid = CurrentCar;
@@ -133,6 +137,7 @@ namespace blekenbleu.jsonio
 						{ Name  = string.Copy(simValues[i].Name),
 						  Value = string.Copy(simValues[i].Current)
 						});
+
 				Settings.gDefaults = new List<Property> {};
 				for(i = gCount; i < simValues.Count; i++)
 					if (null != simValues[i].Name &&  null != simValues[i].Default)
@@ -140,24 +145,15 @@ namespace blekenbleu.jsonio
 						{ Name  = string.Copy(simValues[i].Name),
 					  	  Value = string.Copy(simValues[i].Default)
 						});
-				this.SaveCommonSettings("GeneralSettings", Settings);
 
-				// capture per-game Default value changes
-				if (gCount != slim.data.gList[gndx].cList[0].Vlist.Count)
-					write = true;
-				else
-				{
-					for (i = 0; i < gCount; i++)
-						if (simValues[i].Default != slim.data.gList[gndx].cList[0].Vlist[i])
-							break;
-					if (i < gCount)
-						write = true;
-				}
-				if (write)
-					slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
+				// capture per-game Default changes
+				slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
 			}
 
-			if (!(Changed() || write))
+			if (set)	// .ini mismatches Settings or game run
+				this.SaveCommonSettings("GeneralSettings", Settings);
+
+			if (!write)				// End()
 				return;
 
 			string sjs = Newtonsoft.Json.JsonConvert.SerializeObject(slim.data,
@@ -247,7 +243,7 @@ namespace blekenbleu.jsonio
 			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Myni + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Myni + "steps")?.ToString();
-			if ((!(null == ds && OOpa($"'{pts}' not found")))
+			if ((!(null == ds && (0 == Settings.pcount || OOpa($"per-car properties not found"))))
 			 && (!(null == vs && OOpa($"'{vts}' not found")))
 			 && (!(null == ss && OOpa($"'{sts}' not found")))
 			   )
@@ -262,6 +258,11 @@ namespace blekenbleu.jsonio
 						+$"{values.Count} values;  {steps.Count} steps");
 				Populate(CarProps, values, steps);
 			}
+			if (Settings.pcount != simValues.Count)
+			{
+				set = true;
+				Settings.pcount = simValues.Count;
+			}
 
 			// JSONio.ini also optionally defines per-game Properties
 			string ptts = Myni + "gameprops";
@@ -270,7 +271,7 @@ namespace blekenbleu.jsonio
 			string vss = pluginManager.GetPropertyValue(vtts)?.ToString();
 			string stts = Myni + "gamesteps";
 			string sss = pluginManager.GetPropertyValue(stts)?.ToString();
-			if ((!(null == dss && OOpa($"'{ptts}' not found")))
+			if ((!(null == dss && (0 == Settings.gcount || OOpa($"per-game properties not found"))))
 			 && (!(null == vss && OOpa($"'{vtts}' not found")))
 			 && (!(null == sss && OOpa($"'{stts}' not found")))
 				)
@@ -287,6 +288,10 @@ namespace blekenbleu.jsonio
 				else gCount += pCount;
 				Populate(Sprops, values, steps);
 			}
+			if (Settings.gcount != simValues.Count - Settings.pcount) {
+				set = true;
+				Settings.gcount = simValues.Count - Settings.pcount;
+			}			
 
 			// JSONio.ini also optionally defines global settings
 			string pgts = Myni + "settings";
@@ -295,7 +300,7 @@ namespace blekenbleu.jsonio
 			string vgs = pluginManager.GetPropertyValue(vgts)?.ToString();
 			string sgts = Myni + "setsteps";
 			string sgs = pluginManager.GetPropertyValue(sgts)?.ToString();
-			if ((!(null == dgs && (0 == Settings.gDefaults.Count || OOpa($"'{pgts}' not found"))))
+			if ((!(null == dgs && (0 == Settings.gDefaults.Count || OOpa($"global properties not found"))))
 			 && (!(null == vgs && OOpa($"'{vgts}' not found")))
 			 && (!(null == sgs && OOpa($"'{sgts}' not found")))
 				)
@@ -307,6 +312,12 @@ namespace blekenbleu.jsonio
 					OOpa($"{Gprops.Count} settings;  {values.Count} setvals;"
 									+ $"  {steps.Count} setsteps");
 				Populate(Gprops, values, steps);
+			}
+
+			if (Settings.gDefaults.Count != simValues.Count - (Settings.gcount + Settings.pcount))
+			{
+				Settings.gDefaults = new List<Property>() {};
+				set = true;
 			}
 
 			if (0 == simValues.Count)
