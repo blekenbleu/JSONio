@@ -204,7 +204,7 @@ namespace blekenbleu.jsonio
 			string pts, ds = pluginManager.GetPropertyValue(pts = Myni + "properties")?.ToString();
 			string vts, vs = pluginManager.GetPropertyValue(vts = Myni + "values")?.ToString();
 			string sts, ss = pluginManager.GetPropertyValue(sts = Myni + "steps")?.ToString();
-			if ((!(null == ds && (0 == Settings.pcount || OOpa($"'{pts}' not found"))))
+			if ((!(null == ds && (0 == Settings.pcount || OOpa($"per-car properties not found"))))
 			 && (!(null == vs && OOpa($"'{vts}' not found")))
 			 && (!(null == ss && OOpa($"'{sts}' not found")))
 			   )
@@ -232,7 +232,7 @@ namespace blekenbleu.jsonio
 			string vss = pluginManager.GetPropertyValue(vtts)?.ToString();
 			string stts = Myni + "gamesteps";
 			string sss = pluginManager.GetPropertyValue(stts)?.ToString();
-			if ((!(null == dss && (0 == Settings.gcount || OOpa($"'{ptts}' not found"))))
+			if ((!(null == dss && (0 == Settings.gcount || OOpa($"per-game properties not found"))))
 			 && (!(null == vss && OOpa($"'{vtts}' not found")))
 			 && (!(null == sss && OOpa($"'{stts}' not found")))
 				)
@@ -260,7 +260,7 @@ namespace blekenbleu.jsonio
 			string vgs = pluginManager.GetPropertyValue(vgts)?.ToString();
 			string sgts = Myni + "setsteps";
 			string sgs = pluginManager.GetPropertyValue(sgts)?.ToString();
-			if ((!(null == dgs && (0 == Settings.gDefaults.Count || OOpa($"'{pgts}' not found"))))
+			if ((!(null == dgs && (0 == Settings.gDefaults.Count || OOpa($"global properties not found"))))
 			 && (!(null == vgs && OOpa($"'{vgts}' not found")))
 			 && (!(null == sgs && OOpa($"'{sgts}' not found")))
 				)
