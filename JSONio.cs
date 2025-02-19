@@ -198,6 +198,7 @@ namespace blekenbleu.jsonio
 				if (null != p.Name && null != p.Value)
 					SettingsProps.Add(new Property() { Name = string.Copy(p.Name),
 												  Value = string.Copy(p.Value) });
+
 			Steps = new List<int>() {};		// for Populate()
 
 			// property and setting names, default values and steps from JSONio.ini
@@ -248,7 +249,8 @@ namespace blekenbleu.jsonio
 					gCount = steps.Count + pCount;
 				else gCount += pCount;
 				Populate(Sprops, values, steps);
-			} else if (Settings.gcount != simValues.Count - Settings.pcount) {
+			}
+			if (Settings.gcount != simValues.Count - Settings.pcount) {
 				set = true;
 				Settings.gcount = simValues.Count - Settings.pcount;
 			}			

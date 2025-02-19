@@ -17,8 +17,6 @@
 			<Hyperlink RequestNavigate="Hyperlink_RequestNavigate"
 			NavigateUri="https://github.com/blekenbleu/JSONio/wiki">Help</Hyperlink>
 		</TextBlock>
-		<TextBlock x:Name="Version" FontSize="10" Height="25" Width="60"
-			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="315,15,0,0"/>
 
 		<TextBlock x:Name="Status" Text="{Binding StatusText}" Height="74" Width="350"
 				HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,40,0,0"
