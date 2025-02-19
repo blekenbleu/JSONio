@@ -12,7 +12,7 @@ namespace blekenbleu.jsonio
 			bool changed = false;
 			
 			if ((0 > gndx || 0 > cndx))
-				if (!SaveCar())
+				if (!SaveSlim())
 					return changed;
 
 			// this should be unnecessary if slim.Reconcile() works..
@@ -63,7 +63,7 @@ namespace blekenbleu.jsonio
 			ToSlider();
 		}
 
-		List<string> DefaultCopy()		// called in SaveCar()
+		List<string> DefaultCopy()		// called in SaveSlim(), End()
 		{
 			int i;
 			List<string> New = new List<string> { };
@@ -72,7 +72,7 @@ namespace blekenbleu.jsonio
 			return New;
 		}
 
-		List<string> CurrentCopy()		// called in SaveCar()
+		List<string> CurrentCopy()		// called in SaveSlim()
 		{
 			int i;
 			List<string> New = new List<string> { };
@@ -95,14 +95,14 @@ namespace blekenbleu.jsonio
 			return gndx;
 		}
 
-		bool SaveCar()	// called in End(), CarChange() and maybe Changed()
+		bool SaveSlim()	// called in End(), CarChange() and maybe Changed()
 		{
-			if (null == CurrentCar || 0 == pCount)
+			if (null == CurrentCar || 0 == gCount)
 				return false;			// nothing to save
 
 			if (0 > GameIndex(Gname))	// first car for this game?
 			{
-				write = true;
+				write = true;			// first car
 				gndx = slim.data.gList.Count;
 				slim.data.gList.Add(new GameList
 					{ cList = new List<CarL>
@@ -116,7 +116,7 @@ namespace blekenbleu.jsonio
 
 			if (0 > (cndx = slim.data.gList[gndx].cList.FindIndex(c => c.Name == CurrentCar)))
 			{	// add car to game
-				write = true;
+				write = true;			// add car
 				cndx = slim.data.gList[gndx].cList.Count;
 				slim.data.gList[gndx].cList.Add(new CarL
 					{ Name = string.Copy(CurrentCar),
@@ -128,19 +128,19 @@ namespace blekenbleu.jsonio
 					if (slim.data.gList[gndx].cList[0].Vlist[i] != simValues[i].Default)
 					{
 						slim.data.gList[gndx].cList[0].Vlist = DefaultCopy();
-						write = true;
+						write = true;	// per-game property change
 						break;
 					}
 				for (int i = 0; i < pCount; i++)
 					if (slim.data.gList[gndx].cList[cndx].Vlist[i] != simValues[i].Current)
 					{
 						slim.data.gList[gndx].cList[cndx].Vlist = CurrentCopy();
-						write = true;
+						write = true;	// per-car property change
 						break;
 					}
 			}
-			return write;
-		}	// SaveCar()
+			return write;			// SaveSlim()
+		}
 
 		// Control.xaml methods -------------------------------------------------
 		internal void FromSlider(double value)
@@ -262,7 +262,7 @@ namespace blekenbleu.jsonio
 				int i, count = 0, vcount = 0;
 
 				Msg = "Current Car: " + cname;
-				if (0 < Gname.Length && SaveCar())				// do not save first instance
+				if (0 < Gname.Length && SaveSlim())		// do not save first instance
 					Msg += $";  {CurrentCar} saved";
 				ml = Msg.Length;
 
