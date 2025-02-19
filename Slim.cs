@@ -55,6 +55,9 @@ namespace blekenbleu.jsonio
 			// car[0] is per-game car default and per-game property values
 			int count = (0 == car) ? JSONio.gCount : JSONio.pCount;
 
+			if (count > js.simValues.Count)
+				count = js.simValues.Count;		// it happens 19 Feb 2025
+
 			for (int i = 0; i < count; i++)
 			{
 				int Index =  data.pList.FindIndex(j => j == js.simValues[i].Name);
@@ -123,7 +126,8 @@ namespace blekenbleu.jsonio
 			if (i != gCount)
 			// repopulate car properties according to simValues
 			{
-				js.OOpa($"Slim.Load({path}):  pList mismatch");
+				if (!js.set)	// already warned
+					js.OOpa($"Slim.Load({path}):  pList mismatch");
 				if (i != pCount)
 					for (i = 0; i < data.gList.Count; i++)					// all games
 					{

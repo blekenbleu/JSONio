@@ -17,6 +17,7 @@ namespace blekenbleu.jsonio
 		internal static int pCount;				// append per-game settings after pCount
 		internal static int gCount;				// append global settings after gCount
 		internal int slider = -1;				// simValues index for configured JSONIO.properties
+		internal bool set = false;
 
 		private string CurrentCar;
 		private string Gname = "";
@@ -29,7 +30,7 @@ namespace blekenbleu.jsonio
 		private Slim slim;										// new JSON format
 		private List<Property> SettingsProps;					// non-null Settings entries
 		private List<int> Steps;								// 100 times actual values
-		private bool write = false, set = false;				// slim should not change
+		private bool write = false;								// slim should not change
 
 		/// <summary>
 		/// DisplayGrid contents
