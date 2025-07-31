@@ -166,7 +166,7 @@ namespace blekenbleu.jsonio
 		/// <param name="prefix"></param> should be "in" or "de"
 		public void Ment(int sign)
 		{
-			if (0 == Gname.Length || 0 == CurrentCar.Length)
+			if (0 == Gname.Length || null == CurrentCar || 0 == CurrentCar.Length)
 				return;
 
 			int step = Steps[View.Selection];
@@ -196,7 +196,7 @@ namespace blekenbleu.jsonio
 		/// <param name="next"></param> false for prior
 		public void Select(bool next)
 		{
-			if (0 == Gname.Length || 0 == CurrentCar.Length)
+			if (0 == Gname.Length || null == CurrentCar || 0 == CurrentCar.Length)
 				return;
 
 			if (next)
@@ -249,7 +249,7 @@ namespace blekenbleu.jsonio
  ;          name='CarChange'
  ;          trigger=changed(200, [DataCorePlugin.GameData.CarId])
  ;--------------------------------------------------------------- */
-		void CarChange(string cname, string gnew)
+		void CarChange(string cname, string gnew, bool once)
 		{
 			int ml = 0;
 
@@ -325,7 +325,14 @@ namespace blekenbleu.jsonio
 			else Gname = gnew;
 
 			if (ml < Msg.Length)
-				OOpsMB();
+			{
+				if (once)
+				{
+					Info("CarChange():  " + Msg);
+					Msg = "";
+					return;
+				} else OOpsMB();
+			}
 			else Msg = "";
 			SelectedStatus();					// CarChange()
 			ToSlider();
