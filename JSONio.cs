@@ -55,7 +55,7 @@ namespace blekenbleu.jsonio
 		void OOpsMB()
 		{
 			Info("OOpsMB(): " + Msg);
-			View.Dispatcher.Invoke(() => View.OOpsMB());
+			View?.Dispatcher.Invoke(() => View.OOpsMB());
 			Msg = "";
 		}
 
@@ -180,6 +180,9 @@ namespace blekenbleu.jsonio
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
+			if (null != pluginManager.GetPropertyValue("CarID") && null != pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame"))
+				CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
+    	                  pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
 			return View;
 		}
 
