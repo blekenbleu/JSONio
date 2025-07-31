@@ -148,8 +148,9 @@ namespace blekenbleu.jsonio
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
-			CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
-                      pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
+			if (null != pluginManager.GetPropertyValue("CarID") && null != pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame"))
+				CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
+    	                  pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
 			return View;
 		}
 
