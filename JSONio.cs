@@ -137,7 +137,7 @@ namespace blekenbleu.jsonio
 		async Task AsyncRunningGame(PluginManager pm, int milliseconds)
 		{
 			await Task.Delay(milliseconds); // wait without blocking main thread
-			Info("AsyncRunningGame(CarChange())");
+//			Info("AsyncRunningGame(CarChange())");
 			CarChange(pm.GetPropertyValue("CarID")?.ToString(),
 					  pm.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString(),
 					  true);				// disable popup
@@ -161,7 +161,7 @@ namespace blekenbleu.jsonio
 				Msg = "";
 			}
 			// assignment preempts Compiler Warning CS4014
-			Info("GetWPFSettingsControl():  delayTask");
+//			Info("GetWPFSettingsControl():  delayTask");
             Task delayTask = AsyncRunningGame(pluginManager, 1000);
 			return View;
 		}
