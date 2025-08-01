@@ -249,7 +249,7 @@ namespace blekenbleu.jsonio
  ;          name='CarChange'
  ;          trigger=changed(200, [DataCorePlugin.GameData.CarId])
  ;--------------------------------------------------------------- */
-		void CarChange(string cname, string gnew)
+		void CarChange(string cname, string gnew, bool once)
 		{
 			int ml = 0;
 
@@ -325,7 +325,12 @@ namespace blekenbleu.jsonio
 			else Gname = gnew;
 
 			if (ml < Msg.Length)
-				OOpsMB();
+			{
+				if (once)
+                    Msg = "";
+				else OOpsMB();
+				return;
+			}
 			else Msg = "";
 			SelectedStatus();					// CarChange()
 			ToSlider();

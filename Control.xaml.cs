@@ -17,7 +17,7 @@ namespace blekenbleu.jsonio
 		public JSONio JS { get; }
 		public ViewModel Model;							// reference XAML controls
 		internal byte Selection;						// changes only in JSONio.Select() on UI thread
-		internal static string version = "2.30";
+		internal static string version = "2.31";
 
 		public Control() {								// called before simValues are initialized
 			Model = new ViewModel(this);

@@ -1,6 +1,7 @@
 ﻿using GameReaderCommon;
 using SimHub.Plugins;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace blekenbleu.jsonio
@@ -163,6 +164,17 @@ namespace blekenbleu.jsonio
 			else System.IO.File.WriteAllText(path, sjs);
 		}	// End()
 
+		// try CarChange() for Game already running when JSONio is (re)launched
+		// https://ironpdf.com/blog/net-help/csharp-wait-for-seconds/
+		async Task AsyncRunningGame(PluginManager pm, int milliseconds)
+		{
+			await Task.Delay(milliseconds); // wait without blocking main thread
+//			Info("AsyncRunningGame(CarChange())");
+			CarChange(pm.GetPropertyValue("CarID")?.ToString(),
+					  pm.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString(),
+					  true);				// disable popup
+        }
+
 		/// <summary>
 		/// Returns settings control or null if not required
 		/// </summary>
@@ -180,9 +192,9 @@ namespace blekenbleu.jsonio
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
-			if (null != pluginManager.GetPropertyValue("CarID") && null != pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame"))
-				CarChange(pluginManager.GetPropertyValue("CarID")?.ToString(),
-    	                  pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString());
+			// assignment preempts Compiler Warning CS4014
+//			Info("GetWPFSettingsControl():  delayTask");
+            Task delayTask = AsyncRunningGame(pluginManager, 1000);
 			return View;
 		}
 
@@ -400,7 +412,8 @@ namespace blekenbleu.jsonio
 			this.AddAction("SelectedAsSlider",			(a, b) => SelectSlider());
 			this.AddAction("ChangeProperties",			(a, b) => CarChange(
 					pluginManager.GetPropertyValue("CarID")?.ToString(),
-					pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString()
+					pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString(),
+					false
 				)
 			);
 
