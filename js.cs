@@ -330,8 +330,8 @@ namespace blekenbleu.jsonio
 				{
 					Info("CarChange():  " + Msg);
 					Msg = "";
-					return;
 				} else OOpsMB();
+				return;
 			}
 			else Msg = "";
 			SelectedStatus();					// CarChange()

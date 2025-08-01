@@ -161,6 +161,7 @@ namespace blekenbleu.jsonio
 				Msg = "";
 			}
 			// assignment preempts Compiler Warning CS4014
+			Info("GetWPFSettingsControl():  delayTask");
             Task delayTask = AsyncRunningGame(pluginManager, 1000);
 			return View;
 		}
