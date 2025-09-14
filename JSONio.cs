@@ -61,7 +61,7 @@ namespace blekenbleu.jsonio
 		}
 
 		/// <summary>
-		/// Instance of the plugin manager
+		/// Plugin manager instance
 		/// </summary>
 		public PluginManager PluginManager { get; set; }
 
@@ -81,8 +81,9 @@ namespace blekenbleu.jsonio
 		/// This method is on the critical path, must execute as fast as possible and avoid throwing any error
 		/// </summary>
 		/// <param name="pluginManager"></param>
-		/// <param name="data">Current game data, including present and previous data frames.</param>
-		public void DataUpdate(PluginManager pluginManager, ref GameData data) {}
+		/// <param name="data">Current game data, including current and previous data frames.</param>
+		public void DataUpdate(PluginManager pluginManager, ref GameData data)
+		{}
 
 		/// <summary>
 		/// Called at plugin manager stop, close/dispose anything needed here !

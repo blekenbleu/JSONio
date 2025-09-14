@@ -6,13 +6,13 @@
 		xmlns:local="clr-namespace:blekenbleu.jsonio"
 		mc:Ignorable="d"
 		Width="480" HorizontalAlignment="Left">
-    <Grid Margin="0,0,0,0" HorizontalAlignment="Left">
+	<Grid Margin="0,0,0,0" HorizontalAlignment="Left">
 		<Label x:Name="SHlabel" Content="JSONio Properties Manager" Height="25" Width="158"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="70,10,0,0"/>
 		<TextBlock x:Name="Changed" Text="changed" Height="20" Width="48"
 			Visibility="{Binding ChangedVisibility}" Background="Blue"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="226,15,0,0"/>
-        <TextBlock Background="White" TextAlignment="Center" Height="20" Width="30"
+		<TextBlock Background="White" TextAlignment="Center" Height="20" Width="30"
 			HorizontalAlignment="Left" VerticalAlignment="Top" Margin="280,15,0,0">
 			<Hyperlink RequestNavigate="Hyperlink_RequestNavigate"
 			NavigateUri="https://github.com/blekenbleu/JSONio/wiki">Help</Hyperlink>
