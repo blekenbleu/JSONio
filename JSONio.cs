@@ -354,7 +354,7 @@ namespace blekenbleu.jsonio
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
 			this.AddAction("SelectedAsSlider",			(a, b) => SelectSlider());
-			this.AddAction("ChangeProperties",			(a, b) => CarChange(
+			this.AddAction("ChangeProperties",			(a, b) => CarChange(	// SimHub triggers by ExternalScript.CarChange event
 					pluginManager.GetPropertyValue("CarID")?.ToString(),
 					pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString(),
 					false
