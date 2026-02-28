@@ -44,7 +44,7 @@ namespace blekenbleu.jsonio
 			 ; 100 (1)		0 - 100
 			 ; 1000 (10)	0 - 1000
 			 */
-			if (100 < Convert.ToInt32(simValues[slider].Default))
+			if (100 < Convert.ToDouble(simValues[slider].Default))
 			{
 				SliderFactor[0] = 10;	// slider to value
 				SliderFactor[1] = 0.1;	// value to slider
