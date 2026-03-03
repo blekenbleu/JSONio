@@ -83,7 +83,13 @@ namespace blekenbleu.jsonio
 		/// <param name="pluginManager"></param>
 		/// <param name="data">Current game data, including current and previous data frames.</param>
 		public void DataUpdate(PluginManager pluginManager, ref GameData data)
-		{}
+		{
+			string cid, gid;
+			
+			if (null != (cid = data?.NewData?.CarId) && cid != CurrentCar
+			 && null != (gid = pluginManager?.GameName))
+				CarChange(cid, gid, true);				// disable popup
+		}
 
 		/// <summary>
 		/// Called at plugin manager stop, close/dispose anything needed here !
@@ -133,17 +139,6 @@ namespace blekenbleu.jsonio
 			else System.IO.File.WriteAllText(path, sjs);
 		}	// End()
 
-		// try CarChange() for Game already running when JSONio is (re)launched
-		// https://ironpdf.com/blog/net-help/csharp-wait-for-seconds/
-		async Task AsyncRunningGame(PluginManager pm, int milliseconds)
-		{
-			await Task.Delay(milliseconds); // wait without blocking main thread
-//			Info("AsyncRunningGame(CarChange())");
-			CarChange(pm.GetPropertyValue("CarID")?.ToString(),
-					  pm.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString(),
-					  true);				// disable popup
-        }
-
 		/// <summary>
 		/// Returns settings control or null if not required
 		/// </summary>
@@ -161,9 +156,6 @@ namespace blekenbleu.jsonio
 				View.Dispatcher.Invoke(() => View.OOpsMB());
 				Msg = "";
 			}
-			// assignment preempts Compiler Warning CS4014
-//			Info("GetWPFSettingsControl():  delayTask");
-            Task delayTask = AsyncRunningGame(pluginManager, 1000);
 			return View;
 		}
 
@@ -354,12 +346,6 @@ namespace blekenbleu.jsonio
 			this.AddAction("SwapCurrentPrevious",		(a, b) => Swap()		);
 			this.AddAction("CurrentAsDefaults",			(a, b) => SetDefault());
 			this.AddAction("SelectedAsSlider",			(a, b) => SelectSlider());
-			this.AddAction("ChangeProperties",			(a, b) => CarChange(	// SimHub triggers by ExternalScript.CarChange event
-					pluginManager.GetPropertyValue("CarID")?.ToString(),
-					pluginManager.GetPropertyValue("DataCorePlugin.CurrentGame")?.ToString(),
-					false
-				)
-			);
 
 			Info($"JSONIO.Init():  simValues.Count = {simValues.Count}");
 		}	// Init()
